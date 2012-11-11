@@ -95,8 +95,8 @@ class Node (object):
         self.children = []
     def __getitem__ (self, key):
         return self.attribs[key]
-    def __setitem__ (self, key, val):
-        self.attribs[key] = val
+    #def __setitem__ (self, key, val):
+    #    self.attribs[key] = val
     def __contains__ (self, key):
         return key in self.attribs
     def getChildNames (self):
@@ -126,7 +126,10 @@ class Task(Node):
         parent_task = ''
         if self.parent != None:
             parent_task = ' parentTask:' + self.parent.name
-        return "Task:" + self.name + parent_task
+        completed = ''
+        if self.attribs['dateCompleted'] != None:
+            completed = ' completed:' + str(datetime.fromtimestamp(THIRTY_ONE_YEARS + self.attribs['dateCompleted']))
+        return "Task:" + self.name + parent_task + completed
 
 class Folder(Node):
     TABLE='folder'
@@ -156,8 +159,11 @@ class Project(Task):
     def __str__ (self):
         parent_folder = ''
         if self.folder != None:
-            parent_folder = ' parentFolder:' + self.folder.name  
-        return "Project:" + self.name + parent_folder
+            parent_folder = ' parentFolder:' + self.folder.name
+        completed = ''
+        if self.attribs['dateCompleted'] != None:
+            completed = ' completed:' + str(datetime.fromtimestamp(THIRTY_ONE_YEARS + self.attribs['dateCompleted']))
+        return "Project:" + self.name + parent_folder + completed
     
 def query (conn, clazz):
     c = conn.cursor()
@@ -213,7 +219,6 @@ def wire_tasks_to_enclosing_projects (project_infos, tasks):
         if task['containingProjectInfo'] != None:
             project_info = project_infos[task['containingProjectInfo']]
             project = project_info.project
-            task['projectName'] = project.name
             task.project = project
        
 def wire_tasks_and_contexts (contexts, tasks):
@@ -222,7 +227,6 @@ def wire_tasks_and_contexts (contexts, tasks):
             context = contexts[task['context']]
             task.context = context
             context.children.append(task)
-            task['contextName'] = context['name']
             
 def wire_folder_hierarchy (folders):
     for folder in folders.values():
@@ -238,17 +242,7 @@ def wire_context_hierarchy (contexts):
             parent.children.append(context)
 
 def printTree (depth, item):
-    dateCompleted = ''
-    if 'dateCompleted' in item and item['dateCompleted'] != None:
-        dateCompleted = datetime.fromtimestamp(THIRTY_ONE_YEARS + item['dateCompleted'])
-    context = ''
-    if 'contextName' in item:
-        context = item['contextName']
-    project = ''
-    if 'projectName' in item:
-        project = item['projectName']
     print (' ' * (depth * 4)) + str(item)
-    print (' ' * (depth * 4)) + item['name'] + '[' + str(len(item.children)) + '] ' + item.__class__.__name__ + ' P:' + project + ' C:' + context + ' ' + str(dateCompleted)
     for subItem in item.children:
         printTree(depth + 1, subItem)
 
