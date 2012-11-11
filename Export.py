@@ -56,9 +56,8 @@ CREATE INDEX Context_parent on Context (parent);
 
 '''
 TODO
-- link objects properly
-- sort tasks
 - visitor pattern
+- useful report
 - use select dateField(ZTIME, 'unixepoch', '+31 years') from ...
 - slots?
 '''
@@ -95,8 +94,6 @@ class Node (object):
         self.children = []
     def __getitem__ (self, key):
         return self.attribs[key]
-    #def __setitem__ (self, key, val):
-    #    self.attribs[key] = val
     def __contains__ (self, key):
         return key in self.attribs
     def getChildNames (self):
@@ -104,7 +101,7 @@ class Node (object):
 
 class Context(Node):
     TABLE='context'
-    COLUMNS=['persistentIdentifier', 'name', 'parent', 'childrenCount']
+    COLUMNS=['persistentIdentifier', 'name', 'parent', 'childrenCount', 'rank']
     name = TypedDesc ('name', unicode)
     def __init__(self, param):
         Node.__init__(self,param)
@@ -114,7 +111,7 @@ class Context(Node):
 
 class Task(Node):
     TABLE='task'
-    COLUMNS=['persistentIdentifier', 'name', 'dateDue', 'dateCompleted','projectInfo', 'context', 'containingProjectInfo', 'childrenCount', 'parent']
+    COLUMNS=['persistentIdentifier', 'name', 'dateDue', 'dateCompleted','projectInfo', 'context', 'containingProjectInfo', 'childrenCount', 'parent', 'rank']
     name = TypedDesc ('name', unicode)
     context = TypedDesc('context', Context)
     #project = TypedDesc('project', Project) forward reference?
@@ -133,7 +130,7 @@ class Task(Node):
 
 class Folder(Node):
     TABLE='folder'
-    COLUMNS=['persistentIdentifier', 'name', 'childrenCount', 'parent']
+    COLUMNS=['persistentIdentifier', 'name', 'childrenCount', 'parent', 'rank']
     name = TypedDesc ('name', unicode)
     def __init__(self, param):
         Node.__init__(self,param)
@@ -164,7 +161,7 @@ class Project(Task):
         if self.attribs['dateCompleted'] != None:
             completed = ' completed:' + str(datetime.fromtimestamp(THIRTY_ONE_YEARS + self.attribs['dateCompleted']))
         return "Project:" + self.name + parent_folder + completed
-    
+
 def query (conn, clazz):
     c = conn.cursor()
     columns = clazz.COLUMNS
@@ -242,9 +239,14 @@ def wire_context_hierarchy (contexts):
             parent.children.append(context)
 
 def printTree (depth, item):
-    print (' ' * (depth * 4)) + str(item)
+    print (' ' * (depth * 4)) + str(item['rank']) + ':' + str(item)
     for subItem in item.children:
         printTree(depth + 1, subItem)
+        
+def sort (items):
+    for child in items:
+        child.children.sort(key=lambda item:item['rank'])
+        sort(child.children)
 
 def buildModel (db):
     conn = sqlite3.connect(db)
@@ -262,6 +264,10 @@ def buildModel (db):
     wire_context_hierarchy (contexts)
     
     conn.close ()
+    
+    sort(folders.values())
+    sort(contexts.values())
+    sort (projects.values())
     
     return folders, projects, contexts, tasks
 
