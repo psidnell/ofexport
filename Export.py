@@ -391,28 +391,39 @@ class PrintingVisitor(Visitor):
     def spaces (self):
         return ' ' * self.depth * self.indent
 
-class WeeklyReportVisitor(Visitor):
-    DAYS={'0':'Sun', '1':'Mon', '2':'Tue', '3':'Wed', '4':'Thu', '5':'Fri', '6':'Sat'}
-    MONTHS={'01':'Jan', '02':'Feb', '03':'Mar', '04':'Apr', '05':'May', '06':'Jun', '07':'Jul','08':'Aug', '09':'Sep', '10':'Oct', '11':'Nov', '12':'Dec'}
+DAYS={'0':'Sun', '1':'Mon', '2':'Tue', '3':'Wed', '4':'Thu', '5':'Fri', '6':'Sat'}
+MONTHS={'01':'Jan', '02':'Feb', '03':'Mar', '04':'Apr', '05':'May', '06':'Jun', '07':'Jul','08':'Aug', '09':'Sep', '10':'Oct', '11':'Nov', '12':'Dec'}
 
-    def __init__ (self, out, days=7, indent=4):
-        self.indent = indent
+def format_date (datetime = datetime.datetime.now()):
+        if datetime == None:
+            return ''
+        result = DAYS[datetime.strftime('%w')]
+        result += '-' + MONTHS[datetime.strftime('%m')]
+        result += datetime.strftime('-%d-%Y')
+        return result
+    
+def format_timestamp (datetime = datetime.datetime.now()):
+        return datetime.strftime('%Y-%m-%d')
+    
+class WeeklyReportVisitor(Visitor):
+
+    def __init__ (self, out, proj_pfx='#', days=7, indent=4):
         self.days = days
-        self.project_line = None
         self.tasks = []
         self.out = out
+        self.proj_pfx = proj_pfx
     def end_project (self, project):
         if len(self.tasks) > 0 or self.completed_recently(project):
-            print >>self.out, '# Project: ' + str(project)
+            print >>self.out, self.proj_pfx + ' Project: ' + str(project)
             self.tasks.sort(key=lambda task:task.date_completed)
             for task in self.tasks:
-                print >>self.out, '- Task: ' + str(task) + self.format_date(task.date_completed)
-                self.task = []
+                print >>self.out, '- ' + str(task) + ' - ' + format_date(task.date_completed)
             if self.completed_recently(project):
-                print >>self.out, 'Finished', self.format_date(project.date_completed)
+                print >>self.out, 'Finished - ' + format_date(project.date_completed)
             else:
                 print >>self.out, 'Ongoing...'
             print >>self.out
+            self.tasks = []
     def begin_task (self, task):
         if self.completed_recently(task) and 'Log' == str(task.context):
             self.tasks.append (task)
@@ -423,30 +434,28 @@ class WeeklyReportVisitor(Visitor):
         cutoff = datetime.datetime.now() - datetime.timedelta(self.days)
         if cutoff <= completed:
             return True
-    def format_date (self, datetime):
-        if datetime == None:
-            return ''
-        result = ' (' + self.DAYS[datetime.strftime('%w')]
-        result += '-' + self.MONTHS[datetime.strftime('%m')]
-        result += datetime.strftime('-%d-%Y)')
-        return result
-        
-
+    
 
 folders, contexts = buildModel ('/Users/psidnell/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2')
 
-#traverse_folders (PrintingVisitor (), folders)
+weekly_report=open('/Users/psidnell/Desktop/WeeklyReport-' + format_timestamp () + '.ft', 'w')
+print >>weekly_report, '# Weekly Progress Report'
+print >>weekly_report
+print >>weekly_report, '## Paul Sidnell ' + format_date()
+print >>weekly_report
+print >>weekly_report, '---'
+print >>weekly_report
 
-#traverse_contexts (PrintingVisitor (), contexts)
 
-weekly_report=open('/Users/psidnell/Desktop/WeeklyReport.ft', 'w')
 for folder in folders:
     if folder.name == 'Work':
-        traverse_folder (WeeklyReportVisitor (weekly_report, days=7), folder)
+        traverse_folder (WeeklyReportVisitor (weekly_report, proj_pfx='##', days=7), folder)
 weekly_report.close()
 
-weekly_report=open('/Users/psidnell/Desktop/DailyReport.ft', 'w')
+weekly_report=open('/Users/psidnell/Desktop/DailyReport-' + format_timestamp () + '.ft', 'w')
+
 for folder in folders:
     if folder.name == 'Work':
-        traverse_folder (WeeklyReportVisitor (weekly_report, days=3), folder)
+        traverse_folder (WeeklyReportVisitor (weekly_report, proj_pfx='#', days=3), folder)
 weekly_report.close()
+print 'Done'
