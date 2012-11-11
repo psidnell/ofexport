@@ -66,17 +66,33 @@ TODO
 
 THIRTY_ONE_YEARS = 60 * 60 * 24 * 365 * 31 + 60 * 60 * 24 * 8
 
-class AttribDescriptor( object ):
+class AttribDesc( object ):
     def __init__( self, name ):
         self._name = name
     def __get__( self, instance, owner ):
         return instance.__dict__[self._name]
     def __set__( self, instance, value ):
         instance.__dict__[self._name] = value
+        
+class TypedDesc(object):
+    def __init__(self,name, exptype):
+        self.name = name
+        self.expected_type = exptype
+    def __get__(self,obj,cls):
+        if obj is None:
+            return self
+        else:
+            return obj.__dict__[self.name]
+    def __set__(self,obj,value):
+        if not isinstance(value,self.expected_type):
+            raise TypeError("Expected %s got %s" % (self.expected_type, value.__class__.__name__))
+        obj.__dict__[self.name] = value
+    def __delete__(self,obj):
+        raise AttributeError("Can't delete")
 
-class Node:
-    name = AttribDescriptor ('name')
-    type = AttribDescriptor ('type')
+class Node (object):
+    name = TypedDesc ('name', unicode)
+    parent = None
     def __init__ (self, attribs):
         self.__dict__.update (attribs)
     def __getitem__ (self, key):
@@ -86,26 +102,45 @@ class Node:
     def __contains__ (self, key):
         return key in self.__dict__
 
-class Task(Node):
-    def __init__(self, param):
-        Node.__init__(self,param)
 
 class Context(Node):
+    TABLE='context'
+    COLUMNS=['persistentIdentifier', 'name', 'parent', 'childrenCount']
+    def __init__(self, param):
+        Node.__init__(self,param)
+        self.name=self.__dict__['name']
+
+class Task(Node):
+    TABLE='task'
+    COLUMNS=['persistentIdentifier', 'name', 'dateDue', 'dateCompleted','projectInfo', 'context', 'containingProjectInfo', 'childrenCount', 'parent']
+    context = TypedDesc('context', Context)
+    def __init__(self, param):
+        Node.__init__(self,param)
+        self.name=self.__dict__['name']
+
+class Folder(Node):
+    TABLE='folder'
+    COLUMNS=['persistentIdentifier', 'name', 'childrenCount', 'parent']
+    def __init__(self, param):
+        Node.__init__(self,param)
+        self.name=self.__dict__['name']
+        
+class ProjectInfo(Node):
+    TABLE='projectinfo'
+    COLUMNS=['pk', 'folder']
     def __init__(self, param):
         Node.__init__(self,param)
 
-class Folder(Node):
-    def __init__(self, param):
-        Node.__init__(self,param)
-        
-class ProjectInfo(Node):
-    def __init__(self, param):
-        Node.__init__(self,param)
+class Project(Task):
+    project_info = TypedDesc ('project_info', ProjectInfo)
+    folder = TypedDesc ('folder', Folder)
+
     
-def query (conn, table, columns, clazz=Node):
+def query (conn, clazz):
     c = conn.cursor()
+    columns = clazz.COLUMNS
     results = {}
-    for row in c.execute('SELECT ' + (','.join(columns)) + ' from ' + table):
+    for row in c.execute('SELECT ' + (','.join(columns)) + ' from ' + clazz.TABLE):
         rowData = {}
         for i in range(0,len(columns)):
             key = columns[i]
@@ -116,48 +151,76 @@ def query (conn, table, columns, clazz=Node):
     c.close()
     return results
 
-def knitProjectNames (projects, tasks):
-    for task in tasks.values():        
-        if task['projectInfo'] != None:
-            projectInfo = projects[task['projectInfo']]
-            projectInfo.name = task.name
+def transmute_projects (project_infos, folders, tasks):
+    '''
+    Some tasks are actually projects, convert them
+    '''
+    projects = []
+    for project in tasks.values():        
+        if project['projectInfo'] != None:
+            projects.append(project)
+            project_info = project_infos[project['projectInfo']]
+            project_info.name = project.name
+            project.__class__ = Project
+            
+            # Wire the project to it's folder while we're here 
+            if project_info['folder'] != None:
+                folder = folders[project_info['folder']]
+                project.folder = folder
+                if not ('taskList' in folder):
+                    folder['taskList'] = [project]
+                else:
+                    folder['taskList'].append(project)
+    return projects
 
-def knitTasks (projects, folders, contexts, tasks):
-    for task in tasks.values():
-        task.type = 'TASK'
-        
+def wire_projects_and_folders (project_infos, folders, tasks):
+    '''
+    Some tasks are actually projects, convert them
+    '''
+    for project in tasks.values():        
+        if project['projectInfo'] != None:
+            project_info = project_infos[project['projectInfo']]
+            project_info.name = project.name
+            project.__class__ = Project
+            
+            # Wire the project to it's folder while we're here 
+            if project_info['folder'] != None:
+                folder = folders[project_info['folder']]
+                project.folder = folder
+                if not ('taskList' in folder):
+                    folder['taskList'] = [project]
+                else:
+                    folder['taskList'].append(project)
+
+def wire_task_hierarchy (tasks):
+    for task in tasks.values():  
         if task['parent'] != None:
             parent = tasks[task['parent']]
             if not ('taskList' in parent):
                 parent['taskList'] = [task]
             else:
                 parent['taskList'].append(task)
-                
+
+def wire_tasks_to_enclosing_projects (project_infos, tasks):
+    for task in tasks.values():  
         if task['containingProjectInfo'] != None:
-            projectInfo = projects[task['containingProjectInfo']]
+            projectInfo = project_infos[task['containingProjectInfo']]
             task['projectName'] = projectInfo['name']
-        
-        if task['projectInfo'] != None:
-            task.type = 'PROJECT'
-            projectInfo = projects[task['projectInfo']]
-            if projectInfo['folder'] != None:
-                folder = folders[projectInfo['folder']]
-                if not ('taskList' in folder):
-                    folder['taskList'] = [task]
-                else:
-                    folder['taskList'].append(task)
-                    
+       
+def wire_tasks_and_contexts (contexts, tasks):
+    for task in tasks.values():  
+
         if task['context'] != None:
             context = contexts[task['context']]
+            task.context = context
             if not ('taskList' in context):
                 context['taskList'] = [task]
             else:
                 context['taskList'].append(task)
             task['contextName'] = context['name']
             
-def knitFolders (folders):
+def wire_folder_hierarchy (folders):
     for folder in folders.values():
-        folder.type = 'FOLDER'
         if folder['parent'] != None:
             parent = folders[folder['parent']]
             if not ('taskList' in parent):
@@ -165,9 +228,8 @@ def knitFolders (folders):
             else:
                 parent['taskList'].append(folder)
                 
-def knitContexts (contexts):
+def wire_context_hierarchy (contexts):
     for context in contexts.values():
-        context.type = 'CONTEXT'
         if context['parent'] != None:
             parent = contexts[context['parent']]
             if not ('taskList' in parent):
@@ -192,29 +254,23 @@ def printTree (depth, item):
 
 def buildModel (db):
     conn = sqlite3.connect(db)
-
-    columns=['persistentIdentifier', 'name', 'parent', 'childrenCount']
-    contexts = query (conn, table='context', columns=columns, clazz=Context)
+    contexts = query (conn, clazz=Context)
+    project_infos = query (conn, clazz=ProjectInfo)
+    folders = query (conn, clazz=Folder)
+    tasks = query (conn, clazz=Task)
     
-    columns=['pk', 'folder']
-    projects = query (conn, table='projectinfo', columns=columns, clazz=ProjectInfo)
-    
-    columns=['persistentIdentifier', 'name', 'childrenCount', 'parent']
-    folders = query (conn, table='folder', columns=columns, clazz=Folder)
-    
-    columns=['persistentIdentifier', 'name', 'dateDue', 'dateCompleted','projectInfo', 'context', 'containingProjectInfo', 'childrenCount', 'parent']
-    tasks = query (conn, table='task', columns=columns, clazz=Task)
-    
-    knitProjectNames (projects, tasks)
-    knitTasks(projects, folders, contexts, tasks)
-    knitFolders (folders)
-    knitContexts (contexts)
+    projects = transmute_projects (project_infos, folders, tasks)
+    wire_task_hierarchy(tasks)
+    wire_tasks_to_enclosing_projects (project_infos, tasks)
+    wire_tasks_and_contexts(contexts, tasks)
+    wire_folder_hierarchy (folders)
+    wire_context_hierarchy (contexts)
     
     conn.close ()
     
-    return folders, contexts, tasks
+    return folders, projects, contexts, tasks
 
-folders, contexts, tasks = buildModel ('/Users/psidnell/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2')
+folders, projects, contexts, tasks = buildModel ('/Users/psidnell/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2')
 
 '''
 for folder in folders.values ():
