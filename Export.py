@@ -1,0 +1,135 @@
+import sqlite3
+from pprint import pprint
+
+'''
+sqlite3 ~/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2
+
+.tables
+Attachment   Folder       Perspective  Setting    
+Context      ODOMetadata  ProjectInfo  Task       
+
+sqlite> .schema Task
+CREATE TABLE Task (persistentIdentifier text NOT NULL PRIMARY KEY, blocked integer NOT NULL, blockedByFutureStartDate integer NOT NULL, 
+childrenCount integer NOT NULL, childrenCountAvailable integer NOT NULL, childrenCountCompleted integer NOT NULL, completeWhenChildrenComplete integer NOT NULL,
+containingProjectContainsSingletons integer NOT NULL, containingProjectInfo text, containsNextTask integer NOT NULL, context text, creationOrdinal integer,
+dateAdded timestamp NOT NULL, dateCompleted timestamp, dateDue timestamp, dateModified timestamp NOT NULL, dateToStart timestamp, effectiveContainingProjectInfoActive integer NOT NULL,
+effectiveContainingProjectInfoRemaining integer NOT NULL, effectiveDateDue timestamp, effectiveDateToStart timestamp, effectiveFlagged integer NOT NULL,
+effectiveInInbox integer NOT NULL, estimatedMinutes integer, flagged integer NOT NULL, hasCompletedDescendant integer NOT NULL, hasFlaggedTaskInTree integer NOT NULL,
+hasUnestimatedLeafTaskInTree integer NOT NULL, inInbox integer NOT NULL, isDueSoon integer NOT NULL, isOverdue integer NOT NULL, maximumEstimateInTree integer,
+minimumEstimateInTree integer, name text, nextTaskOfProjectInfo text, noteXMLData blob, parent text, projectInfo text, rank integer NOT NULL, repetitionMethodString text,
+repetitionRuleString text, sequential integer NOT NULL);
+CREATE INDEX Task_containingProjectInfo on Task (containingProjectInfo);
+CREATE INDEX Task_context on Task (context);
+CREATE INDEX Task_nextTaskOfProjectInfo on Task (nextTaskOfProjectInfo);
+CREATE INDEX Task_parent on Task (parent);
+CREATE INDEX Task_projectInfo on Task (projectInfo);
+
+.schema ProjectInfo
+CREATE TABLE ProjectInfo (pk text NOT NULL PRIMARY KEY, containsSingletonActions integer NOT NULL, folder text, folderEffectiveActive integer NOT NULL,
+lastReviewDate timestamp, minimumDueDate timestamp, nextReviewDate timestamp, nextTask text, numberOfAvailableTasks integer NOT NULL, numberOfDueSoonTasks integer NOT NULL,
+numberOfOverdueTasks integer NOT NULL, numberOfRemainingTasks integer NOT NULL, reviewRepetitionString text, status text NOT NULL, task text, taskBlocked integer NOT NULL,
+taskBlockedByFutureStartDate integer NOT NULL, taskDateToStart timestamp);
+CREATE INDEX ProjectInfo_folder on ProjectInfo (folder);
+CREATE INDEX ProjectInfo_nextTask on ProjectInfo (nextTask);
+CREATE INDEX ProjectInfo_task on ProjectInfo (task);
+
+
+sqlite> .schema Folder
+CREATE TABLE Folder (persistentIdentifier text NOT NULL PRIMARY KEY, active integer NOT NULL, childrenCount integer NOT NULL, creationOrdinal integer,
+dateAdded timestamp NOT NULL, dateModified timestamp NOT NULL, effectiveActive integer NOT NULL, name text, noteXMLData blob, numberOfAvailableTasks integer NOT NULL,
+numberOfDueSoonTasks integer NOT NULL, numberOfOverdueTasks integer NOT NULL, parent text, rank integer NOT NULL);
+CREATE INDEX Folder_parent on Folder (parent);
+
+
+.schema Context
+CREATE TABLE Context (persistentIdentifier text NOT NULL PRIMARY KEY, active integer NOT NULL, allowsNextAction integer NOT NULL, altitude real,
+availableTaskCount integer NOT NULL, childrenCount integer NOT NULL, creationOrdinal integer, dateAdded timestamp NOT NULL, dateModified timestamp NOT NULL,
+effectiveActive integer NOT NULL, latitude real, localNumberOfDueSoonTasks integer NOT NULL, localNumberOfOverdueTasks integer NOT NULL, locationName text,
+longitude real, name text, noteXMLData blob, notificationFlags integer, parent text, radius real, rank integer NOT NULL, remainingTaskCount integer NOT NULL,
+totalNumberOfDueSoonTasks integer NOT NULL, totalNumberOfOverdueTasks integer NOT NULL);
+CREATE INDEX Context_parent on Context (parent);
+'''
+
+
+
+
+'''
+TODO
+- set type on node
+- sort tasks
+- visitor pattern
+'''
+def query (conn, table, columns):
+    c = conn.cursor()
+    results = {}
+    for row in c.execute('SELECT ' + (','.join(columns)) + ' from ' + table):
+        rowData = {}
+        for i in range(0,len(columns)):
+            key = columns[i]
+            val = row[i]
+            rowData[key] = val
+        results[rowData[columns[0]]] = rowData
+    c.close()
+    return results
+
+def knitProjectsFoldersTasks (projects, folders, tasks):
+    for task in tasks.values():
+        task['type'] = 'TASK'
+        
+        if task['parent'] != None:
+            parent = tasks[task['parent']]
+            if not ('taskList' in parent):
+                parent['taskList'] = [task]
+            else:
+                parent['taskList'].append(task)
+        
+        if task['projectInfo'] != None:
+            task['type'] = 'PROJECT'
+            projectInfo = projects[task['projectInfo']]
+            if projectInfo['folder'] != None:
+                folder = folders[projectInfo['folder']]
+                if not ('taskList' in folder):
+                    folder['taskList'] = [task]
+                else:
+                    folder['taskList'].append(task)
+            
+def knitFolders (folders):
+    for folder in folders.values():
+        folder['type'] = 'FOLDER'
+        if folder['parent'] != None:
+            parent = folders[folder['parent']]
+            if not ('taskList' in parent):
+                parent['taskList'] = [folder]
+            else:
+                parent['taskList'].append(folder)
+
+def printTree (depth, item):
+    if (not 'dateCompleted' in item) or item['dateCompleted'] == None:
+        if item['type'] != 'TASK':
+            print (' ' * (depth * 4)) + item['name'] + '[' + str(item['childrenCount']) + '] ' + item['type']
+        if 'taskList' in item:
+            for subItem in item['taskList']:
+                printTree(depth + 1, subItem)
+                
+conn = sqlite3.connect('/Users/psidnell/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2')
+
+columns=['persistentIdentifier', 'name']
+contexts = query (conn, 'context', columns)
+
+columns=['pk', 'folder']
+projects = query (conn, 'projectinfo', columns)
+
+columns=['persistentIdentifier', 'name', 'childrenCount', 'parent']
+folders = query (conn, 'folder', columns)
+
+columns=['persistentIdentifier', 'name', 'dateDue', 'dateCompleted','projectInfo', 'context', 'containingProjectInfo', 'childrenCount', 'parent']
+tasks = query (conn, 'task', columns)
+
+knitProjectsFoldersTasks(projects, folders, tasks)
+knitFolders (folders)
+
+for folder in folders.values ():
+    if folder['parent'] == None:
+        printTree (0, folder)
+
+conn.close()
