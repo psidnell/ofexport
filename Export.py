@@ -1,5 +1,6 @@
 import sqlite3
 from pprint import pprint
+from datetime import datetime
 
 '''
 sqlite3 ~/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2
@@ -59,7 +60,11 @@ TODO
 - generic node class
 - sort tasks
 - visitor pattern
+- use select dateField(ZTIME, 'unixepoch', '+31 years') from ...
 '''
+
+THIRTY_ONE_YEARS = 60 * 60 * 24 * 365 * 31 + 60 * 60 * 24 * 8
+
 def query (conn, table, columns):
     c = conn.cursor()
     results = {}
@@ -100,6 +105,7 @@ def knitTasks (projects, folders, contexts, tasks):
                 context['taskList'] = [task]
             else:
                 context['taskList'].append(task)
+            task['contextName'] = context['name']
             
 def knitFolders (folders):
     for folder in folders.values():
@@ -122,38 +128,51 @@ def knitContexts (contexts):
                 parent['taskList'].append(context)
 
 def printTree (depth, item):
-    if (not 'dateCompleted' in item) or item['dateCompleted'] == None:
-        if item['type'] != 'TASK':
-            print (' ' * (depth * 4)) + item['name'] + '[' + str(item['childrenCount']) + '] ' + item['type']
-        if 'taskList' in item:
-            for subItem in item['taskList']:
-                printTree(depth + 1, subItem)
-                
-conn = sqlite3.connect('/Users/psidnell/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2')
+    dateCompleted = ''
+    if 'dateCompleted' in item and item['dateCompleted'] != None:
+        dateCompleted = datetime.fromtimestamp(THIRTY_ONE_YEARS + item['dateCompleted'])
+    context = ''
+    if 'contextName' in item:
+        context = item['contextName']
+    print (' ' * (depth * 4)) + item['name'] + '[' + str(item['childrenCount']) + '] ' + item['type'] + ' C:' + context + ' ' + str(dateCompleted)
+    if 'taskList' in item:
+        for subItem in item['taskList']:
+            printTree(depth + 1, subItem)
 
-columns=['persistentIdentifier', 'name', 'parent', 'childrenCount']
-contexts = query (conn, 'context', columns)
+def buildModel (db):
+    conn = sqlite3.connect(db)
 
-columns=['pk', 'folder']
-projects = query (conn, 'projectinfo', columns)
+    columns=['persistentIdentifier', 'name', 'parent', 'childrenCount']
+    contexts = query (conn, 'context', columns)
+    
+    columns=['pk', 'folder']
+    projects = query (conn, 'projectinfo', columns)
+    
+    columns=['persistentIdentifier', 'name', 'childrenCount', 'parent']
+    folders = query (conn, 'folder', columns)
+    
+    columns=['persistentIdentifier', 'name', 'dateDue', 'dateCompleted','projectInfo', 'context', 'containingProjectInfo', 'childrenCount', 'parent']
+    tasks = query (conn, 'task', columns)
+    
+    knitTasks(projects, folders, contexts, tasks)
+    knitFolders (folders)
+    knitContexts (contexts)
+    
+    conn.close ()
+    
+    return folders, contexts, tasks
 
-columns=['persistentIdentifier', 'name', 'childrenCount', 'parent']
-folders = query (conn, 'folder', columns)
+folders, contexts, tasks = buildModel ('/Users/psidnell/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2')
 
-columns=['persistentIdentifier', 'name', 'dateDue', 'dateCompleted','projectInfo', 'context', 'containingProjectInfo', 'childrenCount', 'parent']
-tasks = query (conn, 'task', columns)
-
-knitTasks(projects, folders, contexts, tasks)
-knitFolders (folders)
-knitContexts (contexts)
-
-
-
+'''
 for folder in folders.values ():
     if folder['parent'] == None:
         printTree (0, folder)
 for context in contexts.values ():
     if context['parent'] == None:
         printTree (0, context)
+'''
 
-conn.close()
+for folder in folders.values ():
+    if folder['parent'] == None and folder['name'] == 'Work':
+        printTree (0, folder)
