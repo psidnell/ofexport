@@ -58,6 +58,7 @@ CREATE INDEX Context_parent on Context (parent);
 TODO
 - tasklist->children
 - generic node class
+- link objects properly
 - sort tasks
 - visitor pattern
 - use select dateField(ZTIME, 'unixepoch', '+31 years') from ...
@@ -78,6 +79,12 @@ def query (conn, table, columns):
     c.close()
     return results
 
+def knitProjectNames (projects, tasks):
+    for task in tasks.values():        
+        if task['projectInfo'] != None:
+            projectInfo = projects[task['projectInfo']]
+            projectInfo['name'] = task['name']
+
 def knitTasks (projects, folders, contexts, tasks):
     for task in tasks.values():
         task['type'] = 'TASK'
@@ -88,6 +95,10 @@ def knitTasks (projects, folders, contexts, tasks):
                 parent['taskList'] = [task]
             else:
                 parent['taskList'].append(task)
+                
+        if task['containingProjectInfo'] != None:
+            projectInfo = projects[task['containingProjectInfo']]
+            task['projectName'] = projectInfo['name']
         
         if task['projectInfo'] != None:
             task['type'] = 'PROJECT'
@@ -134,7 +145,10 @@ def printTree (depth, item):
     context = ''
     if 'contextName' in item:
         context = item['contextName']
-    print (' ' * (depth * 4)) + item['name'] + '[' + str(item['childrenCount']) + '] ' + item['type'] + ' C:' + context + ' ' + str(dateCompleted)
+    project = ''
+    if 'projectName' in item:
+        project = item['projectName']
+    print (' ' * (depth * 4)) + item['name'] + '[' + str(item['childrenCount']) + '] ' + item['type'] + ' P:' + project + ' C:' + context + ' ' + str(dateCompleted)
     if 'taskList' in item:
         for subItem in item['taskList']:
             printTree(depth + 1, subItem)
@@ -154,6 +168,7 @@ def buildModel (db):
     columns=['persistentIdentifier', 'name', 'dateDue', 'dateCompleted','projectInfo', 'context', 'containingProjectInfo', 'childrenCount', 'parent']
     tasks = query (conn, 'task', columns)
     
+    knitProjectNames (projects, tasks)
     knitTasks(projects, folders, contexts, tasks)
     knitFolders (folders)
     knitContexts (contexts)
