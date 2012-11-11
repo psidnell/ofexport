@@ -1,6 +1,6 @@
 import sqlite3
 from pprint import pprint
-from datetime import datetime
+import datetime
 import sys
 
 '''
@@ -57,13 +57,12 @@ CREATE INDEX Context_parent on Context (parent);
 
 '''
 TODO
-- visitor pattern
 - useful report
 - just return root folders/contexts
 - use select dateField(ZTIME, 'unixepoch', '+31 years') from ...
 - NOT: completed = ' completed:' + str(datetime.fromtimestamp(THIRTY_ONE_YEARS + self.attribs['dateCompleted']))
-
 - slots?
+- decode note xml
 '''
 
 THIRTY_ONE_YEARS = 60 * 60 * 24 * 365 * 31 + 60 * 60 * 24 * 8
@@ -99,7 +98,7 @@ class DateAttribDesc (AttribDesc):
         val = AttribDesc.__get__(self, obj, cls)
         if val == None:
             return None
-        return datetime.fromtimestamp(THIRTY_ONE_YEARS + val)
+        return datetime.datetime.fromtimestamp(THIRTY_ONE_YEARS + val)
 
 class BoolAttribDesc (AttribDesc):
     def __init__( self, name ):
@@ -118,8 +117,6 @@ class Node (object):
         return self.attribs[key]
     def __contains__ (self, key):
         return key in self.attribs
-    def getChildNames (self):
-        return '[' + ','.join([child.name for child in self.children]) + ']'
 
 class Context(Node):
     TABLE='context'
@@ -135,13 +132,15 @@ class Context(Node):
 class Task(Node):
     TABLE='task'
     COLUMNS=['persistentIdentifier', 'name', 'dateDue', 'dateCompleted','dateToStart', 'dateDue', 
-             'projectInfo', 'context', 'containingProjectInfo', 'childrenCount', 'parent', 'rank', 'flagged']
+             'projectInfo', 'context', 'containingProjectInfo', 'childrenCount', 'parent', 'rank', 'flagged', 'noteXMLData']
     name = TypedDesc ('name', unicode)
     date_completed = DateAttribDesc ('dateCompleted')
     date_to_start = DateAttribDesc ('dateToStart')
     date_due = DateAttribDesc ('dateDue')
     flagged = BoolAttribDesc ('flagged')
     context = TypedDesc('context', Context)
+    note = AttribDesc ('noteXMLData')
+
     #project = TypedDesc('project', Project) forward reference?
     def __init__(self, param):
         Node.__init__(self,param)
@@ -153,8 +152,9 @@ class Task(Node):
 
 class Folder(Node):
     TABLE='folder'
-    COLUMNS=['persistentIdentifier', 'name', 'childrenCount', 'parent', 'rank']
+    COLUMNS=['persistentIdentifier', 'name', 'childrenCount', 'parent', 'rank', 'noteXMLData']
     name = TypedDesc ('name', unicode)
+    note = AttribDesc ('noteXMLData')
     def __init__(self, param):
         Node.__init__(self,param)
         self.name=self.attribs['name']
@@ -174,13 +174,7 @@ class Project(Task):
     def __init__(self):
         self.folder = None
     def __str__ (self):
-        parent_folder = ''
-        if self.folder != None:
-            parent_folder = ' parentFolder:' + self.folder.name
-        completed = ''
-        if self.attribs['dateCompleted'] != None:
-            completed = ' completed:' + str(datetime.fromtimestamp(THIRTY_ONE_YEARS + self.attribs['dateCompleted']))
-        return "Project:" + self.name + parent_folder + completed
+        return self.name
 
 def query (conn, clazz):
     c = conn.cursor()
@@ -365,6 +359,7 @@ class PrintingVisitor(Visitor):
         self.indent = indent
     def begin_folder (self, folder):
         print self.spaces() + '* Folder: ' + folder.name
+        print self.spaces () + '  - Note: ' + str(folder.note)
         self.depth+=1
     def end_folder (self, folder):
         self.depth-=1
@@ -392,13 +387,66 @@ class PrintingVisitor(Visitor):
         print self.spaces () + '  - StartDate: ' + str(task.date_to_start)
         print self.spaces () + '  - Due: ' + str(task.date_due)
         print self.spaces () + '  - Flagged: ' + str(task.flagged)
-
+        print self.spaces () + '  - Note: ' + str(task.note)
     def spaces (self):
         return ' ' * self.depth * self.indent
 
+class WeeklyReportVisitor(Visitor):
+    DAYS={'0':'Sun', '1':'Mon', '2':'Tue', '3':'Wed', '4':'Thu', '5':'Fri', '6':'Sat'}
+    MONTHS={'01':'Jan', '02':'Feb', '03':'Mar', '04':'Apr', '05':'May', '06':'Jun', '07':'Jul','08':'Aug', '09':'Sep', '10':'Oct', '11':'Nov', '12':'Dec'}
+
+    def __init__ (self, out, days=7, indent=4):
+        self.indent = indent
+        self.days = days
+        self.project_line = None
+        self.tasks = []
+        self.out = out
+    def end_project (self, project):
+        if len(self.tasks) > 0 or self.completed_recently(project):
+            print >>self.out, '# Project: ' + str(project)
+            self.tasks.sort(key=lambda task:task.date_completed)
+            for task in self.tasks:
+                print >>self.out, '- Task: ' + str(task) + self.format_date(task.date_completed)
+                self.task = []
+            if self.completed_recently(project):
+                print >>self.out, 'Finished', self.format_date(project.date_completed)
+            else:
+                print >>self.out, 'Ongoing...'
+            print >>self.out
+    def begin_task (self, task):
+        if self.completed_recently(task) and 'Log' == str(task.context):
+            self.tasks.append (task)
+    def completed_recently (self, task):
+        if task.date_completed == None:
+            return False
+        completed = task.date_completed
+        cutoff = datetime.datetime.now() - datetime.timedelta(self.days)
+        if cutoff <= completed:
+            return True
+    def format_date (self, datetime):
+        if datetime == None:
+            return ''
+        result = ' (' + self.DAYS[datetime.strftime('%w')]
+        result += '-' + self.MONTHS[datetime.strftime('%m')]
+        result += datetime.strftime('-%d-%Y)')
+        return result
+        
+
+
 folders, contexts = buildModel ('/Users/psidnell/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2')
 
-traverse_folders (PrintingVisitor (), folders)
+#traverse_folders (PrintingVisitor (), folders)
 
-traverse_contexts (PrintingVisitor (), contexts)
+#traverse_contexts (PrintingVisitor (), contexts)
 
+weekly_report=open('/Users/psidnell/Desktop/WeeklyReport.ft', 'w')
+for folder in folders:
+    if folder.name == 'Work':
+        traverse_folder (WeeklyReportVisitor (weekly_report, days=7), folder)
+weekly_report.close()
+
+weekly_report=open('/Users/psidnell/Desktop/DailyReport.ft', 'w')
+for folder in folders:
+    if folder.name == 'Work':
+        traverse_folder (WeeklyReportVisitor (weekly_report, days=3), folder)
+weekly_report.close()
