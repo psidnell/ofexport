@@ -438,7 +438,7 @@ class WeeklyReportVisitor(Visitor):
 
 folders, contexts = buildModel ('/Users/psidnell/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2')
 
-weekly_report=open('/Users/psidnell/Desktop/WeeklyReport-' + format_timestamp () + '.ft', 'w')
+weekly_report=open('/Users/psidnell/Documents/Reports/WeeklyReport-' + datetime.datetime.now().strftime('%W') + '.ft', 'w')
 print >>weekly_report, '# Weekly Progress Report'
 print >>weekly_report
 print >>weekly_report, '## Paul Sidnell ' + format_date()
@@ -452,7 +452,7 @@ for folder in folders:
         traverse_folder (WeeklyReportVisitor (weekly_report, proj_pfx='##', days=7), folder)
 weekly_report.close()
 
-weekly_report=open('/Users/psidnell/Desktop/DailyReport-' + format_timestamp () + '.ft', 'w')
+weekly_report=open('/Users/psidnell/Documents/Reports/DailyReport-' + format_timestamp () + '.ft', 'w')
 
 for folder in folders:
     if folder.name == 'Work':
