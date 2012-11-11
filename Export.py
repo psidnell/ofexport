@@ -55,7 +55,8 @@ CREATE INDEX Context_parent on Context (parent);
 
 '''
 TODO
-- set type on node
+- tasklist->children
+- generic node class
 - sort tasks
 - visitor pattern
 '''
@@ -72,7 +73,7 @@ def query (conn, table, columns):
     c.close()
     return results
 
-def knitProjectsFoldersTasks (projects, folders, tasks):
+def knitTasks (projects, folders, contexts, tasks):
     for task in tasks.values():
         task['type'] = 'TASK'
         
@@ -92,6 +93,13 @@ def knitProjectsFoldersTasks (projects, folders, tasks):
                     folder['taskList'] = [task]
                 else:
                     folder['taskList'].append(task)
+                    
+        if task['context'] != None:
+            context = contexts[task['context']]
+            if not ('taskList' in context):
+                context['taskList'] = [task]
+            else:
+                context['taskList'].append(task)
             
 def knitFolders (folders):
     for folder in folders.values():
@@ -102,6 +110,16 @@ def knitFolders (folders):
                 parent['taskList'] = [folder]
             else:
                 parent['taskList'].append(folder)
+                
+def knitContexts (contexts):
+    for context in contexts.values():
+        context['type'] = 'CONTEXT'
+        if context['parent'] != None:
+            parent = contexts[context['parent']]
+            if not ('taskList' in parent):
+                parent['taskList'] = [context]
+            else:
+                parent['taskList'].append(context)
 
 def printTree (depth, item):
     if (not 'dateCompleted' in item) or item['dateCompleted'] == None:
@@ -113,7 +131,7 @@ def printTree (depth, item):
                 
 conn = sqlite3.connect('/Users/psidnell/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2')
 
-columns=['persistentIdentifier', 'name']
+columns=['persistentIdentifier', 'name', 'parent', 'childrenCount']
 contexts = query (conn, 'context', columns)
 
 columns=['pk', 'folder']
@@ -125,11 +143,17 @@ folders = query (conn, 'folder', columns)
 columns=['persistentIdentifier', 'name', 'dateDue', 'dateCompleted','projectInfo', 'context', 'containingProjectInfo', 'childrenCount', 'parent']
 tasks = query (conn, 'task', columns)
 
-knitProjectsFoldersTasks(projects, folders, tasks)
+knitTasks(projects, folders, contexts, tasks)
 knitFolders (folders)
+knitContexts (contexts)
+
+
 
 for folder in folders.values ():
     if folder['parent'] == None:
         printTree (0, folder)
+for context in contexts.values ():
+    if context['parent'] == None:
+        printTree (0, context)
 
 conn.close()
