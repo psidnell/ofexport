@@ -87,10 +87,21 @@ class Node:
         return key in self.__dict__
 
 class Task(Node):
-    def __init__(self, attribs):
-        super(Task, self).__init__(attribs)
-    
+    def __init__(self, param):
+        Node.__init__(self,param)
 
+class Context(Node):
+    def __init__(self, param):
+        Node.__init__(self,param)
+
+class Folder(Node):
+    def __init__(self, param):
+        Node.__init__(self,param)
+        
+class ProjectInfo(Node):
+    def __init__(self, param):
+        Node.__init__(self,param)
+    
 def query (conn, table, columns, clazz=Node):
     c = conn.cursor()
     results = {}
@@ -174,7 +185,7 @@ def printTree (depth, item):
     project = ''
     if 'projectName' in item:
         project = item['projectName']
-    print (' ' * (depth * 4)) + item['name'] + '[' + str(item['childrenCount']) + '] ' + item['type'] + ' P:' + project + ' C:' + context + ' ' + str(dateCompleted)
+    print (' ' * (depth * 4)) + item['name'] + '[' + str(item['childrenCount']) + '] ' + item.__class__.__name__ + ' P:' + project + ' C:' + context + ' ' + str(dateCompleted)
     if 'taskList' in item:
         for subItem in item['taskList']:
             printTree(depth + 1, subItem)
@@ -183,16 +194,16 @@ def buildModel (db):
     conn = sqlite3.connect(db)
 
     columns=['persistentIdentifier', 'name', 'parent', 'childrenCount']
-    contexts = query (conn, table='context', columns=columns)
+    contexts = query (conn, table='context', columns=columns, clazz=Context)
     
     columns=['pk', 'folder']
-    projects = query (conn, table='projectinfo', columns=columns)
+    projects = query (conn, table='projectinfo', columns=columns, clazz=ProjectInfo)
     
     columns=['persistentIdentifier', 'name', 'childrenCount', 'parent']
-    folders = query (conn, table='folder', columns=columns)
+    folders = query (conn, table='folder', columns=columns, clazz=Folder)
     
     columns=['persistentIdentifier', 'name', 'dateDue', 'dateCompleted','projectInfo', 'context', 'containingProjectInfo', 'childrenCount', 'parent']
-    tasks = query (conn, table='task', columns=columns)
+    tasks = query (conn, table='task', columns=columns, clazz=Task)
     
     knitProjectNames (projects, tasks)
     knitTasks(projects, folders, contexts, tasks)
