@@ -1,6 +1,7 @@
 import sqlite3
 from pprint import pprint
 from datetime import datetime
+import sys
 
 '''
 sqlite3 ~/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2
@@ -60,17 +61,19 @@ TODO
 - useful report
 - just return root folders/contexts
 - use select dateField(ZTIME, 'unixepoch', '+31 years') from ...
+- NOT: completed = ' completed:' + str(datetime.fromtimestamp(THIRTY_ONE_YEARS + self.attribs['dateCompleted']))
+
 - slots?
 '''
 
 THIRTY_ONE_YEARS = 60 * 60 * 24 * 365 * 31 + 60 * 60 * 24 * 8
 
-class AttribDesc( object ):
-    def __init__( self, name ):
+class AttribDesc(object):
+    def __init__(self, name):
         self._name = name
-    def __get__( self, instance, owner ):
+    def __get__(self, instance, owner):
         return instance.attribs[self._name]
-    def __set__( self, instance, value ):
+    def __set__(self, instance, value):
         instance.attribs[self._name] = value
         
 class TypedDesc(object):
@@ -89,6 +92,24 @@ class TypedDesc(object):
     def __delete__(self,obj):
         raise AttributeError("Can't delete")
 
+class DateAttribDesc (AttribDesc):
+    def __init__( self, name ):
+        AttribDesc.__init__(self, name)
+    def __get__(self,obj,cls):
+        val = AttribDesc.__get__(self, obj, cls)
+        if val == None:
+            return None
+        return datetime.fromtimestamp(THIRTY_ONE_YEARS + val)
+
+class BoolAttribDesc (AttribDesc):
+    def __init__( self, name ):
+        AttribDesc.__init__(self, name)
+    def __get__(self,obj,cls):
+        val = AttribDesc.__get__(self, obj, cls)
+        if val == None:
+            return None
+        return bool(val)
+        
 class Node (object):
     def __init__ (self, attribs):
         self.attribs = attribs
@@ -109,26 +130,26 @@ class Context(Node):
         self.name=self.attribs['name']
         self.parent = None
     def __str__ (self):
-        return "Context:" + self.name
+        return self.name
 
 class Task(Node):
     TABLE='task'
-    COLUMNS=['persistentIdentifier', 'name', 'dateDue', 'dateCompleted','projectInfo', 'context', 'containingProjectInfo', 'childrenCount', 'parent', 'rank']
+    COLUMNS=['persistentIdentifier', 'name', 'dateDue', 'dateCompleted','dateToStart', 'dateDue', 
+             'projectInfo', 'context', 'containingProjectInfo', 'childrenCount', 'parent', 'rank', 'flagged']
     name = TypedDesc ('name', unicode)
+    date_completed = DateAttribDesc ('dateCompleted')
+    date_to_start = DateAttribDesc ('dateToStart')
+    date_due = DateAttribDesc ('dateDue')
+    flagged = BoolAttribDesc ('flagged')
     context = TypedDesc('context', Context)
     #project = TypedDesc('project', Project) forward reference?
     def __init__(self, param):
         Node.__init__(self,param)
         self.name=self.attribs['name']
         self.parent = None
+        self.context = None
     def __str__ (self):
-        parent_task = ''
-        if self.parent != None:
-            parent_task = ' parentTask:' + self.parent.name
-        completed = ''
-        if self.attribs['dateCompleted'] != None:
-            completed = ' completed:' + str(datetime.fromtimestamp(THIRTY_ONE_YEARS + self.attribs['dateCompleted']))
-        return "Task:" + self.name + parent_task + completed
+        return self.name
 
 class Folder(Node):
     TABLE='folder'
@@ -139,10 +160,7 @@ class Folder(Node):
         self.name=self.attribs['name']
         self.parent = None
     def __str__ (self):
-        parent_folder = ''
-        if self.parent != None:
-            parent_folder = ' parentFolder:' + self.parent.name
-        return "Folder:" + self.name + parent_folder + ' ' + self.getChildNames()
+        return self.name
         
 class ProjectInfo(Node):
     TABLE='projectinfo'
@@ -341,47 +359,44 @@ def traverse_folder (visitor, folder):
             traverse_project (visitor, child)
     visitor.end_folder (folder)
     
-folders, contexts = buildModel ('/Users/psidnell/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2')
-
-'''
-for folder in folders:
-    if folder['parent'] == None:
-        printTree (0, folder)
-for context in contexts:
-    if context['parent'] == None:
-        printTree (0, context)
-'''
-'''
-for folder in folders:
-    if folder['parent'] == None and folder['name'] == 'Work':
-        printTree (0, folder)
-'''
 class PrintingVisitor(Visitor):
     def __init__ (self, indent=4):
         self.depth = 0
         self.indent = indent
     def begin_folder (self, folder):
-        print self.spaces() + folder.name
+        print self.spaces() + '* Folder: ' + folder.name
         self.depth+=1
     def end_folder (self, folder):
         self.depth-=1
     def begin_project (self, project):
-        print self.spaces () + project.name
+        print self.spaces () + '* Project: ' + str(project)
+        self.print_task_attribs (project);
         self.depth+=1
     def end_project (self, project):
         self.depth-=1
     def begin_task (self, task):
-        print self.spaces() + task.name
+        print self.spaces() + '* Task: ' + task.name
+        self.print_task_attribs (task);
         self.depth+=1
     def end_task (self, task):
         self.depth-=1
     def begin_context (self, context):
-        print self.spaces() + context.name
+        print self.spaces() + '* Context: ' + context.name
         self.depth+=1
     def end_context (self, context):
         self.depth-=1
+    def print_task_attribs (self, task):
+        # Tasks and projects have same attribs
+        print self.spaces () + '  - Context: ' + str(task.context)
+        print self.spaces () + '  - DateCompleted: ' + str(task.date_completed)
+        print self.spaces () + '  - StartDate: ' + str(task.date_to_start)
+        print self.spaces () + '  - Due: ' + str(task.date_due)
+        print self.spaces () + '  - Flagged: ' + str(task.flagged)
+
     def spaces (self):
         return ' ' * self.depth * self.indent
+
+folders, contexts = buildModel ('/Users/psidnell/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2')
 
 traverse_folders (PrintingVisitor (), folders)
 
