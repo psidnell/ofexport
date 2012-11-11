@@ -58,6 +58,7 @@ CREATE INDEX Context_parent on Context (parent);
 TODO
 - visitor pattern
 - useful report
+- just return root folders/contexts
 - use select dateField(ZTIME, 'unixepoch', '+31 years') from ...
 - slots?
 '''
@@ -106,6 +107,7 @@ class Context(Node):
     def __init__(self, param):
         Node.__init__(self,param)
         self.name=self.attribs['name']
+        self.parent = None
     def __str__ (self):
         return "Context:" + self.name
 
@@ -237,6 +239,7 @@ def wire_context_hierarchy (contexts):
         if context['parent'] != None:
             parent = contexts[context['parent']]
             parent.children.append(context)
+            context.parent = parent
 
 def printTree (depth, item):
     print (' ' * (depth * 4)) + str(item['rank']) + ':' + str(item)
@@ -247,6 +250,13 @@ def sort (items):
     for child in items:
         child.children.sort(key=lambda item:item['rank'])
         sort(child.children)
+
+def only_roots (items):
+    roots = []
+    for item in items:
+        if item.parent == None:
+            roots.append(item)
+    return roots
 
 def buildModel (db):
     conn = sqlite3.connect(db)
@@ -265,23 +275,115 @@ def buildModel (db):
     
     conn.close ()
     
-    sort(folders.values())
-    sort(contexts.values())
-    sort (projects.values())
+    folder_roots = only_roots (folders.values())
+    context_roots = only_roots (contexts.values())
     
-    return folders, projects, contexts, tasks
+    sort(folder_roots)
+    sort(context_roots)
+    
+    return folder_roots, context_roots
 
-folders, projects, contexts, tasks = buildModel ('/Users/psidnell/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2')
+class Visitor(object):
+    def begin_folder (self, folder):
+        pass
+    def end_folder (self, folder):
+        pass
+    def begin_project (self, project):
+        pass
+    def end_project (self, project):
+        pass
+    def begin_task (self, task):
+        pass
+    def end_task (self, task):
+        pass
+    def begin_context (self, context):
+        pass
+    def end_context (self, context):
+        pass
+
+def traverse_folders (visitor, folders):
+    for folder in folders:
+        traverse_folder (visitor, folder)
+
+def traverse_contexts (visitor, contextx):
+    for context in contexts:
+        traverse_context (visitor, context)
+
+def traverse_context (visitor, context):
+    visitor.begin_context (context)
+    for child in context.children:
+        if child.__class__ == Context:
+            traverse_context (visitor, child)
+        elif child.__class__ == Project:
+            traverse_project (visitor, child)
+        else:
+            traverse_task (visitor, child)
+    visitor.end_context (context)
+
+def traverse_task (visitor, task):
+    visitor.begin_task (task)
+    for subtask in task.children:
+        traverse_task (visitor, subtask)
+    visitor.end_task (task)
+    
+def traverse_project (visitor, project):
+    visitor.begin_project (project)
+    for task in project.children:
+        traverse_task (visitor, task)
+    visitor.end_project (project)
+    
+def traverse_folder (visitor, folder):
+    visitor.begin_folder(folder)
+    for child in folder.children:
+        if child.__class__ == Folder:
+            traverse_folder (visitor, child)
+        else:
+            traverse_project (visitor, child)
+    visitor.end_folder (folder)
+    
+folders, contexts = buildModel ('/Users/psidnell/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2')
 
 '''
-for folder in folders.values ():
+for folder in folders:
     if folder['parent'] == None:
         printTree (0, folder)
-for context in contexts.values ():
+for context in contexts:
     if context['parent'] == None:
         printTree (0, context)
 '''
-
-for folder in folders.values ():
+'''
+for folder in folders:
     if folder['parent'] == None and folder['name'] == 'Work':
         printTree (0, folder)
+'''
+class PrintingVisitor(Visitor):
+    def __init__ (self, indent=4):
+        self.depth = 0
+        self.indent = indent
+    def begin_folder (self, folder):
+        print self.spaces() + folder.name
+        self.depth+=1
+    def end_folder (self, folder):
+        self.depth-=1
+    def begin_project (self, project):
+        print self.spaces () + project.name
+        self.depth+=1
+    def end_project (self, project):
+        self.depth-=1
+    def begin_task (self, task):
+        print self.spaces() + task.name
+        self.depth+=1
+    def end_task (self, task):
+        self.depth-=1
+    def begin_context (self, context):
+        print self.spaces() + context.name
+        self.depth+=1
+    def end_context (self, context):
+        self.depth-=1
+    def spaces (self):
+        return ' ' * self.depth * self.indent
+
+traverse_folders (PrintingVisitor (), folders)
+
+traverse_contexts (PrintingVisitor (), contexts)
+
