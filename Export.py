@@ -456,6 +456,6 @@ weekly_report=open('/Users/psidnell/Documents/Reports/DailyReport-' + format_tim
 
 for folder in folders:
     if folder.name == 'Work':
-        traverse_folder (WeeklyReportVisitor (weekly_report, proj_pfx='#', days=3), folder)
+        traverse_folder (WeeklyReportVisitor (weekly_report, proj_pfx='#', days=1), folder)
 weekly_report.close()
 print 'Done'
