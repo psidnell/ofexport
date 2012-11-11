@@ -69,9 +69,9 @@ class AttribDesc( object ):
     def __init__( self, name ):
         self._name = name
     def __get__( self, instance, owner ):
-        return instance.__dict__[self._name]
+        return instance.attribs[self._name]
     def __set__( self, instance, value ):
-        instance.__dict__[self._name] = value
+        instance.attribs[self._name] = value
         
 class TypedDesc(object):
     def __init__(self,name, exptype, value=None):
@@ -91,14 +91,14 @@ class TypedDesc(object):
 
 class Node (object):
     def __init__ (self, attribs):
-        self.__dict__.update (attribs)
+        self.attribs = attribs
         self.children = []
     def __getitem__ (self, key):
-        return self.__dict__[key]
+        return self.attribs[key]
     def __setitem__ (self, key, val):
-        self.__dict__[key] = val
+        self.attribs[key] = val
     def __contains__ (self, key):
-        return key in self.__dict__
+        return key in self.attribs
     def getChildNames (self):
         return '[' + ','.join([child.name for child in self.children]) + ']'
 
@@ -108,7 +108,7 @@ class Context(Node):
     name = TypedDesc ('name', unicode)
     def __init__(self, param):
         Node.__init__(self,param)
-        self.name=self.__dict__['name']
+        self.name=self.attribs['name']
     def __str__ (self):
         return "Context:" + self.name
 
@@ -120,7 +120,7 @@ class Task(Node):
     #project = TypedDesc('project', Project) forward reference?
     def __init__(self, param):
         Node.__init__(self,param)
-        self.name=self.__dict__['name']
+        self.name=self.attribs['name']
         self.parent = None
     def __str__ (self):
         parent_task = ''
@@ -134,7 +134,8 @@ class Folder(Node):
     name = TypedDesc ('name', unicode)
     def __init__(self, param):
         Node.__init__(self,param)
-        self.name=self.__dict__['name']
+        self.name=self.attribs['name']
+        self.parent = None
     def __str__ (self):
         parent_folder = ''
         if self.parent != None:
@@ -203,7 +204,6 @@ def wire_projects_and_folders (projects, folders):
 def wire_task_hierarchy (tasks):
     for task in tasks.values():  
         if task['parent'] != None:
-            pprint (task.__dict__)
             parent = tasks[task['parent']]
             parent.children.append(task);
             task.parent = parent
