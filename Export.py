@@ -66,7 +66,32 @@ TODO
 
 THIRTY_ONE_YEARS = 60 * 60 * 24 * 365 * 31 + 60 * 60 * 24 * 8
 
-def query (conn, table, columns):
+class AttribDescriptor( object ):
+    def __init__( self, name ):
+        self._name = name
+    def __get__( self, instance, owner ):
+        return instance.__dict__[self._name]
+    def __set__( self, instance, value ):
+        instance.__dict__[self._name] = value
+
+class Node:
+    name = AttribDescriptor ('name')
+    type = AttribDescriptor ('type')
+    def __init__ (self, attribs):
+        self.__dict__.update (attribs)
+    def __getitem__ (self, key):
+        return self.__dict__[key]
+    def __setitem__ (self, key, val):
+        self.__dict__[key] = val
+    def __contains__ (self, key):
+        return key in self.__dict__
+
+class Task(Node):
+    def __init__(self, attribs):
+        super(Task, self).__init__(attribs)
+    
+
+def query (conn, table, columns, clazz=Node):
     c = conn.cursor()
     results = {}
     for row in c.execute('SELECT ' + (','.join(columns)) + ' from ' + table):
@@ -75,7 +100,8 @@ def query (conn, table, columns):
             key = columns[i]
             val = row[i]
             rowData[key] = val
-        results[rowData[columns[0]]] = rowData
+        node = clazz (rowData)
+        results[rowData[columns[0]]] = node
     c.close()
     return results
 
@@ -83,11 +109,11 @@ def knitProjectNames (projects, tasks):
     for task in tasks.values():        
         if task['projectInfo'] != None:
             projectInfo = projects[task['projectInfo']]
-            projectInfo['name'] = task['name']
+            projectInfo.name = task.name
 
 def knitTasks (projects, folders, contexts, tasks):
     for task in tasks.values():
-        task['type'] = 'TASK'
+        task.type = 'TASK'
         
         if task['parent'] != None:
             parent = tasks[task['parent']]
@@ -101,7 +127,7 @@ def knitTasks (projects, folders, contexts, tasks):
             task['projectName'] = projectInfo['name']
         
         if task['projectInfo'] != None:
-            task['type'] = 'PROJECT'
+            task.type = 'PROJECT'
             projectInfo = projects[task['projectInfo']]
             if projectInfo['folder'] != None:
                 folder = folders[projectInfo['folder']]
@@ -120,7 +146,7 @@ def knitTasks (projects, folders, contexts, tasks):
             
 def knitFolders (folders):
     for folder in folders.values():
-        folder['type'] = 'FOLDER'
+        folder.type = 'FOLDER'
         if folder['parent'] != None:
             parent = folders[folder['parent']]
             if not ('taskList' in parent):
@@ -130,7 +156,7 @@ def knitFolders (folders):
                 
 def knitContexts (contexts):
     for context in contexts.values():
-        context['type'] = 'CONTEXT'
+        context.type = 'CONTEXT'
         if context['parent'] != None:
             parent = contexts[context['parent']]
             if not ('taskList' in parent):
@@ -157,16 +183,16 @@ def buildModel (db):
     conn = sqlite3.connect(db)
 
     columns=['persistentIdentifier', 'name', 'parent', 'childrenCount']
-    contexts = query (conn, 'context', columns)
+    contexts = query (conn, table='context', columns=columns)
     
     columns=['pk', 'folder']
-    projects = query (conn, 'projectinfo', columns)
+    projects = query (conn, table='projectinfo', columns=columns)
     
     columns=['persistentIdentifier', 'name', 'childrenCount', 'parent']
-    folders = query (conn, 'folder', columns)
+    folders = query (conn, table='folder', columns=columns)
     
     columns=['persistentIdentifier', 'name', 'dateDue', 'dateCompleted','projectInfo', 'context', 'containingProjectInfo', 'childrenCount', 'parent']
-    tasks = query (conn, 'task', columns)
+    tasks = query (conn, table='task', columns=columns)
     
     knitProjectNames (projects, tasks)
     knitTasks(projects, folders, contexts, tasks)
