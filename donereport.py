@@ -8,8 +8,8 @@ def format_date (thedate = date.today()):
         if thedate == None:
             return ''
         result = DAYS[thedate.strftime('%w')]
-        result += '-' + MONTHS[thedate.strftime('%m')]
-        result += thedate.strftime('-%d-%Y')
+        result += ' ' + MONTHS[thedate.strftime('%m')]
+        result += thedate.strftime(' %d %Y')
         return result
     
 def format_timestamp (thedate = date.today()):
@@ -27,11 +27,11 @@ class WeeklyReportVisitor(Visitor):
             print >>self.out, self.proj_pfx + ' ' + str(project)
             self.tasks.sort(key=lambda task:task.date_completed)
             for task in self.tasks:
-                print >>self.out, '- ' + str(task) + ' - ' + format_date(task.date_completed)
+                print >>self.out, '- ' + str(task) + ' *[' + format_date(task.date_completed) + ']*'
             if self.completed_recently(project):
-                print >>self.out, 'Finished - ' + format_date(project.date_completed)
+                print >>self.out, '- Finished *[' + format_date(project.date_completed) + ']*'
             else:
-                print >>self.out, 'Ongoing...'
+                print >>self.out, '- Ongoing...'
             print >>self.out
             self.tasks = []
     def begin_task (self, task):
