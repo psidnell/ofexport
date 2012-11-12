@@ -432,28 +432,3 @@ class WeeklyReportVisitor(Visitor):
         cutoff = date.today() - timedelta(self.days)
         if cutoff <= completed:
             return True
-    
-
-folders, contexts = buildModel ('/Users/psidnell/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2')
-
-weekly_report=open('/Users/psidnell/Documents/Reports/WeeklyReport-' + date.today().strftime('%W') + '.ft', 'w')
-print >>weekly_report, '# Weekly Progress Report'
-print >>weekly_report
-print >>weekly_report, '## Paul Sidnell ' + format_date()
-print >>weekly_report
-print >>weekly_report, '---'
-print >>weekly_report
-
-
-for folder in folders:
-    if folder.name == 'Work':
-        traverse_folder (WeeklyReportVisitor (weekly_report, proj_pfx='##', days=7), folder)
-weekly_report.close()
-
-weekly_report=open('/Users/psidnell/Documents/Reports/DailyReport-' + format_timestamp () + '.ft', 'w')
-
-for folder in folders:
-    if folder.name == 'Work':
-        traverse_folder (WeeklyReportVisitor (weekly_report, proj_pfx='#', days=1), folder)
-weekly_report.close()
-print 'Done'
