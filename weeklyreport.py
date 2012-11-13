@@ -4,7 +4,7 @@ from datetime import date
 import os
 
 folders, contexts = build_model ('/Users/psidnell/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2')
-file_name = '/Users/psidnell/Documents/Reports/WeeklyReport-' + date.today().strftime('%W') + '.ft'
+file_name = '/Users/psidnell/Documents/Reports/WeeklyReport-' + date.today().strftime('%W') + '.md'
 out=open(file_name, 'w')
 print >>out, '# Weekly Progress Report'
 print >>out
