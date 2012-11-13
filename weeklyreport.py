@@ -15,7 +15,7 @@ print >>out
 
 for folder in folders:
     if folder.name == 'Work':
-        traverse_folder (WeeklyReportVisitor (out, proj_pfx='##', days=7), folder)
+        traverse_folder (WeeklyReportVisitor (out, proj_pfx='##'), folder)
 out.close()
 
 os.system("open '" + file_name + "'")

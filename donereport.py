@@ -1,5 +1,5 @@
 from omnifocus import Visitor
-from datetime import date, timedelta
+from datetime import date
 
 DAYS={'0':'Sun', '1':'Mon', '2':'Tue', '3':'Wed', '4':'Thu', '5':'Fri', '6':'Sat'}
 MONTHS={'01':'Jan', '02':'Feb', '03':'Mar', '04':'Apr', '05':'May', '06':'Jun', '07':'Jul','08':'Aug', '09':'Sep', '10':'Oct', '11':'Nov', '12':'Dec'}
@@ -17,8 +17,8 @@ def format_timestamp (thedate = date.today()):
     
 class WeeklyReportVisitor(Visitor):
 
-    def __init__ (self, out, proj_pfx='#', days=7, indent=4):
-        self.days = days
+    def __init__ (self, out, proj_pfx='#', cmp_fmt='%Y%W', indent=4):
+        self.cmp_fmt = cmp_fmt
         self.tasks = []
         self.out = out
         self.proj_pfx = proj_pfx
@@ -40,7 +40,4 @@ class WeeklyReportVisitor(Visitor):
     def completed_recently (self, task):
         if task.date_completed == None:
             return False
-        completed = task.date_completed
-        cutoff = date.today() - timedelta(self.days)
-        if cutoff <= completed:
-            return True
+        return task.date_completed.strftime(self.cmp_fmt) == date.today().strftime(self.cmp_fmt)

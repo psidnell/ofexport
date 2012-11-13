@@ -8,6 +8,6 @@ file_name='/Users/psidnell/Documents/Reports/DailyReport-' + format_timestamp ()
 out=open(file_name, 'w')
 for folder in folders:
     if folder.name == 'Work':
-        traverse_folder (WeeklyReportVisitor (out, proj_pfx='#', days=1), folder)
+        traverse_folder (WeeklyReportVisitor (out, proj_pfx='#', cmp_fmt='%Y%j'), folder)
 out.close()
 os.system("open '" + file_name + "'")
