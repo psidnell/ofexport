@@ -120,6 +120,7 @@ class Context(Node):
     TABLE='context'
     COLUMNS=['persistentIdentifier', 'name', 'parent', 'childrenCount', 'rank']
     name = TypedDesc ('name', unicode)
+    persistent_identifier = AttribDesc ('persistentIdentifier')
     def __init__(self, param):
         Node.__init__(self,param)
         self.name=self.attribs['name']
@@ -138,8 +139,7 @@ class Task(Node):
     flagged = BoolAttribDesc ('flagged')
     context = TypedDesc('context', Context)
     note = AttribDesc ('noteXMLData')
-
-    #project = TypedDesc('project', Project) forward reference?
+    persistent_identifier = AttribDesc ('persistentIdentifier')
     def __init__(self, param):
         Node.__init__(self,param)
         self.name=self.attribs['name']
@@ -153,6 +153,7 @@ class Folder(Node):
     COLUMNS=['persistentIdentifier', 'name', 'childrenCount', 'parent', 'rank', 'noteXMLData']
     name = TypedDesc ('name', unicode)
     note = AttribDesc ('noteXMLData')
+    persistent_identifier = AttribDesc ('persistentIdentifier')
     def __init__(self, param):
         Node.__init__(self,param)
         self.name=self.attribs['name']
