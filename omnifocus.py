@@ -48,6 +48,10 @@ effectiveActive integer NOT NULL, latitude real, localNumberOfDueSoonTasks integ
 longitude real, name text, noteXMLData blob, notificationFlags integer, parent text, radius real, rank integer NOT NULL, remainingTaskCount integer NOT NULL,
 totalNumberOfDueSoonTasks integer NOT NULL, totalNumberOfOverdueTasks integer NOT NULL);
 CREATE INDEX Context_parent on Context (parent);
+
+.schema Perspective (no name!!!)
+
+CREATE TABLE Perspective (persistentIdentifier text NOT NULL PRIMARY KEY, creationOrdinal integer, dateAdded timestamp NOT NULL, dateModified timestamp NOT NULL, valueData blob);
 '''
 
 
@@ -55,8 +59,6 @@ CREATE INDEX Context_parent on Context (parent);
 
 '''
 TODO
-- useful report
-- just return root folders/contexts
 - use select dateField(ZTIME, 'unixepoch', '+31 years') from ...
 - NOT: completed = ' completed:' + str(datetime.fromtimestamp(THIRTY_ONE_YEARS + self.attribs['dateCompleted']))
 - slots?
