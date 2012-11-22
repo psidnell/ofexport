@@ -1,5 +1,5 @@
 import sqlite3
-from datetime import date, timedelta
+from datetime import date
 
 '''
 sqlite3 ~/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2
@@ -108,6 +108,15 @@ class BoolAttribDesc (AttribDesc):
         if val == None:
             return None
         return bool(val)
+    
+class IntAttribDesc (AttribDesc):
+    def __init__( self, name ):
+        AttribDesc.__init__(self, name)
+    def __get__(self,obj,cls):
+        val = AttribDesc.__get__(self, obj, cls)
+        if val == None:
+            return None
+        return int(val)
         
 class Node (object):
     def __init__ (self, attribs):
@@ -122,6 +131,7 @@ class Context(Node):
     TABLE='context'
     COLUMNS=['persistentIdentifier', 'name', 'parent', 'childrenCount', 'rank']
     name = TypedDesc ('name', unicode)
+    rank = IntAttribDesc ('rank')
     persistent_identifier = AttribDesc ('persistentIdentifier')
     def __init__(self, param):
         Node.__init__(self,param)
@@ -133,7 +143,8 @@ class Context(Node):
 class Task(Node):
     TABLE='task'
     COLUMNS=['persistentIdentifier', 'name', 'dateDue', 'dateCompleted','dateToStart', 'dateDue', 
-             'projectInfo', 'context', 'containingProjectInfo', 'childrenCount', 'parent', 'rank', 'flagged', 'noteXMLData']
+             'projectInfo', 'context', 'containingProjectInfo', 'childrenCount', 'parent', 'rank',
+             'flagged', 'noteXMLData']
     name = TypedDesc ('name', unicode)
     date_completed = DateAttribDesc ('dateCompleted')
     date_to_start = DateAttribDesc ('dateToStart')
@@ -141,6 +152,7 @@ class Task(Node):
     flagged = BoolAttribDesc ('flagged')
     context = TypedDesc('context', Context)
     note = AttribDesc ('noteXMLData')
+    rank = IntAttribDesc ('rank')
     persistent_identifier = AttribDesc ('persistentIdentifier')
     def __init__(self, param):
         Node.__init__(self,param)
@@ -155,6 +167,7 @@ class Folder(Node):
     COLUMNS=['persistentIdentifier', 'name', 'childrenCount', 'parent', 'rank', 'noteXMLData']
     name = TypedDesc ('name', unicode)
     note = AttribDesc ('noteXMLData')
+    rank = IntAttribDesc ('rank')
     persistent_identifier = AttribDesc ('persistentIdentifier')
     def __init__(self, param):
         Node.__init__(self,param)
