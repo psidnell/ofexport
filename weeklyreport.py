@@ -5,7 +5,7 @@ import os
 import codecs
 
 folders, contexts = build_model ('/Users/psidnell/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2')
-file_name = '/Users/psidnell/Documents/Reports/WeeklyReport-' + date.today().strftime('%W') + '.md'
+file_name = '/Users/psidnell/Documents/Reports/WeeklyReport-' + date.today().strftime('%Y-%W') + '.md'
 out=codecs.open(file_name, 'w', 'utf-8')
 print >>out, '# Weekly Progress Report'
 print >>out
