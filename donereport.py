@@ -27,13 +27,13 @@ class WeeklyReportVisitor(Visitor):
             print >>self.out, self.proj_pfx + ' ' + str(project)
             self.tasks.sort(key=lambda task:task.date_completed)
             for task in self.tasks:
-                print >>self.out, '- ' + str(task) + ' *[' + format_date(task.date_completed) + ']*'
+                print >>self.out, '- ' + task.name + ' *[' + format_date(task.date_completed) + ']*'
             if project.date_completed != None:
                 print >>self.out, '- Finished *[' + format_date(project.date_completed) + ']*'
             print >>self.out
         self.tasks = []
     def begin_task (self, task):
-        if self.completed_recently(task) and 'Log' == str(task.context):
+        if self.completed_recently(task) and str(task.context).startswith('Log'):
             self.tasks.append (task)
     def completed_recently (self, task):
         if task.date_completed == None:
