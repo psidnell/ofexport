@@ -15,25 +15,25 @@ def format_date (thedate = date.today()):
 def format_timestamp (thedate = date.today()):
         return thedate.strftime('%Y-%m-%d')
     
-class WeeklyReportVisitor(Visitor):
+class DoneReportVisitor(Visitor):
 
-    def __init__ (self, out, proj_pfx='#', cmp_fmt='%Y%W', indent=4):
+
+    def __init__ (self, out, proj_pfx='#', cmp_fmt='%Y%W', contextPrefix='Log', indent=4):
         self.cmp_fmt = cmp_fmt
         self.tasks = []
         self.out = out
+        self.contextPrefix = contextPrefix
         self.proj_pfx = proj_pfx
     def end_project (self, project):
-        if len(self.tasks) > 0 or self.completed_recently(project):
+        if len(self.tasks) > 0:
             print >>self.out, self.proj_pfx + ' ' + str(project)
             self.tasks.sort(key=lambda task:task.date_completed)
             for task in self.tasks:
                 print >>self.out, '- ' + task.name + ' *[' + format_date(task.date_completed) + ']*'
-            if project.date_completed != None:
-                print >>self.out, '- Finished *[' + format_date(project.date_completed) + ']*'
             print >>self.out
         self.tasks = []
     def begin_task (self, task):
-        if self.completed_recently(task) and str(task.context).startswith('Log'):
+        if self.completed_recently(task) and str(task.context).startswith(self.contextPrefix):
             self.tasks.append (task)
     def completed_recently (self, task):
         if task.date_completed == None:

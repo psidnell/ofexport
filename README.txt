@@ -1,0 +1,15 @@
+I've wanted a reasonably flexible way of generating mardown/taskpaper/html reports of completed tasks from OmniFocus - but never quite found any love for AppleScript.
+
+So I've developed a python library that directly reads the OF database and builds a complete model of the task/project/context hierarchy that can then be used to generate whatever you wish.
+
+It's early days at the moment (there's no help at all yet) but there are example report generating scripts (for my purposes) that should get you going if you know python and sample AppleScript wrappers so you can add buttons that drive the scripts from the OF toolbar.
+
+I've been using this for a few months now with no issues, but bear in mind that the problem of this approach (i.e. scraping the database) is that Omni make no guarantees about compatibility or support going forward. And nor do I :-)
+
+Comments welcome.
+
+The freshly minted GitHub repo is here: https://github.com/psidnell/omnifocus
+
+TODO:
+- Decode note xml, may not be simple (are attachments uuencoded in them?).
+- Add more help for any unfortunate soul who tries to use this.

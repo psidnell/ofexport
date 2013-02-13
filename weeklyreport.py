@@ -1,5 +1,5 @@
 from omnifocus import traverse_folder, build_model
-from donereport import WeeklyReportVisitor, format_date
+from donereport import DoneReportVisitor, format_date
 from datetime import date
 import os
 import codecs
@@ -14,9 +14,10 @@ print >>out
 print >>out, '---'
 print >>out
 
+# Search Work folder and report on tasks completed this year (I prune this context weekly - hence the name) in a Log... context
 for folder in folders:
     if folder.name == 'Work':
-        traverse_folder (WeeklyReportVisitor (out, proj_pfx='##'), folder)
+        traverse_folder (DoneReportVisitor (out, proj_pfx='##', contextPrefix='Log', cmp_fmt='%Y'), folder)
 out.close()
 
 os.system("open '" + file_name + "'")

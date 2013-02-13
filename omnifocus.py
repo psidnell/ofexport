@@ -2,6 +2,11 @@ import sqlite3
 from datetime import date
 
 '''
+A library for loading a data model from the Omnifocus SQLite database.
+
+---------
+Notes on discovering what the Omni schema looks like
+
 sqlite3 ~/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2
 
 .tables
@@ -52,17 +57,6 @@ CREATE INDEX Context_parent on Context (parent);
 .schema Perspective (no name!!!)
 
 CREATE TABLE Perspective (persistentIdentifier text NOT NULL PRIMARY KEY, creationOrdinal integer, dateAdded timestamp NOT NULL, dateModified timestamp NOT NULL, valueData blob);
-'''
-
-
-
-
-'''
-TODO
-- use select dateField(ZTIME, 'unixepoch', '+31 years') from ...
-- NOT: completed = ' completed:' + str(datetime.fromtimestamp(THIRTY_ONE_YEARS + self.attribs['dateCompleted']))
-- slots?
-- decode note xml
 '''
 
 THIRTY_ONE_YEARS = 60 * 60 * 24 * 365 * 31 + 60 * 60 * 24 * 8
@@ -117,7 +111,16 @@ class IntAttribDesc (AttribDesc):
         if val == None:
             return None
         return int(val)
-        
+
+class UnicodeAttribDesc (AttribDesc):
+    def __init__( self, name ):
+        AttribDesc.__init__(self, name)
+    def __get__(self,obj,cls):
+        val = AttribDesc.__get__(self, obj, cls)
+        if val == None:
+            return None
+        return val
+           
 class Node (object):
     def __init__ (self, attribs):
         self.attribs = attribs
@@ -145,13 +148,13 @@ class Task(Node):
     COLUMNS=['persistentIdentifier', 'name', 'dateDue', 'dateCompleted','dateToStart', 'dateDue', 
              'projectInfo', 'context', 'containingProjectInfo', 'childrenCount', 'parent', 'rank',
              'flagged', 'noteXMLData']
-    name = TypedDesc ('name', unicode)
+    name = UnicodeAttribDesc ('name')
     date_completed = DateAttribDesc ('dateCompleted')
     date_to_start = DateAttribDesc ('dateToStart')
     date_due = DateAttribDesc ('dateDue')
     flagged = BoolAttribDesc ('flagged')
     context = TypedDesc('context', Context)
-    note = AttribDesc ('noteXMLData')
+    note = UnicodeAttribDesc ('noteXMLData')
     rank = IntAttribDesc ('rank')
     persistent_identifier = AttribDesc ('persistentIdentifier')
     def __init__(self, param):
@@ -166,7 +169,7 @@ class Folder(Node):
     TABLE='folder'
     COLUMNS=['persistentIdentifier', 'name', 'childrenCount', 'parent', 'rank', 'noteXMLData']
     name = TypedDesc ('name', unicode)
-    note = AttribDesc ('noteXMLData')
+    note = UnicodeAttribDesc ('noteXMLData')
     rank = IntAttribDesc ('rank')
     persistent_identifier = AttribDesc ('persistentIdentifier')
     def __init__(self, param):
