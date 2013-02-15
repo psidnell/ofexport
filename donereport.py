@@ -17,13 +17,12 @@ def format_timestamp (thedate = date.today()):
     
 class DoneReportVisitor(Visitor):
 
-
-    def __init__ (self, out, proj_pfx='#', cmp_fmt='%Y%W', contextPrefix='Log', indent=4):
-        self.cmp_fmt = cmp_fmt
+    def __init__ (self, out, date_filter, proj_pfx='#', contextPrefix='Log', indent=4):
         self.tasks = []
         self.out = out
         self.contextPrefix = contextPrefix
         self.proj_pfx = proj_pfx
+        self.date_filter = date_filter
     def end_project (self, project):
         if len(self.tasks) > 0:
             print >>self.out, self.proj_pfx + ' ' + str(project)
@@ -33,9 +32,5 @@ class DoneReportVisitor(Visitor):
             print >>self.out
         self.tasks = []
     def begin_task (self, task):
-        if self.completed_recently(task) and str(task.context).startswith(self.contextPrefix):
+        if self.date_filter(task) and str(task.context).startswith(self.contextPrefix):
             self.tasks.append (task)
-    def completed_recently (self, task):
-        if task.date_completed == None:
-            return False
-        return task.date_completed.strftime(self.cmp_fmt) == date.today().strftime(self.cmp_fmt)
