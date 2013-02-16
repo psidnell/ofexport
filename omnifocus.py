@@ -1,5 +1,6 @@
 import sqlite3
 from datetime import date
+from os import environ
 
 '''
 A library for loading a data model from the Omnifocus SQLite database.
@@ -408,3 +409,9 @@ class PrintingVisitor(Visitor):
     def spaces (self):
         return ' ' * self.depth * self.indent
 
+DATABASE = environ['HOME'] + '/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2'
+
+if __name__ == "__main__":
+    folders, contexts = build_model (DATABASE)
+    for folder in folders:
+        traverse_folder (PrintingVisitor (), folder)

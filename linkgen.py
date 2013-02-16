@@ -1,7 +1,11 @@
-from omnifocus import traverse_folders, traverse_contexts, build_model, Visitor
+from omnifocus import traverse_folders, traverse_contexts, build_model, Visitor, DATABASE
 import os
 import codecs
 
+'''
+This is a visitor that dumps out html references to each and every entry
+in the database. You can also specify a particular type, e.g. just 'Task'.
+'''
 class LinkGenVisitor(Visitor):
     def __init__ (self, out, types = {'Folder', 'Project', 'Task'}, indent=4):
         self.depth = 0
@@ -37,10 +41,9 @@ class LinkGenVisitor(Visitor):
     def spaces (self):
         return '&nbsp' * self.depth * self.indent
 
+folders, contexts = build_model (DATABASE)
 
-folders, contexts = build_model ('/Users/psidnell/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2')
-
-file_name='/Users/psidnell/Documents/oflinks.html'
+file_name=os.environ['HOME'] + '/Documents/oflinks.html'
 
 out=codecs.open(file_name, 'w', 'utf-8')
 

@@ -15,6 +15,11 @@ def format_date (thedate = date.today()):
 def format_timestamp (thedate = date.today()):
         return thedate.strftime('%Y-%m-%d')
     
+'''
+This is a report visitor that looks for completed tasks in a context with a particular
+prefix. At the end of each day I look at my completed tasks and set the context to Log
+so that those tasks appear in my daily/weekly reports.
+'''
 class DoneReportVisitor(Visitor):
 
     def __init__ (self, out, date_filter, proj_pfx='#', contextPrefix='Log', indent=4):

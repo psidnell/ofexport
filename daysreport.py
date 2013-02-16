@@ -1,13 +1,13 @@
-from omnifocus import traverse_folder, build_model
+from omnifocus import traverse_folder, build_model, DATABASE
 from donereport import DoneReportVisitor, format_timestamp
 import os
 import codecs
 from datetime import date
 import sys
 
-folders, contexts = build_model ('/Users/psidnell/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2')
+folders, contexts = build_model (DATABASE)
 
-file_name='/Users/psidnell/Documents/Reports/DailyReport-' + format_timestamp () + '.md'
+file_name=os.environ['HOME'] + '/Documents/Reports/DailyReport-' + format_timestamp () + '.md'
 out=codecs.open(file_name, 'w', 'utf-8')
 
 cmp_fmt='%Y%j'
