@@ -45,7 +45,9 @@ class OPMLVisitor(Visitor):
         if 'Context' in self.types:
             self.print_node_end ()
     def print_node_start (self, link_type, item):
-        print >>self.out, self.spaces() + '<outline text="' +  str(item.__class__.__name__) + ':' + self.escape(item.name) + '">' #+ ' type="link" url="omnifocus:///' + link_type + '/' + item.persistent_identifier + '">'
+        print >>self.out, self.spaces() + '<outline text="' +  str(item.__class__.__name__) + ':' + self.escape(item.name) + '">'
+        # add a URL to the OF entry as a child
+        print >>self.out, self.spaces() + '  <outline text="omnifocus:///' + link_type + '/' + item.persistent_identifier + '"/>'
     def print_node_end (self):
         print >>self.out, self.spaces() + '</outline>'
     def spaces (self):
