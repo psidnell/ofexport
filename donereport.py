@@ -12,9 +12,6 @@ def format_date (thedate = date.today()):
         result += thedate.strftime(' %d %Y')
         return result
     
-def format_timestamp (thedate = date.today()):
-        return thedate.strftime('%Y-%m-%d')
-    
 '''
 This is a report visitor that looks for completed tasks in a context with a particular
 prefix. At the end of each day I look at my completed tasks and set the context to Log
@@ -22,20 +19,22 @@ so that those tasks appear in my daily/weekly reports.
 '''
 class DoneReportVisitor(Visitor):
 
-    def __init__ (self, out, date_filter, proj_pfx='#', contextPrefix='Log', indent=4):
+    def __init__ (self, out, inclusion_filter, proj_pfx='#', proj_sfx='', task_pfx='- ', time_fmt=' @%Y-%m-%d', indent=4):
         self.tasks = []
         self.out = out
-        self.contextPrefix = contextPrefix
         self.proj_pfx = proj_pfx
-        self.date_filter = date_filter
+        self.proj_sfx = proj_sfx
+        self.task_pfx = task_pfx
+        self.time_fmt = time_fmt
+        self.inclusion_filter = inclusion_filter
     def end_project (self, project):
         if len(self.tasks) > 0:
-            print >>self.out, self.proj_pfx + ' ' + str(project)
+            print >>self.out, self.proj_pfx + ' ' + str(project) + self.proj_sfx
             self.tasks.sort(key=lambda task:task.date_completed)
             for task in self.tasks:
-                print >>self.out, '- ' + task.name + ' *[' + format_date(task.date_completed) + ']*'
+                print >>self.out, self.task_pfx + task.name + ' - ' + DAYS[task.date_completed.strftime('%w')] + ' ' + task.date_completed.strftime (self.time_fmt)
             print >>self.out
         self.tasks = []
     def begin_task (self, task):
-        if self.date_filter(task) and str(task.context).startswith(self.contextPrefix):
+        if self.inclusion_filter(task):
             self.tasks.append (task)

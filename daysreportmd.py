@@ -7,7 +7,7 @@ import sys
 
 folders, contexts = build_model (DATABASE)
 
-file_name=os.environ['HOME'] + '/Documents/Reports/DailyReport.tp'
+file_name=os.environ['HOME'] + '/Documents/Reports/DailyReport.md'
 out=codecs.open(file_name, 'w', 'utf-8')
 
 cmp_fmt='%Y%j'
@@ -28,7 +28,7 @@ def include_completed_logged (task):
 # the number of days defaults to one but can be overridden on the command line
 for folder in folders:
     if folder.name == 'Work':
-        traverse_folder (DoneReportVisitor (out, include_completed_logged, proj_pfx='', proj_sfx=':', task_pfx='\t\t- '), folder)
+        traverse_folder (DoneReportVisitor (out, include_completed_logged), folder)
         
 out.close()
 os.system("open '" + file_name + "'")

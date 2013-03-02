@@ -4,33 +4,51 @@ from datetime import date
 import os
 import codecs
 
-def completed_recently (task):
+
+days = 7
+if len(os.sys.argv) > 1:
+    days = int(os.sys.argv[1])
+
+def completed_logged (task):
     if task.date_completed == None:
         return False
-    days_elapsed = (date.today() - task.date_completed).days
-    return days_elapsed <= 7
+    if str(task.context).startswith('Log'):
+        days_elapsed = (date.today() - task.date_completed).days
+        return days_elapsed <= days
+    return False
+
+def completed_comments (task):
+    if task.date_completed == None:
+        return False
+    if str(task.context).startswith('Comments'):
+        days_elapsed = (date.today() - task.date_completed).days
+        return days_elapsed <= days
+    return False
 
 folders, contexts = build_model (DATABASE)
-file_name = os.environ['HOME']+'/Documents/Reports/WeeklyReport-' + date.today().strftime('%Y-%W') + '.md'
+file_name = os.environ['HOME']+'/Documents/Reports/WeeklyReport.tp'
 out=codecs.open(file_name, 'w', 'utf-8')
-print >>out, '# Weekly Progress Report'
+print >>out, 'Weekly Progress Report:'
 print >>out
-print >>out, '## Paul Sidnell ' + format_date()
+print >>out, '\tPaul Sidnell: ' + format_date()
 print >>out
-print >>out, '---'
-print >>out
-print >>out, '# Accomplishment For This Week'
+print >>out, '\tAccomplishment For This Week:'
 print >>out
 
 # Search Work folder and report on tasks completed this year (I prune this context weekly - hence the name) in a Log... context
 for folder in folders:
     if folder.name == 'Work':
-        traverse_folder (DoneReportVisitor (out, completed_recently, proj_pfx='##', contextPrefix='Log'), folder)
+        traverse_folder (DoneReportVisitor (out, completed_logged, proj_pfx='\t\t', proj_sfx=':', task_pfx='\t\t\t- ', time_fmt=' @%Y-%m-%d'), folder)
 
-print >>out, '# Plans For Next Week'
+print >>out, '\tPlans For Next Week:'
 print >>out
-print >>out, '# Comments/Issues'
+print >>out, '\tComments/Issues:'
 print >>out
+
+for folder in folders:
+    if folder.name == 'Work':
+        traverse_folder (DoneReportVisitor (out, completed_comments, proj_pfx='\t\t', proj_sfx=':', task_pfx='\t\t\t- ', time_fmt=' @%Y-%m-%d'), folder)
+
 out.close()
 
 os.system("open '" + file_name + "'")
