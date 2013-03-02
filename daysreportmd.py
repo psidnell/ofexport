@@ -7,7 +7,7 @@ import sys
 
 folders, contexts = build_model (DATABASE)
 
-file_name=os.environ['HOME'] + '/Documents/Reports/DailyReport.md'
+file_name='/tmp/DailyReport.md'
 out=codecs.open(file_name, 'w', 'utf-8')
 
 cmp_fmt='%Y%j'

@@ -26,7 +26,7 @@ def completed_comments (task):
     return False
 
 folders, contexts = build_model (DATABASE)
-file_name = os.environ['HOME']+'/Documents/Reports/WeeklyReport.tp'
+file_name = os.environ['HOME']+'/Dropbox/TaskPaper/Work/WeeklyReport.taskpaper'
 out=codecs.open(file_name, 'w', 'utf-8')
 print >>out, 'Weekly Progress Report:'
 print >>out

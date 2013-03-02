@@ -7,7 +7,7 @@ import sys
 
 folders, contexts = build_model (DATABASE)
 
-file_name=os.environ['HOME'] + '/Documents/Reports/DailyReport.tp'
+file_name=os.environ['HOME'] + '/Dropbox/TaskPaper/Work/DailyReport.taskpaper'
 out=codecs.open(file_name, 'w', 'utf-8')
 
 cmp_fmt='%Y%j'
