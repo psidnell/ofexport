@@ -19,7 +19,7 @@ so that those tasks appear in my daily/weekly reports.
 '''
 class DoneReportVisitor(Visitor):
 
-    def __init__ (self, out, inclusion_filter, proj_pfx='#', proj_sfx='', task_pfx='- ', time_fmt=' @%Y-%m-%d', indent=4):
+    def __init__ (self, out, inclusion_filter, proj_pfx='# ', proj_sfx='', task_pfx='- ', time_fmt=' @%Y-%m-%d', indent=4):
         self.tasks = []
         self.out = out
         self.proj_pfx = proj_pfx
@@ -29,10 +29,10 @@ class DoneReportVisitor(Visitor):
         self.inclusion_filter = inclusion_filter
     def end_project (self, project):
         if len(self.tasks) > 0:
-            print >>self.out, self.proj_pfx + ' ' + str(project) + self.proj_sfx
+            print >>self.out, self.proj_pfx + str(project) + self.proj_sfx
             self.tasks.sort(key=lambda task:task.date_completed)
             for task in self.tasks:
-                print >>self.out, self.task_pfx + task.name + ' - ' + DAYS[task.date_completed.strftime('%w')] + ' ' + task.date_completed.strftime (self.time_fmt)
+                print >>self.out, self.task_pfx + task.name + ' - ' + DAYS[task.date_completed.strftime('%w')] + task.date_completed.strftime (self.time_fmt)
             print >>self.out
         self.tasks = []
     def begin_task (self, task):
