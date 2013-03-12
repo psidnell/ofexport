@@ -37,9 +37,11 @@ class LinkGenVisitor(Visitor):
     def end_context (self, context):
         self.depth-=1
     def print_link (self, link_type, item):
-        print >>self.out, self.spaces() + str(item.__class__.__name__) + ': <a href="omnifocus:///' + link_type + '/' + item.persistent_identifier + '">' + item.name + '</a><br>'
+        print >>self.out, self.spaces() + self.escape(str(item.__class__.__name__)) + ': <a href="omnifocus:///' + link_type + '/' + item.persistent_identifier + '">' + self.escape(item.name) + '</a><br>'
     def spaces (self):
         return '&nbsp' * self.depth * self.indent
+    def escape (self, val):
+        return val.replace('"','&quot;').replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
 
 folders, contexts = build_model (DATABASE)
 
