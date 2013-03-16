@@ -1,11 +1,11 @@
-from omnifocus import traverse_folder, build_model, DATABASE
+from omnifocus import traverse_folder, build_model, find_database
 from donereport import DoneReportVisitor
 import os
 import codecs
 from datetime import date
 import sys
 
-folders, contexts = build_model (DATABASE)
+folders, contexts = build_model (find_database ())
 
 file_name=os.environ['HOME'] + '/Dropbox/TaskPaper/Work/DailyReport.taskpaper'
 out=codecs.open(file_name, 'w', 'utf-8')

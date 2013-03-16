@@ -1,6 +1,6 @@
 import sqlite3
 from datetime import date
-from os import environ
+from os import environ, path
 
 '''
 A library for loading a data model from the Omnifocus SQLite database.
@@ -409,9 +409,17 @@ class PrintingVisitor(Visitor):
     def spaces (self):
         return ' ' * self.depth * self.indent
 
-DATABASE = environ['HOME'] + '/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2'
+# The Mac Appstore virsion and the direct sale version have DBs in different locations
+DATABASES = [environ['HOME'] + '/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2',
+             environ['HOME'] + '/Library/Caches/com.omnigroup.OmniFocus.MacAppStore/OmniFocusDatabase2']
 
+def find_database ():
+    for db in DATABASES:
+        if (path.exists (db)):
+            return db
+    raise IOError ('cannot find OmnifocusDatabase')
+    
 if __name__ == "__main__":
-    folders, contexts = build_model (DATABASE)
+    folders, contexts = build_model (find_database ())
     for folder in folders:
         traverse_folder (PrintingVisitor (), folder)

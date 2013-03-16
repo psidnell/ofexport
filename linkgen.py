@@ -1,4 +1,4 @@
-from omnifocus import traverse_folders, traverse_contexts, build_model, Visitor, DATABASE
+from omnifocus import traverse_folders, traverse_contexts, build_model, Visitor, find_database
 import os
 import codecs
 
@@ -43,7 +43,7 @@ class LinkGenVisitor(Visitor):
     def escape (self, val):
         return val.replace('"','&quot;').replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
 
-folders, contexts = build_model (DATABASE)
+folders, contexts = build_model (find_database ())
 
 file_name=os.environ['HOME'] + '/Documents/oflinks.html'
 
