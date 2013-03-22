@@ -21,6 +21,14 @@ time_fmt='%Y-%m-%d'
 days = 1
 fmt = "opml"
 
+'''
+Any folder with this name is scanned
+'''
+folder_to_include = 'Work'
+
+'''
+This is the function that controls what's in the report
+'''
 def include_completed_logged (task):
     if task.date_completed == None:
         return False
@@ -102,7 +110,7 @@ if fmt == 'md':
     out=codecs.open(file_name, 'w', 'utf-8')
     
     for folder in folders:
-        if folder.name == 'Work':
+        if folder.name == folder_to_include:
             traverse_folder (DoneVisitor (out, include_completed_logged, md_project_printer), folder)
 
 # FOLDING TEXT
@@ -111,7 +119,7 @@ elif fmt == 'ft':
     out=codecs.open(file_name, 'w', 'utf-8')
     
     for folder in folders:
-        if folder.name == 'Work':
+        if folder.name == folder_to_include:
             traverse_folder (DoneVisitor (out, include_completed_logged, ft_project_printer), folder)
             
 # TASKPAPER            
@@ -120,7 +128,7 @@ elif fmt == 'tp':
     out=codecs.open(file_name, 'w', 'utf-8')
 
     for folder in folders:
-        if folder.name == 'Work':
+        if folder.name == folder_to_include:
             traverse_folder (DoneVisitor (out, include_completed_logged, tp_project_printer), folder)
             
 # MARKDOWN WEEKLY REPORT
@@ -136,7 +144,7 @@ elif fmt == 'week':
     
     # Search Work folder and report on tasks completed this year (I prune this context weekly - hence the name) in a Log... context
     for folder in folders:
-        if folder.name == 'Work':
+        if folder.name == folder_to_include:
             traverse_folder (DoneVisitor (out, include_completed_logged, tp_weekly_project_printer), folder)
     
     print >>out, '\tPlans For Next Week:'
@@ -144,7 +152,7 @@ elif fmt == 'week':
     print >>out, '\tComments/Issues:'
     
     for folder in folders:
-        if folder.name == 'Work':
+        if folder.name == folder_to_include:
             traverse_folder (DoneVisitor (out, include_completed_logged, tp_weekly_project_printer), folder)
     print >>out, '\t\t- ?'
 
@@ -159,7 +167,7 @@ elif fmt == 'opml':
     print >>out, '  </head>'
     print >>out, '  <body>'
     for folder in folders:
-        if folder.name == 'Work':
+        if folder.name == folder_to_include:
             traverse_folder (DoneVisitor (out, include_completed_logged, opml_project_printer), folder)
     print >>out, '  </body>'
     print >>out, '</opml>'
@@ -174,7 +182,7 @@ elif fmt == 'html':
     print >>out, '  </head>'
     print >>out, '  <body>'
     for folder in folders:
-        if folder.name == 'Work':
+        if folder.name == folder_to_include:
             traverse_folder (DoneVisitor (out, include_completed_logged, html_project_printer), folder)
     print >>out, '  </body>'
     print >>out, '<html>'

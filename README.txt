@@ -21,11 +21,6 @@ days.py - a report generation library that prints md, opml, html, taskpaper or f
           of completed tasks. This makes all sorts of assumptions about naming that probably
           only applies to me, but a little modification I'm sure it'll work for you too.
 
-The other python files re-use omnifocus.py and produce custom reports. These are tailored to my own needs
-but should be enough to get you going.
-
-There are also some AppleScript wrappers that can you can use in omnifocus so you can drive your scripts from the toolbar.
-
 Comments welcome.
 
 The freshly minted GitHub repo is here: https://github.com/psidnell/omnifocus
