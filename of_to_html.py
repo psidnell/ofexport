@@ -6,33 +6,28 @@ import codecs
 This is a visitor that dumps out html references to each and every entry
 in the database. You can also specify a particular type, e.g. just 'Task'.
 '''
-class LinkGenVisitor(Visitor):
-    def __init__ (self, out, types = {'Folder', 'Project', 'Task'}, indent=4):
-        self.depth = 0
+class PrintHtmlVisitor(Visitor):
+    def __init__ (self, out, depth=2, indent=4):
+        self.depth = depth
         self.out = out
-        self.types = types
         self.indent = indent
     def begin_folder (self, folder):
-        if 'Folder' in self.types:
-            self.print_link ('folder', folder)
+        self.print_link ('folder', folder)
         self.depth+=1
     def end_folder (self, folder):
         self.depth-=1
     def begin_project (self, project):
-        if project.date_completed == None and 'Project' in self.types:
-            self.print_link ('task', project)
+        self.print_link ('task', project)
         self.depth+=1
     def end_project (self, project):
         self.depth-=1
     def begin_task (self, task):
-        if task.date_completed == None and 'Task' in self.types:
-            self.print_link ('task', task)
+        self.print_link ('task', task)
         self.depth+=1
     def end_task (self, task):
         self.depth-=1
     def begin_context (self, context):
-        if 'Context' in self.types:
-            self.print_link ('context', context)
+        self.print_link ('context', context)
         self.depth+=1
     def end_context (self, context):
         self.depth-=1
@@ -43,20 +38,19 @@ class LinkGenVisitor(Visitor):
     def escape (self, val):
         return val.replace('"','&quot;').replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
 
-folders, contexts = build_model (find_database ())
-
-file_name=os.environ['HOME'] + '/Documents/oflinks.html'
-
-out=codecs.open(file_name, 'w', 'utf-8')
-
-traverse_folders (LinkGenVisitor (out, types ={'Folder', 'Project'}), folders)
-print >>out, '<hr/>'
-
-traverse_contexts (LinkGenVisitor (out, types={'Context'}), contexts)
-print >>out, '<hr/>'
-
-traverse_folders (LinkGenVisitor (out, types ={'Folder','Project','Task'}), folders)
-
-out.close()
-
-os.system("open '" + file_name + "'")
+if __name__ == "__main__":
+    folders, contexts = build_model (find_database ())
+    
+    file_name=os.environ['HOME'] + '/Desktop/OF.html'
+    
+    out=codecs.open(file_name, 'w', 'utf-8')
+    print >>out, '<head><title>Omnifocus</title></head><body>'
+    traverse_folders (PrintHTMLVisitor (out), folders)
+    print >>out, '<hr/>'
+    
+    traverse_contexts (PrintHTMLVisitor (out), contexts)
+    print >>out, '<hr/>'
+    print >>out, '</body>'
+    out.close()
+    
+    os.system("open '" + file_name + "'")

@@ -11,15 +11,15 @@ I've been using this for a few months now with no issues, but bear in mind that 
 
 Usage:
 ------
-To see if everything works run 'python omnifocus.py'. Assuming your omnifocus
-library is in the same place as mine it'll print out your whole task hierarchy.
+To see if everything works run 'python of_to_html.py'. This will print out your whole task hierarchy to OF.html on your desktop.
 
 omnifocus.py - the core library, has a main that prints the whole repository to the console
-of_to_links.py - renders the whole library as HTML
+of_to_html.py - renders the whole library as HTML
 of_to_opml.py - renders the whole library as OPML
-days.py - a report generation library that prints md, opml, html, taskpaper or folding text report
-          of completed tasks. This makes all sorts of assumptions about naming that probably
-          only applies to me, but a little modification I'm sure it'll work for you too.
+of_to_md.py - renders the whole library as Markdown
+of_to_text.py - renders the whole library as text
+of_to_text.py - renders the whole library as Taskpaper
+days.py - a report generation library that prints completed tasks in any of the above formats.
 
 Comments welcome.
 
@@ -27,6 +27,7 @@ The freshly minted GitHub repo is here: https://github.com/psidnell/omnifocus
 
 TODO:
 -----
-- Make days.py more useful to people who aren't me.
+- improve command line parsing
+- options to specify output file or directory
 - Decode note xml, may not be simple (are attachments uuencoded in them?).
 - Add more help for any unfortunate soul who tries to use this.

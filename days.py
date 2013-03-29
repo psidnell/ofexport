@@ -1,25 +1,14 @@
-'''
-usage:
-
-days [-fmt] [n]
-
-fmt=tp|md|ft|opml|html
-n=number of days in the past
-
-'''
-
-from omnifocus import Visitor, traverse_folder, build_model, find_database
+from omnifocus import Visitor, traverse_folders, traverse_project, build_model, find_database
 import os
 import codecs
 from datetime import date
 import sys
-
-today = date.today ()
+from of_to_tp import PrintTaskpaperVisitor
+from of_to_md import PrintMarkdownVisitor
+from of_to_opml import PrintOpmlVisitor
+from of_to_html import PrintHtmlVisitor
 
 DAYS={'0':'Sun', '1':'Mon', '2':'Tue', '3':'Wed', '4':'Thu', '5':'Fri', '6':'Sat'}
-time_fmt='%Y-%m-%d'
-days = 1
-fmt = "opml"
 
 '''
 Any folder with this name is scanned
@@ -27,169 +16,169 @@ Any folder with this name is scanned
 folder_to_include = 'Work'
 
 '''
-This is the function that controls what's in the report
+This is the visitor that controls what tasks are in the report.
+exclude things outside the completion window, with
+'routine' in the project name or unfinished.
 '''
-def include_completed_logged (task):
-    if task.date_completed == None:
-        return False
-    if str(task.context).startswith('Log') or str(task.context).startswith('Comments'):
-        days_elapsed = (date.today() - task.date_completed).days
-        return days_elapsed < days
-    return False
-
-class DoneVisitor(Visitor):
-    def __init__ (self, out, inclusion_filter, project_printer):
-        self.tasks = []
-        self.out = out
-        self.inclusion_filter = inclusion_filter
-        self.project_printer = project_printer
+class FilterVisitor(Visitor):
+    def __init__(self, days=1, root_folder_names=[]):
+        self.days = days;
+        self.root_folder_names = root_folder_names
     def end_project (self, project):
-        if len(self.tasks) > 0:
-            self.tasks.sort(key=lambda task:task.date_completed)
-            self.project_printer (self.out, project, self.tasks)
-        self.tasks = []
-    def begin_task (self, task):
-        if self.inclusion_filter(task):
-            self.tasks.append (task)
+        marked_tasks = [x for x in project.children if x.marked]
+        project.marked = len (marked_tasks) > 0
+    def end_folder (self, folder):
+        marked_tasks = [x for x in folder.children if x.marked]
+        folder.marked = len (marked_tasks) > 0
+        if len(self.root_folder_names) > 0 and not folder.name in self.root_folder_names:
+            folder.marked = False
+    def end_task (self, task):
+        if task.date_completed == None:
+            task.marked = False
+        elif 'routine' in str(task.project).lower():
+            task.marked = False
+        else:
+            days_elapsed = (date.today() - task.date_completed).days
+            task.marked = days_elapsed < self.days
 
-def xml_escape (val):
-        return val.replace('"','&quot;').replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
-    
-def tp_project_printer (out, project, tasks):
-    print >>out, str(project) + ':'
-    for task in tasks:
-        print >>out, '\t-', task.name, '-', DAYS[task.date_completed.strftime('%w')] + ' @' + task.date_completed.strftime (time_fmt) + ' ' # trailing space in case of :
-    
-def tp_weekly_project_printer (out, project, tasks):
-    print >>out, '\t\t' + str(project) + ':'
-    for task in tasks:
-        print >>out, '\t\t\t-', task.name, '-', DAYS[task.date_completed.strftime('%w')] + ' @' + task.date_completed.strftime (time_fmt)  + ' ' # trailing space in case of :
-
-def md_project_printer (out, project, tasks):
-    print >>out, '#', str(project)
-    for task in tasks:
-        print >>out, '-', task.name, '-', DAYS[task.date_completed.strftime('%w')] + ' @' + task.date_completed.strftime (time_fmt)
-    print >>out
-    
-def ft_project_printer (out, project, tasks):
-    print >>out, '#', str(project)
-    for task in tasks:
-        print >>out, '-', task.name, '-', DAYS[task.date_completed.strftime('%w')] + ' @completed(' + task.date_completed.strftime (time_fmt) + ')'
-    print >>out
-
-def opml_project_printer (out, project, tasks):
-    print >>out, '      <outline text="' + xml_escape(project.name) + '">'
-    for task in tasks:
-        print >>out, '        <outline text="' + xml_escape(task.name) + '" completed="' + task.date_completed.strftime (time_fmt) + '"/>'
-    print >>out, '      </outline>'
-
-def html_project_printer (out, project, tasks):
-    time_fmt='%Y-%m-%d'
-    print >>out, '    <H2>' + xml_escape(project.name) + '</H2>'
-    print >>out, '    <P><UL>'
-    for task in tasks:
-        print >>out, '        <LI>' + xml_escape(task.name) + ' <font color="green"><i><small><b>' + task.date_completed.strftime (time_fmt) + '</b></small></i></font></LI>'
-    print >>out, '    </UL></P>'
-    
-for arg in sys.argv[1:]:
-    if arg[0] == '-':
-        fmt = arg[1:]
+class CustomPrintTaskpaperVisitor (PrintTaskpaperVisitor):
+    def tags (self, completed):
+        if completed != None:
+            return completed.strftime(" @%Y-%m-%d")
+        else:
+            return ""
+'''
+Flatten the projects into a list
+'''
+class CollectProjectVisitor (Visitor):
+    def __init__(self):
+        self.projects = []
+    def begin_project (self, project):
+        self.projects.append(project)
+        
+def print_structure (visitor, folders, flat=False):
+    if flat:
+        flattening_visitor = CollectProjectVisitor ()
+        traverse_folders (flattening_visitor, folders)
+        for project in flattening_visitor.projects:
+            traverse_project (visitor, project)
     else:
-        days = int(arg)
-
-# Search Work folder and report on tasks completed in the last N days in the Log... context
-# the number of days defaults to one but can be overridden on the command line
-
-folders, contexts = build_model (find_database ())
-
-file_name_base = os.environ['HOME']+'/Desktop/' + today.strftime (time_fmt)
-
-# MARKDOWN
-if fmt == 'md':
-    file_name = file_name_base + '.md'
-    out=codecs.open(file_name, 'w', 'utf-8')
+        traverse_folders (visitor, folders)
     
-    for folder in folders:
-        if folder.name == folder_to_include:
-            traverse_folder (DoneVisitor (out, include_completed_logged, md_project_printer), folder)
-
-# FOLDING TEXT
-elif fmt == 'ft':
-    file_name = file_name_base + '.ft'
-    out=codecs.open(file_name, 'w', 'utf-8')
+if __name__ == "__main__":
     
-    for folder in folders:
-        if folder.name == folder_to_include:
-            traverse_folder (DoneVisitor (out, include_completed_logged, ft_project_printer), folder)
-            
-# TASKPAPER            
-elif fmt == 'tp':
-    file_name = file_name_base + '.taskpaper'
-    out=codecs.open(file_name, 'w', 'utf-8')
-
-    for folder in folders:
-        if folder.name == folder_to_include:
-            traverse_folder (DoneVisitor (out, include_completed_logged, tp_project_printer), folder)
-            
-# MARKDOWN WEEKLY REPORT
-elif fmt == 'week':
-    days = 7
-    file_name = file_name_base + '.taskpaper'
-    out=codecs.open(file_name, 'w', 'utf-8')
-    print >>out, 'Weekly Progress Report:'
-    print >>out
-    print >>out, '\tPaul Sidnell: ' + today.strftime ("%Y-%m-%d")
-    print >>out
-    print >>out, '\tAccomplishment For This Week:'
+    today = date.today ()
+    time_fmt='%Y-%m-%d'
+    days = 1
+    fmt = "tp"
+    hlp = False
+    opn=False
+    flat=False
+    root_folder_names = []
     
-    # Search Work folder and report on tasks completed this year (I prune this context weekly - hence the name) in a Log... context
-    for folder in folders:
-        if folder.name == folder_to_include:
-            traverse_folder (DoneVisitor (out, include_completed_logged, tp_weekly_project_printer), folder)
+    for arg in sys.argv[1:]:
+        if arg[0] == '-':
+            if arg[1:] == 'o':
+                opn = True
+            elif arg[1:] == 'f':
+                flat = True
+            elif arg[1:] == '?' or arg[1:] == 'h':
+                hlp = True
+            else:
+                fmt = arg[1:]
+        else:
+            try:
+                days = int(arg)
+            except ValueError:
+                root_folder_names.append(arg)
     
-    print >>out, '\tPlans For Next Week:'
-    print >>out, '\t\t- ?'
-    print >>out, '\tComments/Issues:'
+    if hlp:
+        print 'usage:'
+        print 'days [-fmt] [-f] [-?] [-h] [n] [folder...]'
+        print '-h or -?: help'
+        print '-f: flatten project structure (no folders)'
+        print 'fmt: tp|md|ft|opml|html|week'
+        print 'folder: root folder name(s), just descend into named root folders'
+        print 'n=number of days in the past'
+        exit
+        
+    folders, contexts = build_model (find_database ())
+    traverse_folders (FilterVisitor (days=days, root_folder_names=root_folder_names), folders)
     
-    for folder in folders:
-        if folder.name == folder_to_include:
-            traverse_folder (DoneVisitor (out, include_completed_logged, tp_weekly_project_printer), folder)
-    print >>out, '\t\t- ?'
-
-# OPML
-elif fmt == 'opml':
-    file_name = file_name_base + '.opml'
-    out=codecs.open(file_name, 'w', 'utf-8')
-    print >>out, '<?xml version="1.0" encoding="UTF-8" standalone="no"?>'
-    print >>out, '<opml version="1.0">'
-    print >>out, '  <head>'
-    print >>out, '    <title>OmniFocus</title>'
-    print >>out, '  </head>'
-    print >>out, '  <body>'
-    for folder in folders:
-        if folder.name == folder_to_include:
-            traverse_folder (DoneVisitor (out, include_completed_logged, opml_project_printer), folder)
-    print >>out, '  </body>'
-    print >>out, '</opml>'
+    file_name_base = os.environ['HOME']+'/Desktop/'
+    date_str = today.strftime (time_fmt)
     
-# HTML
-elif fmt == 'html':
-    file_name = file_name_base + '.html'
-    out=codecs.open(file_name, 'w', 'utf-8')
-    print >>out, '<html>'
-    print >>out, '  <head>'
-    print >>out, '    <title>OmniFocus</title>'
-    print >>out, '  </head>'
-    print >>out, '  <body>'
-    for folder in folders:
-        if folder.name == folder_to_include:
-            traverse_folder (DoneVisitor (out, include_completed_logged, html_project_printer), folder)
-    print >>out, '  </body>'
-    print >>out, '<html>'
-else:
-    raise Exception ('unknown format ' + fmt)
-
-
-# Close the file and open it
-out.close()
-os.system("open '" + file_name + "'")
+    # MARKDOWN
+    if fmt == 'md':
+        file_name = file_name_base + date_str + '.md'
+        out=codecs.open(file_name, 'w', 'utf-8')
+        
+        print_structure (PrintMarkdownVisitor (out), folders, flat=flat)
+        
+    # FOLDING TEXT
+    elif fmt == 'ft':
+        file_name = file_name_base + date_str + '.ft'
+        out=codecs.open(file_name, 'w', 'utf-8')
+        
+        print_structure (PrintMarkdownVisitor (out), folders, flat=flat)
+                
+    # TASKPAPER            
+    elif fmt == 'tp':
+        file_name = file_name_base + date_str + '.taskpaper'
+        out=codecs.open(file_name, 'w', 'utf-8')
+    
+        print_structure (CustomPrintTaskpaperVisitor (out), folders, flat=flat)
+                
+    # MARKDOWN WEEKLY REPORT
+    elif fmt == 'week':
+        days = 7
+        flat=True
+        file_name = file_name_base + 'week-' + date_str + '.taskpaper'
+        out=codecs.open(file_name, 'w', 'utf-8')
+        print >>out, 'Weekly Progress Report:'
+        print >>out
+        print >>out, '\tPaul Sidnell: ' + today.strftime ("%Y-%m-%d")
+        print >>out
+        print >>out, '\tAccomplishment For This Week:'
+        
+        print_structure (CustomPrintTaskpaperVisitor (out, depth=2), folders, flat=flat)
+        
+        print >>out, '\tPlans For Next Week:'
+        print >>out, '\t\t- ?'
+        print >>out, '\tComments/Issues:'
+        print >>out, '\t\t- ?'
+    
+    # OPML
+    elif fmt == 'opml':
+        file_name = file_name_base + date_str + '.opml'
+        out=codecs.open(file_name, 'w', 'utf-8')
+        print >>out, '<?xml version="1.0" encoding="UTF-8" standalone="no"?>'
+        print >>out, '<opml version="1.0">'
+        print >>out, '  <head>'
+        print >>out, '    <title>OmniFocus</title>'
+        print >>out, '  </head>'
+        print >>out, '  <body>'
+        print_structure (PrintOpmlVisitor (out, depth=1), folders, flat=flat)
+        print >>out, '  </body>'
+        print >>out, '</opml>'
+        
+    # HTML
+    elif fmt == 'html':
+        file_name = file_name_base + date_str + '.html'
+        out=codecs.open(file_name, 'w', 'utf-8')
+        print >>out, '<html>'
+        print >>out, '  <head>'
+        print >>out, '    <title>OmniFocus</title>'
+        print >>out, '  </head>'
+        print >>out, '  <body>'
+        print_structure (PrintHtmlVisitor (out, depth=1), folders, flat=flat)
+        print >>out, '  </body>'
+        print >>out, '<html>'
+    else:
+        raise Exception ('unknown format ' + fmt)
+    
+    # Close the file and open it
+    out.close()
+    
+    if opn:
+        os.system("open '" + file_name + "'")

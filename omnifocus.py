@@ -126,6 +126,7 @@ class Node (object):
     def __init__ (self, attribs):
         self.attribs = attribs
         self.children = []
+        self.marked = True
     def __getitem__ (self, key):
         return self.attribs[key]
     def __contains__ (self, key):
@@ -228,7 +229,7 @@ def wire_projects_and_folders (projects, folders):
     '''
     Some tasks are actually projects, convert them
     '''
-    for project in projects.values():        
+    for project in projects.values():
         if project['projectInfo'] != None:
             project_info = project.project_info
             if project_info['folder'] != None:
@@ -270,11 +271,6 @@ def wire_context_hierarchy (contexts):
             parent = contexts[context['parent']]
             parent.children.append(context)
             context.parent = parent
-
-def printTree (depth, item):
-    print (' ' * (depth * 4)) + str(item['rank']) + ':' + str(item)
-    for subItem in item.children:
-        printTree(depth + 1, subItem)
         
 def sort (items):
     for child in items:
@@ -351,63 +347,28 @@ def traverse_context (visitor, context):
     visitor.end_context (context)
 
 def traverse_task (visitor, task):
-    visitor.begin_task (task)
-    for subtask in task.children:
-        traverse_task (visitor, subtask)
-    visitor.end_task (task)
+    if task.marked:
+        visitor.begin_task (task)
+        for subtask in task.children:
+            traverse_task (visitor, subtask)
+        visitor.end_task (task)
     
 def traverse_project (visitor, project):
-    visitor.begin_project (project)
-    for task in project.children:
-        traverse_task (visitor, task)
-    visitor.end_project (project)
+    if project.marked:
+        visitor.begin_project (project)
+        for task in project.children:
+            traverse_task (visitor, task)
+        visitor.end_project (project)
     
 def traverse_folder (visitor, folder):
-    visitor.begin_folder(folder)
-    for child in folder.children:
-        if child.__class__ == Folder:
-            traverse_folder (visitor, child)
-        else:
-            traverse_project (visitor, child)
-    visitor.end_folder (folder)
-    
-class PrintingVisitor(Visitor):
-    def __init__ (self, indent=4):
-        self.depth = 0
-        self.indent = indent
-    def begin_folder (self, folder):
-        print self.spaces() + '* Folder: ' + folder.name
-        print self.spaces () + '  - Note: ' + str(folder.note)
-        self.depth+=1
-    def end_folder (self, folder):
-        self.depth-=1
-    def begin_project (self, project):
-        print self.spaces () + '* Project: ' + str(project)
-        self.print_task_attribs (project);
-        self.depth+=1
-    def end_project (self, project):
-        self.depth-=1
-    def begin_task (self, task):
-        print self.spaces() + '* Task: ' + task.name
-        self.print_task_attribs (task);
-        self.depth+=1
-    def end_task (self, task):
-        self.depth-=1
-    def begin_context (self, context):
-        print self.spaces() + '* Context: ' + context.name
-        self.depth+=1
-    def end_context (self, context):
-        self.depth-=1
-    def print_task_attribs (self, task):
-        # Tasks and projects have same attribs
-        print self.spaces () + '  - Context: ' + str(task.context)
-        print self.spaces () + '  - DateCompleted: ' + str(task.date_completed)
-        print self.spaces () + '  - StartDate: ' + str(task.date_to_start)
-        print self.spaces () + '  - Due: ' + str(task.date_due)
-        print self.spaces () + '  - Flagged: ' + str(task.flagged)
-        print self.spaces () + '  - Note: ' + str(task.note)
-    def spaces (self):
-        return ' ' * self.depth * self.indent
+    if folder.marked:
+        visitor.begin_folder(folder)
+        for child in folder.children:
+            if child.__class__ == Folder:
+                traverse_folder (visitor, child)
+            else:
+                traverse_project (visitor, child)
+        visitor.end_folder (folder)
 
 # The Mac Appstore virsion and the direct sale version have DBs in different locations
 DATABASES = [environ['HOME'] + '/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2',
@@ -418,8 +379,3 @@ def find_database ():
         if (path.exists (db)):
             return db
     raise IOError ('cannot find OmnifocusDatabase')
-    
-if __name__ == "__main__":
-    folders, contexts = build_model (find_database ())
-    for folder in folders:
-        traverse_folder (PrintingVisitor (), folder)
