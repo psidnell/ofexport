@@ -125,8 +125,10 @@ class UnicodeAttribDesc (AttribDesc):
 class Node (object):
     def __init__ (self, attribs):
         self.attribs = attribs
+        self.parent = None
         self.children = []
         self.marked = True
+        self.user_attribs = {}
     def __getitem__ (self, key):
         return self.attribs[key]
     def __contains__ (self, key):
@@ -138,8 +140,8 @@ class Context(Node):
     name = TypedDesc ('name', unicode)
     rank = IntAttribDesc ('rank')
     persistent_identifier = AttribDesc ('persistentIdentifier')
-    def __init__(self, param):
-        Node.__init__(self,param)
+    def __init__(self, attribs):
+        Node.__init__(self,attribs)
         self.name=self.attribs['name']
         self.parent = None
     def __str__ (self):
@@ -159,8 +161,8 @@ class Task(Node):
     note = UnicodeAttribDesc ('noteXMLData')
     rank = IntAttribDesc ('rank')
     persistent_identifier = AttribDesc ('persistentIdentifier')
-    def __init__(self, param):
-        Node.__init__(self,param)
+    def __init__(self, attribs):
+        Node.__init__(self,attribs)
         self.name=self.attribs['name']
         self.parent = None
         self.context = None
@@ -174,8 +176,8 @@ class Folder(Node):
     note = UnicodeAttribDesc ('noteXMLData')
     rank = IntAttribDesc ('rank')
     persistent_identifier = AttribDesc ('persistentIdentifier')
-    def __init__(self, param):
-        Node.__init__(self,param)
+    def __init__(self, attribs):
+        Node.__init__(self,attribs)
         self.name=self.attribs['name']
         self.parent = None
     def __str__ (self):
@@ -184,8 +186,8 @@ class Folder(Node):
 class ProjectInfo(Node):
     TABLE='projectinfo'
     COLUMNS=['pk', 'folder']
-    def __init__(self, param):
-        Node.__init__(self,param)
+    def __init__(self, attribs):
+        Node.__init__(self,attribs)
 
 class Project(Task):
     project_info = TypedDesc ('project_info', ProjectInfo)
@@ -236,6 +238,7 @@ def wire_projects_and_folders (projects, folders):
                 folder = folders[project_info['folder']]
                 project.folder = folder
                 folder.children.append(project)
+                project.parent = folder
 
 def wire_task_hierarchy (tasks):
     for task in tasks.values():  
@@ -301,13 +304,16 @@ def build_model (db):
     
     conn.close ()
     
+    # Find top level items
+    project_roots = only_roots (projects.values())
     folder_roots = only_roots (folders.values())
-    context_roots = only_roots (contexts.values())
+    roots_projects_and_folders = project_roots + folder_roots
+    root_contexts = only_roots (contexts.values())
     
-    sort(folder_roots)
-    sort(context_roots)
+    sort(roots_projects_and_folders)
+    sort(root_contexts)
     
-    return folder_roots, context_roots
+    return roots_projects_and_folders, root_contexts
 
 class Visitor(object):
     def begin_folder (self, folder):
@@ -327,49 +333,47 @@ class Visitor(object):
     def end_context (self, context):
         pass
 
-def traverse_folders (visitor, folders):
-    for folder in folders:
-        traverse_folder (visitor, folder)
-
-def traverse_contexts (visitor, contexts):
-    for context in contexts:
-        traverse_context (visitor, context)
-
-def traverse_context (visitor, context):
-    visitor.begin_context (context)
-    for child in context.children:
-        if child.__class__ == Context:
-            traverse_context (visitor, child)
-        elif child.__class__ == Project:
-            traverse_project (visitor, child)
+def traverse_list (visitor, lst, only_marked=True):
+    for item in lst:
+        if item.__class__ == Folder:
+            traverse_folder (visitor, item, only_marked = only_marked)
+        elif item.__class__ == Context:
+            traverse_context (visitor, item, only_marked = only_marked)
+        elif item.__class__ == Project:
+            traverse_project (visitor, item, only_marked = only_marked)
         else:
-            traverse_task (visitor, child)
-    visitor.end_context (context)
+            traverse_task (visitor, item, only_marked = only_marked)
+            
+def traverse_folders (visitor, folders, only_marked=True):
+    traverse_list (visitor, folders, only_marked = only_marked)
 
-def traverse_task (visitor, task):
-    if task.marked:
+def traverse_contexts (visitor, contexts, only_marked=True):
+    traverse_list (visitor, contexts, only_marked = only_marked)
+
+def traverse_context (visitor, context, only_marked=True):
+    if context.marked or not only_marked:
+        visitor.begin_context (context)
+        traverse_list (visitor, context.children, only_marked = only_marked)
+        visitor.end_context (context)
+
+def traverse_task (visitor, task, only_marked=True):
+    if task.marked or not only_marked:
         visitor.begin_task (task)
-        for subtask in task.children:
-            traverse_task (visitor, subtask)
+        traverse_list (visitor, task.children, only_marked = only_marked)
         visitor.end_task (task)
     
-def traverse_project (visitor, project):
-    if project.marked:
+def traverse_project (visitor, project,only_marked=True):
+    if project.marked or not only_marked:
         visitor.begin_project (project)
-        for task in project.children:
-            traverse_task (visitor, task)
+        traverse_list (visitor, project.children, only_marked = only_marked)
         visitor.end_project (project)
     
-def traverse_folder (visitor, folder):
-    if folder.marked:
+def traverse_folder (visitor, folder, only_marked=True):
+    if folder.marked or not only_marked:
         visitor.begin_folder(folder)
-        for child in folder.children:
-            if child.__class__ == Folder:
-                traverse_folder (visitor, child)
-            else:
-                traverse_project (visitor, child)
+        traverse_list (visitor, folder.children, only_marked = only_marked)
         visitor.end_folder (folder)
-
+        
 # The Mac Appstore virsion and the direct sale version have DBs in different locations
 DATABASES = [environ['HOME'] + '/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2',
              environ['HOME'] + '/Library/Caches/com.omnigroup.OmniFocus.MacAppStore/OmniFocusDatabase2']

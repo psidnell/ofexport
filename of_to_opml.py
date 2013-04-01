@@ -1,4 +1,4 @@
-from omnifocus import traverse_folders, traverse_contexts, build_model, Visitor, find_database
+from omnifocus import traverse_list, traverse_contexts, build_model, Visitor, find_database
 import os
 import codecs
 
@@ -52,7 +52,7 @@ class PrintOpmlVisitor(Visitor):
 
 if __name__ == "__main__":
 
-    folders, contexts = build_model (find_database ())
+    root_projects_and_folders, root_contexts = build_model (find_database ())
     
     file_name=os.environ['HOME'] + '/Desktop/OF.opml'
     
@@ -66,10 +66,10 @@ if __name__ == "__main__":
     print >>out, '  <body>'
     print >>out, '    <outline text="OmniFocus">'
     print >>out, '      <outline text="Projects">'
-    traverse_folders (PrintOpmlVisitor (out, depth=4), folders)
+    traverse_list (PrintOpmlVisitor (out, depth=4), root_projects_and_folders)
     print >>out, '      </outline>'
     print >>out, '      <outline text="Contexts">'
-    traverse_contexts (PrintOpmlVisitor (out, depth=4), contexts)
+    traverse_contexts (PrintOpmlVisitor (out, depth=4), root_contexts)
     print >>out, '      </outline>'
     print >>out, '    </outline>'
     print >>out, '  </body>'

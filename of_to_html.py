@@ -1,4 +1,4 @@
-from omnifocus import traverse_folders, traverse_contexts, build_model, Visitor, find_database
+from omnifocus import traverse_list, traverse_contexts, build_model, Visitor, find_database
 import os
 import codecs
 
@@ -39,16 +39,16 @@ class PrintHtmlVisitor(Visitor):
         return val.replace('"','&quot;').replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
 
 if __name__ == "__main__":
-    folders, contexts = build_model (find_database ())
+    root_projects_and_folders, root_contexts = build_model (find_database ())
     
     file_name=os.environ['HOME'] + '/Desktop/OF.html'
     
     out=codecs.open(file_name, 'w', 'utf-8')
     print >>out, '<head><title>Omnifocus</title></head><body>'
-    traverse_folders (PrintHTMLVisitor (out), folders)
+    traverse_list (PrintHtmlVisitor (out), root_projects_and_folders)
     print >>out, '<hr/>'
     
-    traverse_contexts (PrintHTMLVisitor (out), contexts)
+    traverse_contexts (PrintHtmlVisitor (out), root_contexts)
     print >>out, '<hr/>'
     print >>out, '</body>'
     out.close()

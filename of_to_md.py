@@ -1,4 +1,4 @@
-from omnifocus import traverse_folders, traverse_contexts, build_model, Visitor, find_database
+from omnifocus import traverse_list, traverse_contexts, build_model, Visitor, find_database
 import os
 import codecs
 
@@ -38,21 +38,21 @@ class PrintMarkdownVisitor(Visitor):
         self.header_depth-=1
     def done (self, completed):
         if completed != None:
-            return completed.strftime(" @done(%Y-%m-%d)")
+            return completed.strftime(" %Y-%m-%d-%a")
         return ""
 
 if __name__ == "__main__":
 
-    folders, contexts = build_model (find_database ())
+    root_projects_and_folders, root_contexts = build_model (find_database ())
     
     file_name=os.environ['HOME'] + '/Desktop/OF.md'
     
     out=codecs.open(file_name, 'w', 'utf-8')
     
     print >>out, '# Projects:'
-    traverse_folders (PrintMarkdownVisitor (out, depth=1), folders)
+    traverse_list (PrintMarkdownVisitor (out, depth=1), root_projects_and_folders)
     print >>out, '# Contexts:'
-    traverse_contexts (PrintMarkdownVisitor (out, depth=1), contexts)
+    traverse_contexts (PrintMarkdownVisitor (out, depth=1), root_contexts)
     
     out.close()
     

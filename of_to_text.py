@@ -1,6 +1,6 @@
 import os
 import codecs
-from omnifocus import Visitor, build_model, find_database, traverse_folder, traverse_context
+from omnifocus import Visitor, build_model, find_database, traverse_list, traverse_contexts
 
 class PrintTextVisitor(Visitor):
     def __init__ (self, out, indent=4):
@@ -37,7 +37,7 @@ class PrintTextVisitor(Visitor):
         print >>self.out, self.spaces () + '  - StartDate: ' + str(task.date_to_start)
         print >>self.out, self.spaces () + '  - Due: ' + str(task.date_due)
         print >>self.out, self.spaces () + '  - Flagged: ' + str(task.flagged)
-        print >>self.out, self.spaces () + '  - Note: ' + str(task.note)
+        #print >>self.out, self.spaces () + '  - Note: ' + str(task.note)
     def spaces (self):
         return ' ' * self.depth * self.indent
     
@@ -47,11 +47,9 @@ if __name__ == "__main__":
     out=codecs.open(file_name, 'w', 'utf-8')
      
     visitor = PrintTextVisitor (out)
-    folders, contexts = build_model (find_database ())
-    for folder in folders:
-        traverse_folder (visitor, folder)
-    for context in contexts:
-        traverse_context (visitor, context)
+    root_projects_and_folders, root_contexts = build_model (find_database ())
+    traverse_list (visitor, root_projects_and_folders)
+    traverse_contexts (visitor, root_contexts)
         
     os.system("open '" + file_name + "'")
     

@@ -1,4 +1,4 @@
-from omnifocus import traverse_folders, traverse_contexts, build_model, Visitor, find_database
+from omnifocus import traverse_list, traverse_contexts, build_model, Visitor, find_database
 import os
 import codecs
 
@@ -24,7 +24,7 @@ class PrintTaskpaperVisitor(Visitor):
         if len(task.children) == 0:
             print >>self.out, self.tabs() + '- ' + task.name + self.tags(task.date_completed)
         else:
-            print >>self.out, self.tabs() + task.name + self.tags(task.date_completed) + ':'
+            print >>self.out, self.tabs() + task.name + ':'
         self.depth+=1
     def end_task (self, task):
         self.depth-=1
@@ -35,7 +35,7 @@ class PrintTaskpaperVisitor(Visitor):
         self.depth-=1
     def tags (self, completed):
         if completed != None:
-            return completed.strftime(" @done(%Y-%m-%d)")
+            return completed.strftime(" @done(%Y-%m-%d-%a)")
         else:
             return " @todo"
     def tabs (self):
@@ -43,16 +43,16 @@ class PrintTaskpaperVisitor(Visitor):
 
 if __name__ == "__main__":
 
-    folders, contexts = build_model (find_database ())
+    root_projects_and_folders, root_contexts = build_model (find_database ())
     
     file_name=os.environ['HOME'] + '/Desktop/OF.taskpaper'
     
     out=codecs.open(file_name, 'w', 'utf-8')
     
     print >>out, 'Projects:'
-    traverse_folders (PrintTaskpaperVisitor (out, depth=1), folders)
+    traverse_list (PrintTaskpaperVisitor (out, depth=1), root_projects_and_folders)
     print >>out, 'Contexts:'
-    traverse_contexts (PrintTaskpaperVisitor (out, depth=1), contexts)
+    traverse_contexts (PrintTaskpaperVisitor (out, depth=1), root_contexts)
     
     out.close()
     

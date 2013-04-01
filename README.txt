@@ -1,6 +1,10 @@
 Introduction
 ------------
 
+Comments welcome (twitter: @psidnell)
+
+The GitHub repo is here: https://github.com/psidnell/omnifocus
+
 I've wanted a reasonably flexible way of generating mardown/taskpaper/html reports of completed tasks from OmniFocus - but never quite found any love for AppleScript.
 
 So I've developed a python library that directly reads the OF database and builds a complete model of the task/project/context hierarchy that can then be used to generate whatever you wish.
@@ -9,7 +13,7 @@ It's early days at the moment (there's no help at all yet) but there are example
 
 I've been using this for a few months now with no issues, but bear in mind that the problem of this approach (i.e. scraping the database) is that Omni make no guarantees about compatibility or support going forward. And nor do I :-)
 
-Usage:
+Files:
 ------
 To see if everything works run 'python of_to_html.py'. This will print out your whole task hierarchy to OF.html on your desktop.
 
@@ -17,17 +21,20 @@ omnifocus.py - the core library, has a main that prints the whole repository to 
 of_to_html.py - renders the whole library as HTML
 of_to_opml.py - renders the whole library as OPML
 of_to_md.py - renders the whole library as Markdown
-of_to_text.py - renders the whole library as text
-of_to_text.py - renders the whole library as Taskpaper
-days.py - a report generation library that prints completed tasks in any of the above formats.
+of_to_tp.py - renders the whole library as Taskpaper
+of_to_text.py - renders the whole library as Text
+days.py (DEPRECATED) - a report generation library that prints completed tasks in any of the above formats.
+ofexport.py - a general purpose export and filtering utility.
 
-Comments welcome.
+ofexport
+--------
 
-The freshly minted GitHub repo is here: https://github.com/psidnell/omnifocus
+Run without arguments to print full option list and examples.
+
 
 TODO:
 -----
-- improve command line parsing
-- options to specify output file or directory
+- Start making changes in branches like a grownup
+- Document ofexport usage
 - Decode note xml, may not be simple (are attachments uuencoded in them?).
 - Add more help for any unfortunate soul who tries to use this.

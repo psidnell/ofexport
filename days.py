@@ -1,4 +1,4 @@
-from omnifocus import Visitor, traverse_folders, traverse_project, build_model, find_database
+from omnifocus import Folder, Visitor, traverse_folder, traverse_list, traverse_project, build_model, find_database
 import os
 import codecs
 from datetime import date
@@ -28,8 +28,8 @@ class FilterVisitor(Visitor):
         marked_tasks = [x for x in project.children if x.marked]
         project.marked = len (marked_tasks) > 0
     def end_folder (self, folder):
-        marked_tasks = [x for x in folder.children if x.marked]
-        folder.marked = len (marked_tasks) > 0
+        marked_projects = [x for x in folder.children if x.marked]
+        folder.marked = len (marked_projects) > 0
         if len(self.root_folder_names) > 0 and not folder.name in self.root_folder_names:
             folder.marked = False
     def end_task (self, task):
@@ -44,7 +44,7 @@ class FilterVisitor(Visitor):
 class CustomPrintTaskpaperVisitor (PrintTaskpaperVisitor):
     def tags (self, completed):
         if completed != None:
-            return completed.strftime(" @%Y-%m-%d")
+            return completed.strftime(" @%Y-%m-%d-%a")
         else:
             return ""
 '''
@@ -56,14 +56,23 @@ class CollectProjectVisitor (Visitor):
     def begin_project (self, project):
         self.projects.append(project)
         
-def print_structure (visitor, folders, flat=False):
-    if flat:
-        flattening_visitor = CollectProjectVisitor ()
-        traverse_folders (flattening_visitor, folders)
-        for project in flattening_visitor.projects:
-            traverse_project (visitor, project)
-    else:
-        traverse_folders (visitor, folders)
+def print_structure (visitor, root_projects_and_folders, flat=False):
+    for item in root_projects_and_folders:
+        if item.__class__ == Folder:
+            if flat:
+                flattening_visitor = CollectProjectVisitor ()
+                traverse_folder (flattening_visitor, item)
+                for project in flattening_visitor.projects:
+                    traverse_project (visitor, project)
+            else:
+                traverse_folder (visitor, item)
+        else:
+            if flat:
+                flattening_visitor = CollectProjectVisitor ()
+                traverse_project (flattening_visitor, item)
+                traverse_project (visitor, item)
+            else:
+                traverse_folder (visitor, item)
     
 if __name__ == "__main__":
     
@@ -102,8 +111,7 @@ if __name__ == "__main__":
         print 'n=number of days in the past'
         exit
         
-    folders, contexts = build_model (find_database ())
-    traverse_folders (FilterVisitor (days=days, root_folder_names=root_folder_names), folders)
+    root_projects_and_folders, root_contexts = build_model (find_database ())
     
     file_name_base = os.environ['HOME']+'/Desktop/'
     date_str = today.strftime (time_fmt)
@@ -113,27 +121,31 @@ if __name__ == "__main__":
         file_name = file_name_base + date_str + '.md'
         out=codecs.open(file_name, 'w', 'utf-8')
         
-        print_structure (PrintMarkdownVisitor (out), folders, flat=flat)
+        traverse_list (FilterVisitor (days=days, root_folder_names=root_folder_names), root_projects_and_folders)
+        print_structure (PrintMarkdownVisitor (out), root_projects_and_folders, flat=flat)
         
     # FOLDING TEXT
     elif fmt == 'ft':
         file_name = file_name_base + date_str + '.ft'
         out=codecs.open(file_name, 'w', 'utf-8')
         
-        print_structure (PrintMarkdownVisitor (out), folders, flat=flat)
+        traverse_list (FilterVisitor (days=days, root_folder_names=root_folder_names), root_projects_and_folders)
+        print_structure (PrintMarkdownVisitor (out), root_projects_and_folders, flat=flat)
                 
     # TASKPAPER            
     elif fmt == 'tp':
         file_name = file_name_base + date_str + '.taskpaper'
         out=codecs.open(file_name, 'w', 'utf-8')
-    
-        print_structure (CustomPrintTaskpaperVisitor (out), folders, flat=flat)
+        
+        traverse_list (FilterVisitor (days=days, root_folder_names=root_folder_names), root_projects_and_folders)
+        print_structure (CustomPrintTaskpaperVisitor (out), root_projects_and_folders, flat=flat)
                 
     # MARKDOWN WEEKLY REPORT
     elif fmt == 'week':
         days = 7
         flat=True
         file_name = file_name_base + 'week-' + date_str + '.taskpaper'
+        root_folder_names = ['Work', 'Miscellaneous']
         out=codecs.open(file_name, 'w', 'utf-8')
         print >>out, 'Weekly Progress Report:'
         print >>out
@@ -141,7 +153,8 @@ if __name__ == "__main__":
         print >>out
         print >>out, '\tAccomplishment For This Week:'
         
-        print_structure (CustomPrintTaskpaperVisitor (out, depth=2), folders, flat=flat)
+        traverse_list (FilterVisitor (days=days, root_folder_names=root_folder_names), root_projects_and_folders)
+        print_structure (CustomPrintTaskpaperVisitor (out, depth=2), root_projects_and_folders, flat=flat)
         
         print >>out, '\tPlans For Next Week:'
         print >>out, '\t\t- ?'
@@ -158,7 +171,10 @@ if __name__ == "__main__":
         print >>out, '    <title>OmniFocus</title>'
         print >>out, '  </head>'
         print >>out, '  <body>'
-        print_structure (PrintOpmlVisitor (out, depth=1), folders, flat=flat)
+        
+        traverse_list (FilterVisitor (days=days, root_folder_names=root_folder_names), root_projects_and_folders)
+        print_structure (PrintOpmlVisitor (out, depth=1), root_projects_and_folders, flat=flat)
+        
         print >>out, '  </body>'
         print >>out, '</opml>'
         
@@ -171,7 +187,10 @@ if __name__ == "__main__":
         print >>out, '    <title>OmniFocus</title>'
         print >>out, '  </head>'
         print >>out, '  <body>'
-        print_structure (PrintHtmlVisitor (out, depth=1), folders, flat=flat)
+        
+        traverse_list (FilterVisitor (days=days, root_folder_names=root_folder_names), root_projects_and_folders)
+        print_structure (PrintHtmlVisitor (out, depth=1), root_projects_and_folders, flat=flat)
+        
         print >>out, '  </body>'
         print >>out, '<html>'
     else:
