@@ -1,0 +1,8 @@
+OmniPythonLib Todo:
+	- Allow match on start dates
+	- Find way to support date ranges
+	- What happens to items with no context?
+	- More thas one sorting filter?
+	- Make pruning function a visitor
+	- Extract note text (even possible?)
+	- Resolve utf8/ascii issues

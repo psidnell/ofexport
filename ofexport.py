@@ -103,7 +103,6 @@ class FilterVisitor(Visitor):
         if item.date_completed != None:
             days_elapsed = (date.today() - item.date_completed).days
             date_str = item.date_completed.strftime ('%Y-%m-%d %A %B') + ' -' + str (days_elapsed) +'d'
-            print date_str
         else:
             date_str = ''
         return re.search (regexp, date_str) != None
@@ -190,6 +189,9 @@ def print_help ():
     print "    python ofexport.py --open -o ~/Desktop/x.tp --fi '^Home$' --tci '2013-02-10' --prune"
     print '  7. Create a taskpaper file including everything in any folder called "Home", including completed items from a February'
     print "    python ofexport.py --open -o ~/Desktop/x.tp --fi '^Home$' --tci 'Feb' --prune"
+    print
+    print "  The TODO.tp file was created with:"
+    print "    python ofexport.py --open -o TODO.tp --pi OmniPythonLib --tce '.' --prune -F"
     print
     print "filtering:"
     print "  Filtering is based on regular expressions that match an items text. When an item is matched"

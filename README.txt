@@ -30,11 +30,3 @@ ofexport
 --------
 
 Run without arguments to print full option list and examples.
-
-
-TODO:
------
-- Start making changes in branches like a grownup
-- Document ofexport usage
-- Decode note xml, may not be simple (are attachments uuencoded in them?).
-- Add more help for any unfortunate soul who tries to use this.
