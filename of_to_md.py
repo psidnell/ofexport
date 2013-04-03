@@ -38,7 +38,7 @@ class PrintMarkdownVisitor(Visitor):
         self.header_depth-=1
     def done (self, completed):
         if completed != None:
-            return completed.strftime(" %Y-%m-%d-%a")
+            return completed.strftime(" @%Y-%m-%d-%a")
         return ""
 
 if __name__ == "__main__":

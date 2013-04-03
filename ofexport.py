@@ -1,10 +1,10 @@
-from omnifocus import Visitor, traverse_list, traverse_contexts, traverse_project, build_model, find_database
 import os
 import re
 import codecs
 import getopt
-from datetime import date
 import sys
+from omnifocus import Visitor, traverse_list, traverse_contexts, build_model, find_database
+from datetime import date
 from of_to_tp import PrintTaskpaperVisitor
 from of_to_md import PrintMarkdownVisitor
 from of_to_opml import PrintOpmlVisitor
@@ -138,15 +138,17 @@ class FlatteningVisitor (Visitor):
             child.parent = task.parent
         task.children = []
         
-def print_structure (visitor, root_projects_and_folders, root_contexts, project_mode, flat):
+class TaskCompletionSortingVisitor (Visitor):
+    def end_project (self, project):
+        project.children.sort(key=lambda item:self.get_key(item))
+    def get_key (self, item):
+        if item.date_completed != None:
+            return item.date_completed
+        return date.today()                      
+        
+def print_structure (visitor, root_projects_and_folders, root_contexts, project_mode):
     if project_mode:
-        if flat:
-            flattening_visitor = FlatteningVisitor ()
-            traverse_list (flattening_visitor, root_projects_and_folders)
-            for project in flattening_visitor.projects:
-                traverse_project (visitor, project)
-        else:
-            traverse_list (visitor, root_projects_and_folders)
+        traverse_list (visitor, root_projects_and_folders)
     else:
         traverse_contexts (visitor, root_contexts)
 
@@ -169,6 +171,7 @@ def print_help ():
     print '  --pce regexp: exclude projects with completion matching regexp'
     print '  --tci regexp: include tasks with completion matching regexp'
     print '  --tce regexp: exclude tasks with completion matching regexp'
+    print '  --tsc: sort tasks by completion'
     print '  -F: flatten project/task structure'
     print '  -C: context mode (as opposed to project mode)'
     print '  --prune: prune empty projects or folders'
@@ -211,7 +214,6 @@ if __name__ == "__main__":
     today = date.today ()
     time_fmt='%Y-%m-%d'
     opn=False
-    flat=False
     prune=False
     project_mode=True
     file_name = None
@@ -222,6 +224,7 @@ if __name__ == "__main__":
                                                        'pci=','pce=',
                                                        'ti=','te=',
                                                        'tci=','tce=',
+                                                       'tsc',
                                                        'help',
                                                        'open',
                                                        'prune'])
@@ -230,8 +233,6 @@ if __name__ == "__main__":
             prune = True
         elif '--open' == opt:
             opn = True
-        elif '-F' == opt:
-            flat = True
         elif '-C' == opt:
             project_mode = False
         elif '-o' == opt:
@@ -252,7 +253,7 @@ if __name__ == "__main__":
     fmt = file_name[dot+1:]
     
     root_projects_and_folders, root_contexts = build_model (find_database ())
-    
+        
     if project_mode:
         items = root_projects_and_folders
     else:
@@ -292,6 +293,13 @@ if __name__ == "__main__":
         elif '--pce' == opt:
             print 'project completion', arg
             traverse_list (FilterVisitor (project_completed_filter = arg, prune = prune, include=False), items)
+        elif '--tsc' == opt:
+            print 'sort by task completion'
+            traverse_list (TaskCompletionSortingVisitor (), items)
+        elif '-F' == opt:
+            visitor = FlatteningVisitor ()
+            traverse_list (visitor, root_projects_and_folders)
+            root_projects_and_folders = visitor.projects
 
     file_name_base = os.environ['HOME']+'/Desktop/'
     date_str = today.strftime (time_fmt)
@@ -300,19 +308,19 @@ if __name__ == "__main__":
     if fmt == 'md':
         out=codecs.open(file_name, 'w', 'utf-8')
         
-        print_structure (PrintMarkdownVisitor (out), root_projects_and_folders, root_contexts, project_mode, flat)
+        print_structure (PrintMarkdownVisitor (out), root_projects_and_folders, root_contexts, project_mode)
         
     # FOLDING TEXT
     elif fmt == 'ft':
         out=codecs.open(file_name, 'w', 'utf-8')
         
-        print_structure (PrintMarkdownVisitor (out), root_projects_and_folders, root_contexts, project_mode, flat)
+        print_structure (PrintMarkdownVisitor (out), root_projects_and_folders, root_contexts, project_mode)
                 
     # TASKPAPER            
     elif fmt == 'tp' or fmt == 'taskpaper':
         out=codecs.open(file_name, 'w', 'utf-8')
 
-        print_structure (CustomPrintTaskpaperVisitor (out), root_projects_and_folders, root_contexts, project_mode, flat)
+        print_structure (CustomPrintTaskpaperVisitor (out), root_projects_and_folders, root_contexts, project_mode)
     
     # OPML
     elif fmt == 'opml':
@@ -324,7 +332,7 @@ if __name__ == "__main__":
         print >>out, '  </head>'
         print >>out, '  <body>'
         
-        print_structure (PrintOpmlVisitor (out, depth=1), root_projects_and_folders, root_contexts, project_mode, flat)
+        print_structure (PrintOpmlVisitor (out, depth=1), root_projects_and_folders, root_contexts, project_mode)
         
         print >>out, '  </body>'
         print >>out, '</opml>'
@@ -338,7 +346,7 @@ if __name__ == "__main__":
         print >>out, '  </head>'
         print >>out, '  <body>'
         
-        print_structure (PrintHtmlVisitor (out, depth=1), root_projects_and_folders, root_contexts, project_mode, flat)
+        print_structure (PrintHtmlVisitor (out, depth=1), root_projects_and_folders, root_contexts, project_mode)
         
         print >>out, '  </body>'
         print >>out, '<html>'

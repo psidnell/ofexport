@@ -24,9 +24,9 @@ of_to_md.py - renders the whole library as Markdown
 of_to_tp.py - renders the whole library as Taskpaper
 of_to_text.py - renders the whole library as Text
 days.py (DEPRECATED) - a report generation library that prints completed tasks in any of the above formats.
-ofexport.py - a general purpose export and filtering utility.
+ofexport.py - a general purpose export and filtering utility
 
-ofexport
---------
+About ofexport
+--------------
 
 Run without arguments to print full option list and examples.
