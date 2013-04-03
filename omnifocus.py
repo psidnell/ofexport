@@ -1,5 +1,5 @@
 import sqlite3
-from datetime import date
+from datetime import datetime
 from os import environ, path
 
 '''
@@ -93,7 +93,7 @@ class DateAttribDesc (AttribDesc):
         val = AttribDesc.__get__(self, obj, cls)
         if val == None:
             return None
-        return date.fromtimestamp(THIRTY_ONE_YEARS + val)
+        return datetime.fromtimestamp(THIRTY_ONE_YEARS + val)
 
 class BoolAttribDesc (AttribDesc):
     def __init__( self, name ):

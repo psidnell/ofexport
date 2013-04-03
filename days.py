@@ -1,7 +1,7 @@
 from omnifocus import Folder, Visitor, traverse_folder, traverse_list, traverse_project, build_model, find_database
 import os
 import codecs
-from datetime import date
+from datetime import datetime
 import sys
 from of_to_tp import PrintTaskpaperVisitor
 from of_to_md import PrintMarkdownVisitor
@@ -38,7 +38,7 @@ class FilterVisitor(Visitor):
         elif 'routine' in str(task.project).lower():
             task.marked = False
         else:
-            days_elapsed = (date.today() - task.date_completed).days
+            days_elapsed = (datetime.today().date() - task.date_completed.date()).days
             task.marked = days_elapsed < self.days
 
 class CustomPrintTaskpaperVisitor (PrintTaskpaperVisitor):

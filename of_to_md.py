@@ -19,7 +19,7 @@ class PrintMarkdownVisitor(Visitor):
         self.header_depth-=1
     def begin_project (self, project):
         self.task_depth = 0
-        print >>self.out, ('#' * (self.header_depth+1)) + ' ' + project.name + self.done(project.date_completed)
+        print >>self.out, ('#' * (self.header_depth+1)) + ' ' + project.name
         self.header_depth+=1
     def end_project (self, project):
         print >>self.out

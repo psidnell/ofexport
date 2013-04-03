@@ -2,7 +2,12 @@ OmniPythonLib Todo:
 	- Allow match on start dates
 	- Find way to support date ranges
 	- What happens to items with no context?
-	- More thas one sorting filter?
-	- Make pruning function a visitor
+	- Filter on start dates
+	- Sort on start dates
+	- Move general purpose visitors to their own module
 	- Extract note text (even possible?)
-	- Resolve utf8/ascii issues
+	- Resolve utf8/ascii issues (only when launched from Applescript?)
+	- Create a taggable dump of projects as files with links to corresponing Omnifocus entities
+	- Create a omnifocus independent tree model that works with existing visitors
+	- Read other file types such as Taskpaper?
+	- Genericise printing visitor base class

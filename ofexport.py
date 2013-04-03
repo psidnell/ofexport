@@ -4,7 +4,7 @@ import codecs
 import getopt
 import sys
 from omnifocus import Visitor, traverse_list, traverse_contexts, build_model, find_database
-from datetime import date
+from datetime import date, datetime
 from of_to_tp import PrintTaskpaperVisitor
 from of_to_md import PrintMarkdownVisitor
 from of_to_opml import PrintOpmlVisitor
@@ -24,7 +24,6 @@ exclude things outside the completion window, with
 '''
 class FilterVisitor(Visitor):
     def __init__(self,
-                 prune=False,
                  include=True,
                  folder_filter=None,
                  project_filter=None,
@@ -32,7 +31,6 @@ class FilterVisitor(Visitor):
                  task_filter=None,
                  task_completed_filter=None,
                  project_completed_filter=None):
-        self.prune = prune
         self.folder_filter = folder_filter
         self.project_filter = project_filter
         self.context_filter = context_filter
@@ -51,8 +49,6 @@ class FilterVisitor(Visitor):
             self.set_item_matched(project, matched);
     def end_project (self, project):
         self.end_item (project)
-        if self.prune:
-            self.prune_if_empty (project)
     def begin_folder (self, folder):
         self.begin_item(folder)
         if not folder.user_attribs['matched_filter'] and self.folder_filter != None:
@@ -60,8 +56,6 @@ class FilterVisitor(Visitor):
             self.set_item_matched(folder, matched);
     def end_folder (self, folder):
         self.end_item(folder)
-        if self.prune:
-            self.prune_if_empty (folder)
     def begin_context (self, context):
         self.begin_item(context)
         if not context.user_attribs['matched_filter'] and self.context_filter != None:
@@ -69,8 +63,6 @@ class FilterVisitor(Visitor):
             self.set_item_matched(context, matched);
     def end_context (self, context):
         self.end_item (context)
-        if self.prune:
-            self.prune_if_empty (context)
     def begin_task (self, task):
         self.begin_item (task)
         if not task.user_attribs['matched_filter'] and self.task_filter != None:
@@ -101,7 +93,9 @@ class FilterVisitor(Visitor):
         return re.search (regexp, item.name) != None
     def match_completed (self, item, regexp):
         if item.date_completed != None:
-            days_elapsed = (date.today() - item.date_completed).days
+            # be careful - we want whole days, life gets confusing if we want to see
+            # todays tasks but we also see some of yesterdays since it's <24hrs ago 
+            days_elapsed = (datetime.today().date() - item.date_completed.date()).days
             date_str = item.date_completed.strftime ('%Y-%m-%d %A %B') + ' -' + str (days_elapsed) +'d'
         else:
             date_str = ''
@@ -144,7 +138,20 @@ class TaskCompletionSortingVisitor (Visitor):
     def get_key (self, item):
         if item.date_completed != None:
             return item.date_completed
-        return date.today()                      
+        return datetime.today()
+    
+class PruningFilterVisitor (Visitor):
+    def end_project (self, project):
+        self.prune_if_empty(project)
+    def end_folder (self, folder):
+        self.prune_if_empty(folder)
+    def end_context (self, context):
+        self.prune_if_empty(context)
+    def prune_if_empty (self, item):
+        if item.marked:
+            empty = len ([x for x in item.children if x.marked]) == 0
+            if empty:
+                item.marked = False                   
         
 def print_structure (visitor, root_projects_and_folders, root_contexts, project_mode):
     if project_mode:
@@ -214,7 +221,6 @@ if __name__ == "__main__":
     today = date.today ()
     time_fmt='%Y-%m-%d'
     opn=False
-    prune=False
     project_mode=True
     file_name = None
         
@@ -229,9 +235,7 @@ if __name__ == "__main__":
                                                        'open',
                                                        'prune'])
     for opt, arg in opts:
-        if '--prune' == opt:
-            prune = True
-        elif '--open' == opt:
+        if '--open' == opt:
             opn = True
         elif '-C' == opt:
             project_mode = False
@@ -262,40 +266,43 @@ if __name__ == "__main__":
     for opt, arg in opts:
         if '--fi' == opt:
             print 'include folders', arg
-            traverse_list (FilterVisitor (folder_filter = arg, prune = prune, include=True), items)
+            traverse_list (FilterVisitor (folder_filter = arg, include=True), items)
         elif '--fe' == opt:
             print 'exclude folders', arg
-            traverse_list (FilterVisitor (folder_filter = arg, prune = prune, include=False), items)
+            traverse_list (FilterVisitor (folder_filter = arg, include=False), items)
         elif '--pi' == opt:
             print 'include projects', arg
-            traverse_list (FilterVisitor (project_filter = arg, prune = prune, include=True), items)
+            traverse_list (FilterVisitor (project_filter = arg, include=True), items)
         elif '--pe' == opt:
             print 'filter exclude projects', arg
-            traverse_list (FilterVisitor (project_filter = arg, prune = prune, include=False), items)
+            traverse_list (FilterVisitor (project_filter = arg, include=False), items)
         elif '-c' == opt:
             print 'contexts', arg
-            traverse_list (FilterVisitor (context_filter = arg, prune = prune), items)
+            traverse_list (FilterVisitor (context_filter = arg), items)
         elif '--ti' == opt:
             print 'include tasks', arg
-            traverse_list (FilterVisitor (task_filter = arg, prune = prune, include=True), items)
+            traverse_list (FilterVisitor (task_filter = arg, include=True), items)
         elif '--te' == opt:
             print 'exclude tasks', arg
-            traverse_list (FilterVisitor (task_filter = arg, prune = prune, include=False), items)
+            traverse_list (FilterVisitor (task_filter = arg, include=False), items)
         elif '--tci' == opt:
             print 'include task completion', arg
-            traverse_list (FilterVisitor (task_completed_filter = arg, prune = prune, include=True), items)
+            traverse_list (FilterVisitor (task_completed_filter = arg, include=True), items)
         elif '--tce' == opt:
             print 'include task completion', arg
-            traverse_list (FilterVisitor (task_completed_filter = arg, prune = prune, include=False), items)
+            traverse_list (FilterVisitor (task_completed_filter = arg, include=False), items)
         elif '--pci' == opt:
             print 'project completion', arg
-            traverse_list (FilterVisitor (project_completed_filter = arg, prune = prune, include=True), items)
+            traverse_list (FilterVisitor (project_completed_filter = arg, include=True), items)
         elif '--pce' == opt:
             print 'project completion', arg
-            traverse_list (FilterVisitor (project_completed_filter = arg, prune = prune, include=False), items)
+            traverse_list (FilterVisitor (project_completed_filter = arg, include=False), items)
         elif '--tsc' == opt:
             print 'sort by task completion'
             traverse_list (TaskCompletionSortingVisitor (), items)
+        elif '--prune' == opt:
+            print 'pruning empty folders, projects, contexts'
+            traverse_list (PruningFilterVisitor (), items)
         elif '-F' == opt:
             visitor = FlatteningVisitor ()
             traverse_list (visitor, root_projects_and_folders)
