@@ -10,67 +10,24 @@ from of_to_md import PrintMarkdownVisitor
 from of_to_opml import PrintOpmlVisitor
 from of_to_html import PrintHtmlVisitor
 
-DAYS={'0':'Sun', '1':'Mon', '2':'Tue', '3':'Wed', '4':'Thu', '5':'Fri', '6':'Sat'}
-
-'''
-Any folder with this name is scanned
-'''
-folder_to_include = 'Work'
-
-'''
-This is the visitor that controls what tasks are in the report.
-exclude things outside the completion window, with
-'routine' in the project name or unfinished.
-'''
-class FilterVisitor(Visitor):
-    def __init__(self,
-                 include=True,
-                 folder_filter=None,
-                 project_filter=None,
-                 context_filter=None,
-                 task_filter=None,
-                 task_completed_filter=None,
-                 project_completed_filter=None):
-        self.folder_filter = folder_filter
-        self.project_filter = project_filter
-        self.context_filter = context_filter
-        self.task_filter = task_filter
-        self.task_completed_filter = task_completed_filter
-        self.project_completed_filter = project_completed_filter
+class BaseFilterVisitor(Visitor):
+    def __init__(self, include=True):
         self.include = include
         self.node_path = []
     def begin_project (self, project):
         self.begin_item(project)
-        if not project.user_attribs['matched_filter'] and self.project_filter != None:
-            matched = self.match_name(project, self.project_filter)
-            self.set_item_matched(project, matched);
-        if not project.user_attribs['matched_filter'] and self.project_completed_filter != None:
-            self.match_completed(project, self.project_completed_filter)
-            self.set_item_matched(project, matched);
     def end_project (self, project):
         self.end_item (project)
     def begin_folder (self, folder):
         self.begin_item(folder)
-        if not folder.user_attribs['matched_filter'] and self.folder_filter != None:
-            matched = self.match_name(folder, self.folder_filter)
-            self.set_item_matched(folder, matched);
     def end_folder (self, folder):
         self.end_item(folder)
     def begin_context (self, context):
         self.begin_item(context)
-        if not context.user_attribs['matched_filter'] and self.context_filter != None:
-            matched = self.match_name(context, self.context_filter)
-            self.set_item_matched(context, matched);
     def end_context (self, context):
         self.end_item (context)
     def begin_task (self, task):
         self.begin_item (task)
-        if not task.user_attribs['matched_filter'] and self.task_filter != None:
-            matched = self.match_name(task, self.task_filter)
-            self.set_item_matched(task, matched);
-        if self.task_completed_filter != None:
-            matched = self.match_completed(task, self.task_completed_filter)
-            self.set_item_matched(task, matched);
     def end_task (self, task):
         self.end_item (task)
     def begin_item (self, item):
@@ -105,11 +62,66 @@ class FilterVisitor(Visitor):
         if len(self.node_path) > 0:
             parent = self.node_path[len(self.node_path) - 1]
             item.user_attribs.update(parent.user_attribs)
-    def prune_if_empty (self, item):
-        if item.marked:
-            empty = len ([x for x in item.children if x.marked]) == 0
-            if empty:
-                item.marked = False
+
+class FolderNameFilterVisitor(BaseFilterVisitor):
+    def __init__(self, filtr, include=True):
+        BaseFilterVisitor.__init__(self, include)
+        self.filter = filtr
+    def begin_folder (self, project):
+        self.begin_item(project)
+        if not project.user_attribs['matched_filter'] and self.filter != None:
+            matched = self.match_name(project, self.filter)
+            self.set_item_matched(project, matched);
+
+class ProjectNameFilterVisitor(BaseFilterVisitor):
+    def __init__(self, filtr, include=True):
+        BaseFilterVisitor.__init__(self, include)
+        self.filter = filtr
+    def begin_project (self, project):
+        self.begin_item(project)
+        if not project.user_attribs['matched_filter'] and self.filter != None:
+            matched = self.match_name(project, self.filter)
+            self.set_item_matched(project, matched);
+
+class ContextNameFilterVisitor(BaseFilterVisitor):
+    def __init__(self, filtr, include=True):
+        BaseFilterVisitor.__init__(self, include)
+        self.filter = filtr
+    def begin_context (self, project):
+        self.begin_item(project)
+        if not project.user_attribs['matched_filter'] and self.filter != None:
+            matched = self.match_name(project, self.filter)
+            self.set_item_matched(project, matched);
+            
+class TaskNameFilterVisitor(BaseFilterVisitor):
+    def __init__(self, filtr, include=True):
+        BaseFilterVisitor.__init__(self, include)
+        self.filter = filtr
+    def begin_task (self, project):
+        self.begin_item(project)
+        if not project.user_attribs['matched_filter'] and self.filter != None:
+            matched = self.match_name(project, self.filter)
+            self.set_item_matched(project, matched);
+            
+class ProjectCompletionFilterVisitor(BaseFilterVisitor):
+    def __init__(self, filtr, include=True):
+        BaseFilterVisitor.__init__(self, include)
+        self.filter = filtr
+    def begin_project (self, project):
+        self.begin_item(project)
+        if not project.user_attribs['matched_filter'] and self.filter != None:
+            matched = self.match_completed(project, self.filter)
+            self.set_item_matched(project, matched);
+
+class TaskCompletionFilterVisitor(BaseFilterVisitor):
+    def __init__(self, filtr, include=True):
+        BaseFilterVisitor.__init__(self, include)
+        self.filter = filtr
+    def begin_task (self, project):
+        self.begin_item(project)
+        if not project.user_attribs['matched_filter'] and self.filter != None:
+            matched = self.match_completed(project, self.filter)
+            self.set_item_matched(project, matched);
 
 class CustomPrintTaskpaperVisitor (PrintTaskpaperVisitor):
     def tags (self, completed):
@@ -117,9 +129,7 @@ class CustomPrintTaskpaperVisitor (PrintTaskpaperVisitor):
             return completed.strftime(" @%Y-%m-%d-%a")
         else:
             return ""
-'''
-Flatten the projects into a list
-'''
+
 class FlatteningVisitor (Visitor):
     def __init__(self):
         self.projects = []
@@ -227,6 +237,7 @@ if __name__ == "__main__":
     opts, args = getopt.optlist, args = getopt.getopt(sys.argv[1:], 'hFC?o:',
                                                       ['fi=','fe=',
                                                        'pi=','pe=',
+                                                       'ci=','ce=',
                                                        'pci=','pce=',
                                                        'ti=','te=',
                                                        'tci=','tce=',
@@ -266,37 +277,40 @@ if __name__ == "__main__":
     for opt, arg in opts:
         if '--fi' == opt:
             print 'include folders', arg
-            traverse_list (FilterVisitor (folder_filter = arg, include=True), items)
+            traverse_list (FolderNameFilterVisitor (arg, include=True), items)
         elif '--fe' == opt:
             print 'exclude folders', arg
-            traverse_list (FilterVisitor (folder_filter = arg, include=False), items)
+            traverse_list (FolderNameFilterVisitor (arg, include=False), items)
         elif '--pi' == opt:
             print 'include projects', arg
-            traverse_list (FilterVisitor (project_filter = arg, include=True), items)
+            traverse_list (ProjectNameFilterVisitor (arg, include=True), items)
         elif '--pe' == opt:
             print 'filter exclude projects', arg
-            traverse_list (FilterVisitor (project_filter = arg, include=False), items)
-        elif '-c' == opt:
+            traverse_list (ProjectNameFilterVisitor (arg, include=False), items)
+        elif '--ci' == opt:
             print 'contexts', arg
-            traverse_list (FilterVisitor (context_filter = arg), items)
+            traverse_list (ContextNameFilterVisitor (arg, include=True), items)
+        elif '--ce' == opt:
+            print 'contexts', arg
+            traverse_list (ContextNameFilterVisitor (arg, include=False), items)
         elif '--ti' == opt:
             print 'include tasks', arg
-            traverse_list (FilterVisitor (task_filter = arg, include=True), items)
+            traverse_list (TaskNameFilterVisitor (arg, include=True), items)
         elif '--te' == opt:
             print 'exclude tasks', arg
-            traverse_list (FilterVisitor (task_filter = arg, include=False), items)
+            traverse_list (TaskNameFilterVisitor (arg, include=False), items)
         elif '--tci' == opt:
             print 'include task completion', arg
-            traverse_list (FilterVisitor (task_completed_filter = arg, include=True), items)
+            traverse_list (TaskCompletionFilterVisitor (arg, include=True), items)
         elif '--tce' == opt:
             print 'include task completion', arg
-            traverse_list (FilterVisitor (task_completed_filter = arg, include=False), items)
+            traverse_list (TaskCompletionFilterVisitor (arg, include=False), items)
         elif '--pci' == opt:
             print 'project completion', arg
-            traverse_list (FilterVisitor (project_completed_filter = arg, include=True), items)
+            traverse_list (ProjectCompletionFilterVisitor (arg, include=True), items)
         elif '--pce' == opt:
             print 'project completion', arg
-            traverse_list (FilterVisitor (project_completed_filter = arg, include=False), items)
+            traverse_list (ProjectCompletionFilterVisitor (arg, include=False), items)
         elif '--tsc' == opt:
             print 'sort by task completion'
             traverse_list (TaskCompletionSortingVisitor (), items)
