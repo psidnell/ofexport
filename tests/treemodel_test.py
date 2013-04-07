@@ -32,7 +32,7 @@ class SortableTask(Task):
     def get_sort_key(self):
         return self.name
 
-class Test_typeof(unittest.TestCase):
+class Test_treemodel(unittest.TestCase):
     
     def test_traverse_list_tasks (self):
         n1 = Task (name=u'n1')
@@ -125,6 +125,19 @@ class Test_typeof(unittest.TestCase):
         self.assertTrue(n1 in visitor.tasks_ended)
         self.assertTrue(n2 in visitor.tasks_ended)
         
+    def test_traverse_task_when_not_marked (self):
+        parent = Task (name=u'p')
+        n1 = Task (name=u'n1')
+        n2 = Task (name=u'n2')
+        parent.children.append (n1)
+        parent.children.append (n2)
+        parent.marked = False
+        
+        visitor = DemoVisitor ()
+        traverse_task (visitor, parent)
+        self.assertEqual(0, len(visitor.tasks_started))
+        self.assertEqual(0, len(visitor.tasks_ended))
+        
     def test_traverse_project (self):
         parent = Project (name=u'p')
         n1 = Task (name=u'n1')
@@ -146,6 +159,21 @@ class Test_typeof(unittest.TestCase):
         self.assertTrue(n1 in visitor.tasks_ended)
         self.assertTrue(n2 in visitor.tasks_ended)
         
+    def test_traverse_project_when_not_marked (self):
+        parent = Project (name=u'p')
+        n1 = Task (name=u'n1')
+        n2 = Task (name=u'n2')
+        parent.children.append (n1)
+        parent.children.append (n2)
+        parent.marked = False
+        
+        visitor = DemoVisitor ()
+        traverse_project (visitor, parent)
+        self.assertEqual(0, len(visitor.tasks_started))
+        self.assertEqual(0, len(visitor.projects_started))
+        self.assertEqual(0, len(visitor.tasks_ended))
+        self.assertEqual(0, len(visitor.projects_ended))
+        
     def test_traverse_context (self):
         parent = Context (name=u'p')
         n1 = Task (name=u'n1')
@@ -166,6 +194,21 @@ class Test_typeof(unittest.TestCase):
         self.assertTrue(parent in visitor.contexts_ended)
         self.assertTrue(n1 in visitor.tasks_ended)
         self.assertTrue(n2 in visitor.tasks_ended)
+        
+    def test_traverse_context_when_not_marked (self):
+        parent = Context (name=u'p')
+        n1 = Task (name=u'n1')
+        n2 = Task (name=u'n2')
+        parent.children.append (n1)
+        parent.children.append (n2)
+        parent.marked = False
+        
+        visitor = DemoVisitor ()
+        traverse_context (visitor, parent)
+        self.assertEqual(0, len(visitor.tasks_started))
+        self.assertEqual(0, len(visitor.contexts_started))
+        self.assertEqual(0, len(visitor.tasks_ended))
+        self.assertEqual(0, len(visitor.contexts_ended))
         
     def test_traverse_folder (self):
         parent = Folder (name=u'p')
