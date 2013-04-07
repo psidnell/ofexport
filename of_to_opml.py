@@ -42,7 +42,8 @@ class PrintOpmlVisitor(Visitor):
         if completed != None:
             print >>self.out, 'completed="' + completed.strftime ("%Y-%m-%d") + '"',
         if self.links:
-            print >>self.out,'_note="omnifocus:///' + link_type + '/' + item.persistent_identifier + '"',
+            ident = item.ofattribs['persistentIdentifier']
+            print >>self.out,'_note="omnifocus:///' + link_type + '/' + ident + '"',
         print >>self.out, ">"
     def print_node_end (self):
         print >>self.out, self.spaces() + '</outline>'

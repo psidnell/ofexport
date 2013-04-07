@@ -12,7 +12,6 @@ class PrintTaskpaperVisitor(Visitor):
         self.depth = depth
         self.out = out
     def begin_folder (self, folder):
-        print 'seeing project ' + folder.name + ' ' + str(folder.marked)
         print >>self.out, self.tabs() + folder.name + ':'
         self.depth+=1
     def end_folder (self, folder):

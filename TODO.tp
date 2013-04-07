@@ -1,6 +1,9 @@
 OmniPythonLib Todo:
+	- Links (from persistent identifier)
+	- verify help examples all still work
+	- Submit to github
+	- dump schema programatically
 	- Write a unit test that tries each filter
-	- Move general purpose visitors to their own module
 	- Add documentation to the github wiki or html files to the project?
 	- Genericise printing visitor base class
 	- Find way to support date ranges 2013-04-01..2013-04-04 - use sort order?
@@ -14,3 +17,4 @@ OmniPythonLib Todo:
 	- Read other file types such as Taskpaper?
 	- Resolve utf8/ascii issues (only when launched from Applescript?)
 	- Clarify capabilities in readme
+	- configurable formatting for printers? "stylesheets"?
