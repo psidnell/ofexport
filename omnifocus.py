@@ -157,16 +157,14 @@ def wire_projects_and_folders (projects, folders):
             folder_ref = project_info.ofattribs['folder']
             if folder_ref != None:
                 folder = folders[folder_ref]
-                folder.children.append(project)
                 project.folder = folder
-                project.parent = folder
+                folder.add_child (project)
 
 def wire_task_hierarchy (tasks):
     for task in tasks.values():  
         if task.ofattribs['parent'] != None:
             parent = tasks[task.ofattribs['parent']]
-            parent.children.append(task);
-            task.parent = parent
+            parent.add_child (task)
             
 def wire_tasks_to_enclosing_projects (project_infos, tasks):
     for task in tasks.values():  
@@ -186,15 +184,13 @@ def wire_folder_hierarchy (folders):
     for folder in folders.values():
         if folder.ofattribs['parent'] != None:
             parent = folders[folder.ofattribs['parent']]
-            parent.children.append (folder)
-            folder.parent = parent
+            parent.add_child (folder)
                 
 def wire_context_hierarchy (contexts):
     for context in contexts.values():
         if context.ofattribs['parent'] != None:
             parent = contexts[context.ofattribs['parent']]
-            parent.children.append(context)
-            context.parent = parent
+            parent.add_child (context)
 
 def only_roots (items):
     roots = []

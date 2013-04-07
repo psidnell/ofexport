@@ -2,7 +2,7 @@ import os
 import codecs
 import getopt
 import sys
-from treemodel import traverse_list, traverse_contexts
+from treemodel import traverse_list
 from omnifocus import build_model, find_database
 from datetime import date
 from of_to_tp import PrintTaskpaperVisitor
@@ -15,7 +15,7 @@ def print_structure (visitor, root_projects_and_folders, root_contexts, project_
     if project_mode:
         traverse_list (visitor, root_projects_and_folders)
     else:
-        traverse_contexts (visitor, root_contexts)
+        traverse_list (visitor, root_contexts)
 
 class CustomPrintTaskpaperVisitor (PrintTaskpaperVisitor):
     def tags (self, completed):

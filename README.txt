@@ -13,6 +13,11 @@ It's early days at the moment (there's no help at all yet) but there are example
 
 I've been using this for a few months now with no issues, but bear in mind that the problem of this approach (i.e. scraping the database) is that Omni make no guarantees about compatibility or support going forward. And nor do I :-)
 
+Pro's/Con's
+-----------
++ Omnifocus doesn't need to be running (or even installed!) as long as it's db file is present.
+- If Omni change their schema then the code will need fixing.
+
 Files:
 ------
 To see if everything works run 'python of_to_html.py'. This will print out your whole task hierarchy to OF.html on your desktop.

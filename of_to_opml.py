@@ -1,4 +1,4 @@
-from treemodel import traverse_list, traverse_contexts, Visitor
+from treemodel import traverse_list, traverse_list, Visitor
 from omnifocus import build_model, find_database
 import os
 import codecs
@@ -71,7 +71,7 @@ if __name__ == "__main__":
     traverse_list (PrintOpmlVisitor (out, depth=4), root_projects_and_folders)
     print >>out, '      </outline>'
     print >>out, '      <outline text="Contexts">'
-    traverse_contexts (PrintOpmlVisitor (out, depth=4), root_contexts)
+    traverse_list (PrintOpmlVisitor (out, depth=4), root_contexts)
     print >>out, '      </outline>'
     print >>out, '    </outline>'
     print >>out, '  </body>'

@@ -1,4 +1,4 @@
-from treemodel import traverse_list, traverse_contexts, Visitor
+from treemodel import traverse_list, Visitor
 from omnifocus import build_model, find_database
 import os
 import codecs
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     traverse_list (PrintHtmlVisitor (out), root_projects_and_folders)
     print >>out, '<hr/>'
     
-    traverse_contexts (PrintHtmlVisitor (out), root_contexts)
+    traverse_list (PrintHtmlVisitor (out), root_contexts)
     print >>out, '<hr/>'
     print >>out, '</body>'
     out.close()

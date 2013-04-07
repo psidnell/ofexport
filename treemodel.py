@@ -30,6 +30,9 @@ class Node (NodeFwdDecl):
         self.marked = marked
         self.attribs = dict(attribs)
         self.type = nType
+    def add_child (self, child):
+        self.children.append(child)
+        child.parent = self
     def get_sort_key (self):
         raise Exception ('not implemented in ' + str (self.__class__))
     def __str__ (self):
@@ -141,20 +144,17 @@ def sort (items):
 
 def traverse_list (visitor, lst, ignore_marked=False):
     for item in lst:
-        if item.type == FOLDER:
-            traverse_folder (visitor, item, ignore_marked = ignore_marked)
-        elif item.type == CONTEXT:
-            traverse_context (visitor, item, ignore_marked = ignore_marked)
-        elif item.type == PROJECT:
-            traverse_project (visitor, item, ignore_marked = ignore_marked)
-        elif item.type == TASK:
-            traverse_task (visitor, item, ignore_marked = ignore_marked)
-            
-def traverse_folders (visitor, folders, ignore_marked=False):
-    traverse_list (visitor, folders, ignore_marked = ignore_marked)
+        traverse (visitor, item, ignore_marked = ignore_marked)
 
-def traverse_contexts (visitor, contexts, ignore_marked=False):
-    traverse_list (visitor, contexts, ignore_marked = ignore_marked)
+def traverse (visitor, item, ignore_marked=False):       
+    if item.type == FOLDER:
+        traverse_folder (visitor, item, ignore_marked = ignore_marked)
+    elif item.type == CONTEXT:
+        traverse_context (visitor, item, ignore_marked = ignore_marked)
+    elif item.type == PROJECT:
+        traverse_project (visitor, item, ignore_marked = ignore_marked)
+    elif item.type == TASK:
+        traverse_task (visitor, item, ignore_marked = ignore_marked)
 
 def traverse_context (visitor, context, ignore_marked=False):
     if context.marked or ignore_marked:

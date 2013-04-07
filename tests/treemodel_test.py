@@ -1,4 +1,4 @@
-from treemodel import Task, Project, Folder, Context, Visitor, traverse_list, traverse_task, traverse_project, traverse_context, traverse_folder, sort
+from treemodel import Task, Project, Folder, Context, Visitor, traverse, traverse_list, sort
 import unittest
 
 class DemoVisitor(Visitor):
@@ -114,7 +114,7 @@ class Test_treemodel(unittest.TestCase):
         parent.children.append (n2)
         
         visitor = DemoVisitor ()
-        traverse_task (visitor, parent)
+        traverse (visitor, parent)
         self.assertEqual(3, len(visitor.tasks_started))
         self.assertTrue(parent in visitor.tasks_started)
         self.assertTrue(n1 in visitor.tasks_started)
@@ -134,7 +134,7 @@ class Test_treemodel(unittest.TestCase):
         parent.marked = False
         
         visitor = DemoVisitor ()
-        traverse_task (visitor, parent)
+        traverse (visitor, parent)
         self.assertEqual(0, len(visitor.tasks_started))
         self.assertEqual(0, len(visitor.tasks_ended))
         
@@ -146,7 +146,7 @@ class Test_treemodel(unittest.TestCase):
         parent.children.append (n2)
         
         visitor = DemoVisitor ()
-        traverse_project (visitor, parent)
+        traverse (visitor, parent)
         self.assertEqual(2, len(visitor.tasks_started))
         self.assertEqual(1, len(visitor.projects_started))
         self.assertTrue(parent in visitor.projects_started)
@@ -168,7 +168,7 @@ class Test_treemodel(unittest.TestCase):
         parent.marked = False
         
         visitor = DemoVisitor ()
-        traverse_project (visitor, parent)
+        traverse (visitor, parent)
         self.assertEqual(0, len(visitor.tasks_started))
         self.assertEqual(0, len(visitor.projects_started))
         self.assertEqual(0, len(visitor.tasks_ended))
@@ -182,7 +182,7 @@ class Test_treemodel(unittest.TestCase):
         parent.children.append (n2)
         
         visitor = DemoVisitor ()
-        traverse_context (visitor, parent)
+        traverse (visitor, parent)
         self.assertEqual(2, len(visitor.tasks_started))
         self.assertEqual(1, len(visitor.contexts_started))
         self.assertTrue(parent in visitor.contexts_started)
@@ -204,7 +204,7 @@ class Test_treemodel(unittest.TestCase):
         parent.marked = False
         
         visitor = DemoVisitor ()
-        traverse_context (visitor, parent)
+        traverse (visitor, parent)
         self.assertEqual(0, len(visitor.tasks_started))
         self.assertEqual(0, len(visitor.contexts_started))
         self.assertEqual(0, len(visitor.tasks_ended))
@@ -218,7 +218,7 @@ class Test_treemodel(unittest.TestCase):
         parent.children.append (n2)
         
         visitor = DemoVisitor ()
-        traverse_folder (visitor, parent)
+        traverse (visitor, parent)
         self.assertEqual(2, len(visitor.folders_started))
         self.assertEqual(1, len(visitor.projects_started))
         self.assertTrue(parent in visitor.folders_started)

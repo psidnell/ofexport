@@ -1,6 +1,6 @@
 import os
 import codecs
-from treemodel import traverse_list, traverse_contexts, Visitor
+from treemodel import traverse_list, traverse_list, Visitor
 from omnifocus import build_model, find_database
 
 class PrintTextVisitor(Visitor):
