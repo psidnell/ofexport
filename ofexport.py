@@ -124,9 +124,6 @@ if __name__ == "__main__":
     
     root_projects_and_folders, root_contexts = build_model (find_database ())
     
-    for item in root_projects_and_folders:
-        print 'root ' + item.name
-    
     if project_mode:
         items = root_projects_and_folders
     else:

@@ -6,8 +6,6 @@ PROJECT = 'Project'
 CONTEXT = 'Context'
 FOLDER = 'Folder'
 
-
-
 class NodeFwdDecl (object):
     # How to do forward class declarations in python?
     pass
