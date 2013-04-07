@@ -1,4 +1,5 @@
-from omnifocus import traverse_list, traverse_contexts, build_model, Visitor, find_database
+from treemodel import traverse_list, traverse_contexts, Visitor
+from omnifocus import build_model, find_database
 import os
 import codecs
 
@@ -32,7 +33,7 @@ class PrintHtmlVisitor(Visitor):
     def end_context (self, context):
         self.depth-=1
     def print_link (self, link_type, item):
-        print >>self.out, self.spaces() + self.escape(str(item.__class__.__name__)) + ': <a href="omnifocus:///' + link_type + '/' + item.persistent_identifier + '">' + self.escape(item.name) + '</a><br>'
+        print >>self.out, self.spaces() + item.type + ': <a href="omnifocus:///' + link_type + '/' + item.persistent_identifier + '">' + self.escape(item.name) + '</a><br>'
     def spaces (self):
         return '&nbsp' * self.depth * self.indent
     def escape (self, val):

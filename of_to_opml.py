@@ -1,4 +1,5 @@
-from omnifocus import traverse_list, traverse_contexts, build_model, Visitor, find_database
+from treemodel import traverse_list, traverse_contexts, Visitor
+from omnifocus import build_model, find_database
 import os
 import codecs
 

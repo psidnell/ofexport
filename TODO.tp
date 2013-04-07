@@ -1,13 +1,16 @@
 OmniPythonLib Todo:
-	- Allow match on start dates
-	- Find way to support date ranges
+	- Write a unit test that tries each filter
+	- Move general purpose visitors to their own module
+	- Add documentation to the github wiki or html files to the project?
+	- Genericise printing visitor base class
+	- Find way to support date ranges 2013-04-01..2013-04-04 - use sort order?
 	- What happens to items with no context?
 	- Filter on start dates
+	- Allow match on start dates
 	- Sort on start dates
-	- Move general purpose visitors to their own module
 	- Extract note text (even possible?)
-	- Resolve utf8/ascii issues (only when launched from Applescript?)
 	- Create a taggable dump of projects as files with links to corresponing Omnifocus entities
 	- Create a omnifocus independent tree model that works with existing visitors
 	- Read other file types such as Taskpaper?
-	- Genericise printing visitor base class
+	- Resolve utf8/ascii issues (only when launched from Applescript?)
+	- Clarify capabilities in readme

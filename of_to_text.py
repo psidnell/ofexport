@@ -1,6 +1,7 @@
 import os
 import codecs
-from omnifocus import Visitor, build_model, find_database, traverse_list, traverse_contexts
+from treemodel import traverse_list, traverse_contexts, Visitor
+from omnifocus import build_model, find_database
 
 class PrintTextVisitor(Visitor):
     def __init__ (self, out, indent=4):
@@ -9,7 +10,6 @@ class PrintTextVisitor(Visitor):
         self.out = out
     def begin_folder (self, folder):
         print >>self.out, self.spaces() + '* Folder: ' + folder.name
-        print >>self.out, self.spaces () + '  - Note: ' + str(folder.note)
         self.depth+=1
     def end_folder (self, folder):
         self.depth-=1
@@ -37,7 +37,6 @@ class PrintTextVisitor(Visitor):
         print >>self.out, self.spaces () + '  - StartDate: ' + str(task.date_to_start)
         print >>self.out, self.spaces () + '  - Due: ' + str(task.date_due)
         print >>self.out, self.spaces () + '  - Flagged: ' + str(task.flagged)
-        #print >>self.out, self.spaces () + '  - Note: ' + str(task.note)
     def spaces (self):
         return ' ' * self.depth * self.indent
     

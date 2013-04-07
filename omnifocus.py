@@ -1,7 +1,8 @@
+from treemodel import PROJECT, Project, Node, Task, Context, Folder, sort
 import sqlite3
-from datetime import datetime
 from os import environ, path
-
+from datetime import datetime
+from typeof import TypeOf
 '''
 A library for loading a data model from the Omnifocus SQLite database.
 
@@ -62,140 +63,61 @@ CREATE TABLE Perspective (persistentIdentifier text NOT NULL PRIMARY KEY, creati
 
 THIRTY_ONE_YEARS = 60 * 60 * 24 * 365 * 31 + 60 * 60 * 24 * 8
 
-class AttribDesc(object):
-    def __init__(self, name):
-        self._name = name
-    def __get__(self, instance, owner):
-        return instance.attribs[self._name]
-    def __set__(self, instance, value):
-        instance.attribs[self._name] = value
-        
-class TypedDesc(object):
-    def __init__(self,name, exptype, value=None):
-        self.name = name
-        self.expected_type = exptype
-    def __get__(self,obj,cls):
-        if obj is None:
-            return self
-        else:
-            return obj.__dict__[self.name]
-    def __set__(self,obj,value):
-        if not (isinstance(value,self.expected_type) or value == None):
-            raise TypeError("Expected %s got %s" % (self.expected_type, value.__class__.__name__))
-        obj.__dict__[self.name] = value
-    def __delete__(self,obj):
-        raise AttributeError("Can't delete")
+def datetimeFromAttrib (ofattribs, name):
+    val = ofattribs[name]
+    if val == None:
+        return None
+    return datetime.fromtimestamp(THIRTY_ONE_YEARS + val)
 
-class DateAttribDesc (AttribDesc):
-    def __init__( self, name ):
-        AttribDesc.__init__(self, name)
-    def __get__(self,obj,cls):
-        val = AttribDesc.__get__(self, obj, cls)
-        if val == None:
-            return None
-        return datetime.fromtimestamp(THIRTY_ONE_YEARS + val)
-
-class BoolAttribDesc (AttribDesc):
-    def __init__( self, name ):
-        AttribDesc.__init__(self, name)
-    def __get__(self,obj,cls):
-        val = AttribDesc.__get__(self, obj, cls)
-        if val == None:
-            return None
-        return bool(val)
+class OFNodeMixin (object):
+    ofattribs = TypeOf ('ofattribs', dict)
+    def get_sort_key (self):
+        return int(self.ofattribs['rank'])
     
-class IntAttribDesc (AttribDesc):
-    def __init__( self, name ):
-        AttribDesc.__init__(self, name)
-    def __get__(self,obj,cls):
-        val = AttribDesc.__get__(self, obj, cls)
-        if val == None:
-            return None
-        return int(val)
-
-class UnicodeAttribDesc (AttribDesc):
-    def __init__( self, name ):
-        AttribDesc.__init__(self, name)
-    def __get__(self,obj,cls):
-        val = AttribDesc.__get__(self, obj, cls)
-        if val == None:
-            return None
-        return val
-           
-class Node (object):
-    def __init__ (self, attribs):
-        self.attribs = attribs
-        self.parent = None
-        self.children = []
-        self.marked = True
-        self.user_attribs = {}
-    def __getitem__ (self, key):
-        return self.attribs[key]
-    def __contains__ (self, key):
-        return key in self.attribs
-
-class Context(Node):
+class OFContext(OFNodeMixin, Context):
     TABLE='context'
     COLUMNS=['persistentIdentifier', 'name', 'parent', 'childrenCount', 'rank']
-    name = TypedDesc ('name', unicode)
-    rank = IntAttribDesc ('rank')
-    persistent_identifier = AttribDesc ('persistentIdentifier')
-    def __init__(self, attribs):
-        Node.__init__(self,attribs)
-        self.name=self.attribs['name']
-        self.parent = None
-    def __str__ (self):
-        return self.name
+    def __init__(self, ofattribs):
+        Context.__init__(self,
+                         name=ofattribs['name'])
+        self.ofattribs = ofattribs
 
-class Task(Node):
+class OFTask(OFNodeMixin, Task):
     TABLE='task'
     COLUMNS=['persistentIdentifier', 'name', 'dateDue', 'dateCompleted','dateToStart', 'dateDue', 
              'projectInfo', 'context', 'containingProjectInfo', 'childrenCount', 'parent', 'rank',
-             'flagged', 'noteXMLData']
-    name = UnicodeAttribDesc ('name')
-    date_completed = DateAttribDesc ('dateCompleted')
-    date_to_start = DateAttribDesc ('dateToStart')
-    date_due = DateAttribDesc ('dateDue')
-    flagged = BoolAttribDesc ('flagged')
-    context = TypedDesc('context', Context)
-    note = UnicodeAttribDesc ('noteXMLData')
-    rank = IntAttribDesc ('rank')
-    persistent_identifier = AttribDesc ('persistentIdentifier')
-    def __init__(self, attribs):
-        Node.__init__(self,attribs)
-        self.name=self.attribs['name']
-        self.parent = None
-        self.context = None
-    def __str__ (self):
-        return self.name
-
-class Folder(Node):
+             'flagged', 'noteXMLData']    
+    def __init__(self, ofattribs):
+        Task.__init__(self,
+                      name=ofattribs['name'],
+                      date_completed = datetimeFromAttrib (ofattribs,'dateCompleted'),
+                      date_to_start = datetimeFromAttrib (ofattribs,'dateToStart'),
+                      date_due = datetimeFromAttrib (ofattribs,'dateDue'),
+                      flagged = bool (ofattribs['flagged']),
+                      context=None)
+        self.ofattribs = ofattribs
+    
+class OFFolder(OFNodeMixin, Folder):
     TABLE='folder'
     COLUMNS=['persistentIdentifier', 'name', 'childrenCount', 'parent', 'rank', 'noteXMLData']
-    name = TypedDesc ('name', unicode)
-    note = UnicodeAttribDesc ('noteXMLData')
-    rank = IntAttribDesc ('rank')
-    persistent_identifier = AttribDesc ('persistentIdentifier')
-    def __init__(self, attribs):
-        Node.__init__(self,attribs)
-        self.name=self.attribs['name']
-        self.parent = None
-    def __str__ (self):
-        return self.name
+    def __init__(self, ofattribs):
+        Folder.__init__(self,
+                        name=ofattribs['name'])
+        self.ofattribs = ofattribs
         
 class ProjectInfo(Node):
     TABLE='projectinfo'
     COLUMNS=['pk', 'folder']
-    def __init__(self, attribs):
-        Node.__init__(self,attribs)
+    def __init__(self, ofattribs):
+        Node.__init__(self,"ProjectInfo")
+        self.ofattribs = ofattribs
 
-class Project(Task):
-    project_info = TypedDesc ('project_info', ProjectInfo)
-    folder = TypedDesc ('folder', Folder)
+class OFProject(OFNodeMixin, Project):
+    project_info = TypeOf ('project_info', ProjectInfo)
     def __init__(self):
-        self.folder = None
-    def __str__ (self):
-        return self.name
+        # UNUSUAL - don't call super constructor
+        # We convert these from tasks rather than construct them
+        pass
 
 def query (conn, clazz):
     c = conn.cursor()
@@ -218,67 +140,61 @@ def transmute_projects (project_infos, tasks):
     '''
     projects = {}
     for project in tasks.values():        
-        if project['projectInfo'] != None:
-            projects[project['persistentIdentifier']] = project
-            project_info = project_infos[project['projectInfo']]
-            project.project_info = project_info
-            project.__class__ = Project
+        if project.ofattribs['projectInfo'] != None:
+            projects[project.ofattribs['persistentIdentifier']] = project
+            project_info = project_infos[project.ofattribs['projectInfo']]
+            project.__class__ = OFProject
             project.__init__()
             project_info.project = project
+            project.type = PROJECT
+            project.project_info = project_info
     return projects
 
 def wire_projects_and_folders (projects, folders):
-    '''
-    Some tasks are actually projects, convert them
-    '''
     for project in projects.values():
-        if project['projectInfo'] != None:
-            project_info = project.project_info
-            if project_info['folder'] != None:
-                folder = folders[project_info['folder']]
-                project.folder = folder
+        project_info = project.project_info
+        if project.project_info != None:
+            folder_ref = project_info.ofattribs['folder']
+            if folder_ref != None:
+                folder = folders[folder_ref]
                 folder.children.append(project)
+                project.folder = folder
                 project.parent = folder
 
 def wire_task_hierarchy (tasks):
     for task in tasks.values():  
-        if task['parent'] != None:
-            parent = tasks[task['parent']]
+        if task.ofattribs['parent'] != None:
+            parent = tasks[task.ofattribs['parent']]
             parent.children.append(task);
             task.parent = parent
             
 def wire_tasks_to_enclosing_projects (project_infos, tasks):
     for task in tasks.values():  
-        if task['containingProjectInfo'] != None:
-            project_info = project_infos[task['containingProjectInfo']]
+        if task.ofattribs['containingProjectInfo'] != None:
+            project_info = project_infos[task.ofattribs['containingProjectInfo']]
             project = project_info.project
             task.project = project
        
 def wire_tasks_and_contexts (contexts, tasks):
     for task in tasks.values():  
-        if task['context'] != None:
-            context = contexts[task['context']]
+        if task.ofattribs['context'] != None:
+            context = contexts[task.ofattribs['context']]
             task.context = context
             context.children.append(task)
             
 def wire_folder_hierarchy (folders):
     for folder in folders.values():
-        if folder['parent'] != None:
-            parent = folders[folder['parent']]
+        if folder.ofattribs['parent'] != None:
+            parent = folders[folder.ofattribs['parent']]
             parent.children.append (folder)
             folder.parent = parent
                 
 def wire_context_hierarchy (contexts):
     for context in contexts.values():
-        if context['parent'] != None:
-            parent = contexts[context['parent']]
+        if context.ofattribs['parent'] != None:
+            parent = contexts[context.ofattribs['parent']]
             parent.children.append(context)
             context.parent = parent
-        
-def sort (items):
-    for child in items:
-        child.children.sort(key=lambda item:item['rank'])
-        sort(child.children)
 
 def only_roots (items):
     roots = []
@@ -289,10 +205,10 @@ def only_roots (items):
 
 def build_model (db):
     conn = sqlite3.connect(db)
-    contexts = query (conn, clazz=Context)
+    contexts = query (conn, clazz=OFContext)
     project_infos = query (conn, clazz=ProjectInfo)
-    folders = query (conn, clazz=Folder)
-    tasks = query (conn, clazz=Task)
+    folders = query (conn, clazz=OFFolder)
+    tasks = query (conn, clazz=OFTask)
     
     projects = transmute_projects (project_infos, tasks)
     wire_projects_and_folders(projects, folders)
@@ -314,65 +230,6 @@ def build_model (db):
     sort(root_contexts)
     
     return roots_projects_and_folders, root_contexts
-
-class Visitor(object):
-    def begin_folder (self, folder):
-        pass
-    def end_folder (self, folder):
-        pass
-    def begin_project (self, project):
-        pass
-    def end_project (self, project):
-        pass
-    def begin_task (self, task):
-        pass
-    def end_task (self, task):
-        pass
-    def begin_context (self, context):
-        pass
-    def end_context (self, context):
-        pass
-
-def traverse_list (visitor, lst, only_marked=True):
-    for item in lst:
-        if item.__class__ == Folder:
-            traverse_folder (visitor, item, only_marked = only_marked)
-        elif item.__class__ == Context:
-            traverse_context (visitor, item, only_marked = only_marked)
-        elif item.__class__ == Project:
-            traverse_project (visitor, item, only_marked = only_marked)
-        else:
-            traverse_task (visitor, item, only_marked = only_marked)
-            
-def traverse_folders (visitor, folders, only_marked=True):
-    traverse_list (visitor, folders, only_marked = only_marked)
-
-def traverse_contexts (visitor, contexts, only_marked=True):
-    traverse_list (visitor, contexts, only_marked = only_marked)
-
-def traverse_context (visitor, context, only_marked=True):
-    if context.marked or not only_marked:
-        visitor.begin_context (context)
-        traverse_list (visitor, context.children, only_marked = only_marked)
-        visitor.end_context (context)
-
-def traverse_task (visitor, task, only_marked=True):
-    if task.marked or not only_marked:
-        visitor.begin_task (task)
-        traverse_list (visitor, task.children, only_marked = only_marked)
-        visitor.end_task (task)
-    
-def traverse_project (visitor, project,only_marked=True):
-    if project.marked or not only_marked:
-        visitor.begin_project (project)
-        traverse_list (visitor, project.children, only_marked = only_marked)
-        visitor.end_project (project)
-    
-def traverse_folder (visitor, folder, only_marked=True):
-    if folder.marked or not only_marked:
-        visitor.begin_folder(folder)
-        traverse_list (visitor, folder.children, only_marked = only_marked)
-        visitor.end_folder (folder)
         
 # The Mac Appstore virsion and the direct sale version have DBs in different locations
 DATABASES = [environ['HOME'] + '/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2',

@@ -1,4 +1,5 @@
-from omnifocus import traverse_list, traverse_contexts, build_model, Visitor, find_database
+from treemodel import traverse_list, traverse_contexts, Visitor
+from omnifocus import build_model, find_database
 import os
 import codecs
 
@@ -11,6 +12,7 @@ class PrintTaskpaperVisitor(Visitor):
         self.depth = depth
         self.out = out
     def begin_folder (self, folder):
+        print 'seeing project ' + folder.name + ' ' + str(folder.marked)
         print >>self.out, self.tabs() + folder.name + ':'
         self.depth+=1
     def end_folder (self, folder):
