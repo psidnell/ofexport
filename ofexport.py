@@ -6,6 +6,7 @@ from treemodel import traverse_list
 from omnifocus import build_model, find_database
 from datetime import date
 from of_to_tp import PrintTaskpaperVisitor
+from of_to_text import PrintTextVisitor
 from of_to_md import PrintMarkdownVisitor
 from of_to_opml import PrintOpmlVisitor
 from of_to_html import PrintHtmlVisitor
@@ -180,14 +181,19 @@ if __name__ == "__main__":
     file_name_base = os.environ['HOME']+'/Desktop/'
     date_str = today.strftime (time_fmt)
     
+    if fmt == 'txt' or fmt == 'text':
+        out=codecs.open(file_name, 'w', 'utf-8')
+        
+        print_structure (PrintTextVisitor (out), root_projects_and_folders, root_contexts, project_mode)
+        
     # MARKDOWN
-    if fmt == 'md':
+    elif fmt == 'md' or fmt == 'markdown':
         out=codecs.open(file_name, 'w', 'utf-8')
         
         print_structure (PrintMarkdownVisitor (out), root_projects_and_folders, root_contexts, project_mode)
         
     # FOLDING TEXT
-    elif fmt == 'ft':
+    elif fmt == 'ft' or fmt == 'foldingtext':
         out=codecs.open(file_name, 'w', 'utf-8')
         
         print_structure (PrintMarkdownVisitor (out), root_projects_and_folders, root_contexts, project_mode)
@@ -214,7 +220,7 @@ if __name__ == "__main__":
         print >>out, '</opml>'
         
     # HTML
-    elif fmt == 'html':
+    elif fmt == 'html' or fmt == 'htm':
         out=codecs.open(file_name, 'w', 'utf-8')
         print >>out, '<html>'
         print >>out, '  <head>'
