@@ -1,7 +1,9 @@
-# ofexport command:
+# Ofexport Command: #
+
+
 ## Overview:
 
-ofexport is a command line utility that reads the OmniFocus database. It's a work in progress but currently it's capabilities include:-
+**ofexport** is a command line utility that reads the OmniFocus database. It's a work in progress but currently it's capabilities include:-
 
 Exports it to a number of text based file formats:
 
@@ -65,21 +67,45 @@ In this case, the --tci filter (task completion include) includes only those tas
 
 The core filters are:-
 
+**Projects**
+
         --pi regexp: include projects matching regexp
         --pe regexp: exclude projects matching regexp
-        --fi regexp: include folders matching regexp
-        --fe regexp: exclude folders matching regexp
-        --ti regexp: include tasks matching regexp
-        --te regexp: exclude tasks matching regexp
-        --ci regexp: include contexts matching regexp
-        --ce regexp: exclude contexts matching regexp
+        --psi regexp: include projects with start matching regexp
+        --pse regexp: exclude projects with start matching regexp
         --pci regexp: include projects with completion matching regexp
         --pce regexp: exclude projects with completion matching regexp
+        --pdi regexp: include projects with due matching regexp
+        --pde regexp: exclude projects with due matching regexp
+        --pfi: include flagged projects
+        --pfe: exclude flagged projects
+
+**Tasks**
+
+        --ti regexp: include tasks matching regexp
+        --te regexp: exclude tasks matching regexp
+        --tsi regexp: include tasks with start matching regexp
+        --tse regexp: exclude tasks with start matching regexp
+        --tdi regexp: include tasks with due matching regexp
+        --tde regexp: exclude tasks with due matching regexp
         --tci regexp: include tasks with completion matching regexp
         --tce regexp: exclude tasks with completion matching regexp
         --tfi: include flagged tasks
         --tfe: exclude flagged tasks
         --tsc: sort tasks by completion
+
+**Folders**
+
+        --fi regexp: include folders matching regexp
+        --fe regexp: exclude folders matching regexp
+
+**Contexts**
+
+        --ci regexp: include contexts matching regexp
+        --ce regexp: exclude contexts matching regexp
+
+**Misc**
+
         -F: flatten project/task structure
 
 The important thing to note about filters is that you can specify as many as you like and they are executed in the order you specify.
@@ -95,6 +121,31 @@ Most of the filters come in two flavours, include and exclude with one being the
 ### Filtering on Dates:
 
 The core date format is YYYY-MM-DD (sorry America) largely because Taskpaper requires this format so that sorting works (I may provide configuration in the future).
+
+A week is considered to start on Monday.
+
+A day of the week can be expressed as:
+
+- "Monday" - the monday that occurs within this week.
+- "th" - Days of the week can be abbreviated down to 2 characters.
+- "yesterday"
+- "today"
+- "tomorrow"
+- "last tuesday" - the Tuesday that occurs in the previous week.
+- "next sat" - the Saturday that occurs in the next week.
+
+A specific date can be expressed as:
+
+- "2013-04-09"
+
+A range of dates can be expressed as:
+
+- "to 2013-05-10" - everything on or before the date.
+- "from yesterday" - everything on or after yesterday.
+- "yesterday to 2014-10-01" everything between the two days
+- "this week" - everything from this Monday to this Sunday.
+- "next week"
+- "last week"
 
 The following are examples of dates that can be given as arguments to the date based filters:-
 

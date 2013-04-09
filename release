@@ -1,0 +1,4 @@
+#!/bin/bash
+
+ofexport -o TODO.md --open --pi 'OmniPythonLib Todo' --tci '' -F
+markdown DOCUMENTATION.md > DOCUMENTATION.html

@@ -10,7 +10,7 @@ from of_to_text import PrintTextVisitor
 from of_to_md import PrintMarkdownVisitor
 from of_to_opml import PrintOpmlVisitor
 from of_to_html import PrintHtmlVisitor
-from visitors import FolderNameFilterVisitor, ProjectNameFilterVisitor, ContextNameFilterVisitor, TaskNameFilterVisitor, TaskCompletionFilterVisitor, ProjectCompletionFilterVisitor, TaskCompletionSortingVisitor, TaskFlaggedFilterVisitor, PruningFilterVisitor, FlatteningVisitor
+from visitors import FolderNameFilterVisitor, ProjectNameFilterVisitor, ProjectFlaggedFilterVisitor, ProjectDueFilterVisitor, ProjectStartFilterVisitor, ContextNameFilterVisitor, TaskDueFilterVisitor, TaskNameFilterVisitor, TaskStartFilterVisitor, TaskCompletionFilterVisitor, ProjectCompletionFilterVisitor, TaskCompletionSortingVisitor, TaskFlaggedFilterVisitor, PruningFilterVisitor, FlatteningVisitor
 
 VERSION = "1.0.0 (2013-04-09)" 
      
@@ -42,21 +42,45 @@ def print_help ():
     print '  --open: open the output file with the registered application (if one is installed)'
     print
     print 'filters:'
+    
     print '  --pi regexp: include projects matching regexp'
     print '  --pe regexp: exclude projects matching regexp'
-    print '  --fi regexp: include folders matching regexp'
-    print '  --fe regexp: exclude folders matching regexp'
-    print '  --ti regexp: include tasks matching regexp'
-    print '  --te regexp: exclude tasks matching regexp'
-    print '  --ci regexp: include contexts matching regexp'
-    print '  --ce regexp: exclude contexts matching regexp'
+    
     print '  --pci regexp: include projects with completion matching regexp'
     print '  --pce regexp: exclude projects with completion matching regexp'
+    
+    print '  --pdi regexp: include projects with due matching regexp'
+    print '  --pde regexp: exclude projects with due matching regexp'
+    
+    print '  --psi regexp: include projects with start matching regexp'
+    print '  --pse regexp: exclude projects with start matching regexp'
+    
+    print '  --pfi: include flagged projects'
+    print '  --pfe: exclude flagged projects'
+    
+    print '  --fi regexp: include folders matching regexp'
+    print '  --fe regexp: exclude folders matching regexp'
+    
+    print '  --ti regexp: include tasks matching regexp'
+    print '  --te regexp: exclude tasks matching regexp'
+    
+    print '  --ci regexp: include contexts matching regexp'
+    print '  --ce regexp: exclude contexts matching regexp'
+     
     print '  --tci regexp: include tasks with completion matching regexp'
     print '  --tce regexp: exclude tasks with completion matching regexp'
+    
+    print '  --tsi regexp: include tasks with start matching regexp'
+    print '  --tse regexp: exclude tasks with start matching regexp'
+    
+    print '  --tdi regexp: include tasks with due matching regexp'
+    print '  --tde regexp: exclude tasks with due matching regexp'
+    
     print '  --tfi: include flagged tasks'
     print '  --tfe: exclude flagged tasks'
+    
     print '  --tsc: sort tasks by completion'
+    
     print '  -F: flatten project/task structure'
     print '  --prune: prune empty projects or folders'
 
@@ -70,11 +94,16 @@ if __name__ == "__main__":
         
     opts, args = getopt.optlist, args = getopt.getopt(sys.argv[1:], 'hFC?o:',
                                                       ['fi=','fe=',
-                                                       'pi=','pe=',
                                                        'ci=','ce=',
+                                                       'pi=','pe=',
                                                        'pci=','pce=',
+                                                       'psi=','pse=',
+                                                       'pdi=','pde=',
+                                                       'pfi','pfe',
                                                        'ti=','te=',
                                                        'tci=','tce=',
+                                                       'tsi=','tse=',
+                                                       'tdi=','tde=',
                                                        'tfi','tfe',
                                                        'tsc',
                                                        'help',
@@ -110,24 +139,56 @@ if __name__ == "__main__":
         items = root_contexts
         
     for opt, arg in opts:
+        
+        # FOLDER
         if '--fi' == opt:
             print 'include folders', arg
             traverse_list (FolderNameFilterVisitor (arg, include=True), items)
         elif '--fe' == opt:
             print 'exclude folders', arg
             traverse_list (FolderNameFilterVisitor (arg, include=False), items)
+        
+        # PROJECT
         elif '--pi' == opt:
-            print 'include projects', arg
+            print 'include project', arg
             traverse_list (ProjectNameFilterVisitor (arg, include=True), items)
         elif '--pe' == opt:
-            print 'filter exclude projects', arg
+            print 'exclude project', arg
             traverse_list (ProjectNameFilterVisitor (arg, include=False), items)
+        elif '--psi' == opt:
+            print 'include project start', arg
+            traverse_list (ProjectStartFilterVisitor (arg, include=True), items)
+        elif '--pse' == opt:
+            print 'exclude project start', arg
+            traverse_list (ProjectStartFilterVisitor (arg, include=False), items)
+        elif '--pdi' == opt:
+            print 'include project due', arg
+            traverse_list (ProjectDueFilterVisitor (arg, include=True), items)
+        elif '--psc' == opt:
+            print 'exclude project due', arg
+            traverse_list (ProjectDueFilterVisitor (arg, include=False), items)
+        elif '--pci' == opt:
+            print 'include project completion', arg
+            traverse_list (ProjectCompletionFilterVisitor (arg, include=True), items)
+        elif '--pce' == opt:
+            print 'exclude project completion', arg
+            traverse_list (ProjectCompletionFilterVisitor (arg, include=False), items)
+        elif '--pfi' == opt:
+            print 'include project completion'
+            traverse_list (ProjectFlaggedFilterVisitor (arg, include=True), items)
+        elif '--pfe' == opt:
+            print 'exclude project completion'
+            traverse_list (ProjectFlaggedFilterVisitor (arg, include=False), items)
+            
+        # CONTEXT
         elif '--ci' == opt:
-            print 'contexts', arg
+            print 'include contexts', arg
             traverse_list (ContextNameFilterVisitor (arg, include=True), items)
         elif '--ce' == opt:
-            print 'contexts', arg
+            print 'exclude contexts', arg
             traverse_list (ContextNameFilterVisitor (arg, include=False), items)
+        
+        # TASK
         elif '--ti' == opt:
             print 'include tasks', arg
             traverse_list (TaskNameFilterVisitor (arg, include=True), items)
@@ -138,14 +199,20 @@ if __name__ == "__main__":
             print 'include task completion', arg
             traverse_list (TaskCompletionFilterVisitor (arg, include=True), items)
         elif '--tce' == opt:
-            print 'include task completion', arg
+            print 'exclude task completion', arg
             traverse_list (TaskCompletionFilterVisitor (arg, include=False), items)
-        elif '--pci' == opt:
-            print 'include project completion', arg
-            traverse_list (ProjectCompletionFilterVisitor (arg, include=True), items)
-        elif '--pce' == opt:
-            print 'exclude project completion', arg
-            traverse_list (ProjectCompletionFilterVisitor (arg, include=False), items)
+        elif '--tsi' == opt:
+            print 'include task start', arg
+            traverse_list (TaskStartFilterVisitor (arg, include=True), items)
+        elif '--tse' == opt:
+            print 'exclude task start', arg
+            traverse_list (TaskStartFilterVisitor (arg, include=False), items)
+        elif '--tdi' == opt:
+            print 'include task due', arg
+            traverse_list (TaskDueFilterVisitor (arg, include=True), items)
+        elif '--tde' == opt:
+            print 'exclude task due', arg
+            traverse_list (TaskDueFilterVisitor (arg, include=False), items)
         elif '--tfi' == opt:
             print 'include flagged tasks'
             traverse_list (TaskFlaggedFilterVisitor (include=True), items)
@@ -155,6 +222,8 @@ if __name__ == "__main__":
         elif '--tsc' == opt:
             print 'sort by task completion'
             traverse_list (TaskCompletionSortingVisitor (), items)
+        
+        # MISC
         elif '--prune' == opt:
             print 'pruning empty folders, projects, contexts'
             traverse_list (PruningFilterVisitor (), items)

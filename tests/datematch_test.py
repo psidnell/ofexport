@@ -1,9 +1,57 @@
 import unittest
-from datematch import format_date_for_matching, match_date
+from datematch import format_date_for_matching, match_date, date_from_string
 from datetime import datetime
 
 class Test_datematch(unittest.TestCase):
     
+    def test_date_from_string (self):
+        tue = datetime.strptime('Apr 9 2013  11:33PM', '%b %d %Y %I:%M%p')
+        
+        self.assertEquals("2013-04-08", date_from_string (tue,"monday").strftime ("%Y-%m-%d"))
+        self.assertEquals("2013-04-09", date_from_string (tue,"tues").strftime ("%Y-%m-%d"))
+        self.assertEquals("2013-04-10", date_from_string (tue,"wed").strftime ("%Y-%m-%d"))
+        self.assertEquals("2013-04-11", date_from_string (tue,"th").strftime ("%Y-%m-%d"))
+        self.assertEquals("2013-04-12", date_from_string (tue,"fr").strftime ("%Y-%m-%d"))
+        self.assertEquals("2013-04-13", date_from_string (tue,"sa").strftime ("%Y-%m-%d"))
+        self.assertEquals("2013-04-14", date_from_string (tue,"su").strftime ("%Y-%m-%d"))
+        
+        self.assertEquals("2013-04-09", date_from_string (tue,"today").strftime ("%Y-%m-%d"))
+        self.assertEquals("2013-04-08", date_from_string (tue,"yesterday").strftime ("%Y-%m-%d"))
+        self.assertEquals("2013-04-10", date_from_string (tue,"tomorrow").strftime ("%Y-%m-%d"))
+
+        self.assertEquals("2013-04-15", date_from_string (tue,"next monday").strftime ("%Y-%m-%d"))
+        self.assertEquals("2013-04-16", date_from_string (tue,"next tuesday").strftime ("%Y-%m-%d"))
+        self.assertEquals("2013-04-17", date_from_string (tue,"next wednesday").strftime ("%Y-%m-%d"))
+        self.assertEquals("2013-04-18", date_from_string (tue,"next thurs").strftime ("%Y-%m-%d"))
+        self.assertEquals("2013-04-19", date_from_string (tue,"next fr").strftime ("%Y-%m-%d"))
+        self.assertEquals("2013-04-20", date_from_string (tue,"next sa").strftime ("%Y-%m-%d"))
+        self.assertEquals("2013-04-21", date_from_string (tue,"next su").strftime ("%Y-%m-%d"))
+        try:
+            self.assertEquals("2013-04-14", date_from_string (tue,"next monkey").strftime ("%Y-%m-%d"))
+            self.fail('Exception expected')
+        except Exception as e:
+            self.assertEquals ('I don\'t think "monkey" is a real day', e.message)
+        self.assertEquals("2013-04-01", date_from_string (tue,"last mo").strftime ("%Y-%m-%d"))
+        self.assertEquals("2013-04-02", date_from_string (tue,"last tu").strftime ("%Y-%m-%d"))
+        self.assertEquals("2013-04-03", date_from_string (tue,"last we").strftime ("%Y-%m-%d"))
+        self.assertEquals("2013-04-04", date_from_string (tue,"last th").strftime ("%Y-%m-%d"))
+        self.assertEquals("2013-04-05", date_from_string (tue,"last fr").strftime ("%Y-%m-%d"))
+        self.assertEquals("2013-04-06", date_from_string (tue,"last sa").strftime ("%Y-%m-%d"))
+        self.assertEquals("2013-04-07", date_from_string (tue,"last su").strftime ("%Y-%m-%d"))
+        
+        try:
+            self.assertEquals("2013-04-14", date_from_string (tue,"last monkey").strftime ("%Y-%m-%d"))
+            self.fail('Exception expected')
+        except Exception as e:
+            self.assertEquals ('I don\'t think "monkey" is a real day', e.message)
+        self.assertEquals("2013-04-08", date_from_string (tue,"mo").strftime ("%Y-%m-%d"))
+        self.assertEquals("2013-04-09", date_from_string (tue,"tu").strftime ("%Y-%m-%d"))
+        self.assertEquals("2013-04-10", date_from_string (tue,"we").strftime ("%Y-%m-%d"))
+        self.assertEquals("2013-04-11", date_from_string (tue,"th").strftime ("%Y-%m-%d"))
+        self.assertEquals("2013-04-12", date_from_string (tue,"fri").strftime ("%Y-%m-%d"))
+        self.assertEquals("2013-04-13", date_from_string (tue,"sat").strftime ("%Y-%m-%d"))
+        self.assertEquals("2013-04-14", date_from_string (tue,"sun").strftime ("%Y-%m-%d"))
+            
     def test_date_formatting (self):
         completion = datetime.strptime('Jun 1 2005  1:33AM', '%b %d %Y %I:%M%p')
         now = datetime.strptime('Jun 5 2005  11:33PM', '%b %d %Y %I:%M%p')
@@ -49,14 +97,14 @@ class Test_datematch(unittest.TestCase):
     def test_match_date_day (self):
         
         # match
-        completion = datetime.strptime('Apr 8 2013  1:33AM', '%b %d %Y %I:%M%p')
-        now = datetime.strptime('Jun 2 2005  11:33PM', '%b %d %Y %I:%M%p')
-        self.assertTrue(match_date (now, completion, "Monday"))
+        sun = datetime.strptime('Apr 7 2013  1:33AM', '%b %d %Y %I:%M%p')
+        now_mon = datetime.strptime('Apr 8 2013  1:33AM', '%b %d %Y %I:%M%p')
+        self.assertTrue(match_date (now_mon, sun, "Last Sunday"))
         
         # no match
-        completion = datetime.strptime('Apr 8 2013  1:33AM', '%b %d %Y %I:%M%p')
-        now = datetime.strptime('Jun 2 2005  11:33PM', '%b %d %Y %I:%M%p')
-        self.assertFalse(match_date (now, completion, "Tuesday"))
+        sat = datetime.strptime('Apr 6 2013  1:33AM', '%b %d %Y %I:%M%p')
+        now_mon = datetime.strptime('Apr 8 2013  1:33AM', '%b %d %Y %I:%M%p')
+        self.assertFalse(match_date (now_mon, sat, "Last Sun"))
         
     def test_match_date_today (self):
         
@@ -109,7 +157,6 @@ class Test_datematch(unittest.TestCase):
         now = datetime.strptime('Jun 2 2005  11:33PM', '%b %d %Y %I:%M%p')
         self.assertTrue(match_date (now, completion, "2005-06-01 to 2005-06-10"))
 
-
     def test_match_date_from_date (self):
         
         # before
@@ -124,16 +171,28 @@ class Test_datematch(unittest.TestCase):
         completion = datetime.strptime('Jun 1 2005  1:33AM', '%b %d %Y %I:%M%p')
         self.assertTrue(match_date (None, completion, "from 2005-06-01"))
         
+    def test_match_date_to_date (self):
+        
+        # before
+        completion = datetime.strptime('Jun 1 2005  1:33AM', '%b %d %Y %I:%M%p')
+        self.assertTrue(match_date (None, completion, "to 2005-06-02"))
+        
+        # after
+        completion = datetime.strptime('Jun 3 2005  1:33AM', '%b %d %Y %I:%M%p')
+        self.assertFalse(match_date (None, completion, "to 2005-06-02"))
+        
+        # on
+        completion = datetime.strptime('Jun 1 2005  1:33AM', '%b %d %Y %I:%M%p')
+        self.assertTrue(match_date (None, completion, "from 2005-06-01"))
+        
     def test_match_date_from_day (self):
         mon = datetime.strptime('Apr 8 2013  1:33AM', '%b %d %Y %I:%M%p')
         tue = datetime.strptime('Apr 9 2013  1:33AM', '%b %d %Y %I:%M%p')
         wed = datetime.strptime('Apr 10 2013  1:33AM', '%b %d %Y %I:%M%p')
         
         # before
-        completion = mon
-        now = wed
-        self.assertFalse(match_date (now, completion, "from Tuesday"))
-        self.assertFalse(match_date (now, completion, "from Tue"))
+        now_wed = wed
+        self.assertFalse(match_date (now_wed, mon, "from tuesday"))
         
         # after
         completion = tue

@@ -11,6 +11,12 @@ def match_name (item, regexp):
 def match_completed (item, regexp):
     return match_date (datetime.now(), item.date_completed, regexp)
 
+def match_start (item, regexp):
+    return match_date (datetime.now(), item.date_to_start, regexp)
+
+def match_due (item, regexp):
+    return match_date (datetime.now(), item.date_due, regexp)
+
 def match_flagged (item, ignore):
         return item.flagged
 
@@ -102,10 +108,30 @@ class TaskNameFilterVisitor(TaskFilterVisitor):
 class ProjectCompletionFilterVisitor(ProjectFilterVisitor):
     def __init__(self, filtr, include=True):
         ProjectFilterVisitor.__init__(self, filtr, match_completed, include)
+        
+class ProjectStartFilterVisitor(ProjectFilterVisitor):
+    def __init__(self, filtr, include=True):
+        ProjectFilterVisitor.__init__(self, filtr, match_start, include)
+        
+class ProjectDueFilterVisitor(ProjectFilterVisitor):
+    def __init__(self, filtr, include=True):
+        ProjectFilterVisitor.__init__(self, filtr, match_due, include)
+        
+class ProjectFlaggedFilterVisitor(ProjectFilterVisitor):
+    def __init__(self, include=True):
+        ProjectFilterVisitor.__init__(self, None, match_flagged, include)
 
 class TaskCompletionFilterVisitor(TaskFilterVisitor):
     def __init__(self, filtr, include=True):
         TaskFilterVisitor.__init__(self, filtr, match_completed, include)
+
+class TaskDueFilterVisitor(TaskFilterVisitor):
+    def __init__(self, filtr, include=True):
+        TaskFilterVisitor.__init__(self, filtr, match_due, include)
+        
+class TaskStartFilterVisitor(TaskFilterVisitor):
+    def __init__(self, filtr, include=True):
+        TaskFilterVisitor.__init__(self, filtr, match_start, include)
         
 class TaskFlaggedFilterVisitor(TaskFilterVisitor):
     def __init__(self, include=True):

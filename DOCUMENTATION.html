@@ -1,8 +1,8 @@
-<h1>ofexport command:</h1>
+<h1>Ofexport Command:</h1>
 
 <h2>Overview:</h2>
 
-<p>ofexport is a command line utility that reads the OmniFocus database. It's a work in progress but currently it's capabilities include:-</p>
+<p><strong>ofexport</strong> is a command line utility that reads the OmniFocus database. It's a work in progress but currently it's capabilities include:-</p>
 
 <p>Exports it to a number of text based file formats:</p>
 
@@ -78,22 +78,50 @@
 
 <p>The core filters are:-</p>
 
+<p><strong>Projects</strong></p>
+
 <pre><code>    --pi regexp: include projects matching regexp
     --pe regexp: exclude projects matching regexp
-    --fi regexp: include folders matching regexp
-    --fe regexp: exclude folders matching regexp
-    --ti regexp: include tasks matching regexp
-    --te regexp: exclude tasks matching regexp
-    --ci regexp: include contexts matching regexp
-    --ce regexp: exclude contexts matching regexp
+    --psi regexp: include projects with start matching regexp
+    --pse regexp: exclude projects with start matching regexp
     --pci regexp: include projects with completion matching regexp
     --pce regexp: exclude projects with completion matching regexp
+    --pdi regexp: include projects with due matching regexp
+    --pde regexp: exclude projects with due matching regexp
+    --pfi: include flagged projects
+    --pfe: exclude flagged projects
+</code></pre>
+
+<p><strong>Tasks</strong></p>
+
+<pre><code>    --ti regexp: include tasks matching regexp
+    --te regexp: exclude tasks matching regexp
+    --tsi regexp: include tasks with start matching regexp
+    --tse regexp: exclude tasks with start matching regexp
+    --tdi regexp: include tasks with due matching regexp
+    --tde regexp: exclude tasks with due matching regexp
     --tci regexp: include tasks with completion matching regexp
     --tce regexp: exclude tasks with completion matching regexp
     --tfi: include flagged tasks
     --tfe: exclude flagged tasks
     --tsc: sort tasks by completion
-    -F: flatten project/task structure
+</code></pre>
+
+<p><strong>Folders</strong></p>
+
+<pre><code>    --fi regexp: include folders matching regexp
+    --fe regexp: exclude folders matching regexp
+</code></pre>
+
+<p><strong>Contexts</strong></p>
+
+<pre><code>    --ci regexp: include contexts matching regexp
+    --ce regexp: exclude contexts matching regexp
+</code></pre>
+
+<p><strong>Misc</strong></p>
+
+<pre><code>    -F: flatten project/task structure
 </code></pre>
 
 <p>The important thing to note about filters is that you can specify as many as you like and they are executed in the order you specify.</p>
@@ -109,6 +137,37 @@
 <h3>Filtering on Dates:</h3>
 
 <p>The core date format is YYYY-MM-DD (sorry America) largely because Taskpaper requires this format so that sorting works (I may provide configuration in the future).</p>
+
+<p>A week is considered to start on Monday.</p>
+
+<p>A day of the week can be expressed as:</p>
+
+<ul>
+<li>"Monday" - the monday that occurs within this week.</li>
+<li>"th" - Days of the week can be abbreviated down to 2 characters.</li>
+<li>"yesterday"</li>
+<li>"today"</li>
+<li>"tomorrow"</li>
+<li>"last tuesday" - the Tuesday that occurs in the previous week.</li>
+<li>"next sat" - the Saturday that occurs in the next week.</li>
+</ul>
+
+<p>A specific date can be expressed as:</p>
+
+<ul>
+<li>"2013-04-09"</li>
+</ul>
+
+<p>A range of dates can be expressed as:</p>
+
+<ul>
+<li>"to 2013-05-10" - everything on or before the date.</li>
+<li>"from yesterday" - everything on or after yesterday.</li>
+<li>"yesterday to 2014-10-01" everything between the two days</li>
+<li>"this week" - everything from this Monday to this Sunday.</li>
+<li>"next week"</li>
+<li>"last week"</li>
+</ul>
 
 <p>The following are examples of dates that can be given as arguments to the date based filters:-</p>
 
