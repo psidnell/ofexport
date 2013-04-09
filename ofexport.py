@@ -10,8 +10,10 @@ from of_to_text import PrintTextVisitor
 from of_to_md import PrintMarkdownVisitor
 from of_to_opml import PrintOpmlVisitor
 from of_to_html import PrintHtmlVisitor
-from visitors import FolderNameFilterVisitor, ProjectNameFilterVisitor, ContextNameFilterVisitor, TaskNameFilterVisitor, TaskCompletionFilterVisitor, ProjectCompletionFilterVisitor, TaskCompletionSortingVisitor, PruningFilterVisitor, FlatteningVisitor
-           
+from visitors import FolderNameFilterVisitor, ProjectNameFilterVisitor, ContextNameFilterVisitor, TaskNameFilterVisitor, TaskCompletionFilterVisitor, ProjectCompletionFilterVisitor, TaskCompletionSortingVisitor, TaskFlaggedFilterVisitor, PruningFilterVisitor, FlatteningVisitor
+
+VERSION = "1.0.0 (2013-04-09)" 
+     
 def print_structure (visitor, root_projects_and_folders, root_contexts, project_mode):
     if project_mode:
         traverse_list (visitor, root_projects_and_folders)
@@ -26,12 +28,20 @@ class CustomPrintTaskpaperVisitor (PrintTaskpaperVisitor):
             return ""
         
 def print_help ():
-    print 'usage:'
+    print 'Version ' + VERSION
+    print 
+    print 'Usage:'
+    print
     print 'ofexport [options...] -o file_name'
-    print 'file_name: the output file name, must end in .tp, .taskpaper, .md, .html, or .opml'
+    print
     print
     print 'options:'
     print '  -h,-?,--help'
+    print '  -C: context mode (as opposed to project mode)'
+    print '  -o file_name: the output file name, must end in a recognised suffix - see documentation'
+    print '  --open: open the output file with the registered application (if one is installed)'
+    print
+    print 'filters:'
     print '  --pi regexp: include projects matching regexp'
     print '  --pe regexp: exclude projects matching regexp'
     print '  --fi regexp: include folders matching regexp'
@@ -44,43 +54,11 @@ def print_help ():
     print '  --pce regexp: exclude projects with completion matching regexp'
     print '  --tci regexp: include tasks with completion matching regexp'
     print '  --tce regexp: exclude tasks with completion matching regexp'
+    print '  --tfi: include flagged tasks'
+    print '  --tfe: exclude flagged tasks'
     print '  --tsc: sort tasks by completion'
     print '  -F: flatten project/task structure'
-    print '  -C: context mode (as opposed to project mode)'
     print '  --prune: prune empty projects or folders'
-    print '  --open: open the output file with the registered application (if one is installed)'
-    print
-    print 'examples:'
-    print '  1. Create a taskpaper file containing everything in any folder called "Home" folder'
-    print "    python ofexport.py --open -o ~/Desktop/OF.tp --fi '^Home$'"
-    print '  2. Create a taskpaper file containing everything in any folder called "Home" or "Miscellaneous" folder'
-    print "    python ofexport.py --open -o ~/Desktop/OF.tp --fi '^Home$|^Miscellaneous$'"
-    print '  3. Create an opml file excluding everything in any folder called "Work"'
-    print "    python ofexport.py --open -o ~/Desktop/OF.opml --fe '^Work$'"
-    print '  4. Create a taskpaper file including everything in any folder called "Home", excluding completed items and excluding empty projects/folders'
-    print "    python ofexport.py --open -o ~/Desktop/x.tp --fi '^Home$' --tce '.' --prune"
-    print '  5. Create a taskpaper file including everything in any folder called "Home", including completed items from the last week'
-    print "    python ofexport.py --open -o ~/Desktop/x.tp --fi '^Home$' --tci '-[0-6]d' --prune"
-    print '  6. Create a taskpaper file including everything in any folder called "Home", including completed items from a specific day'
-    print "    python ofexport.py --open -o ~/Desktop/x.tp --fi '^Home$' --tci '2013-02-10' --prune"
-    print '  7. Create a taskpaper file including everything in any folder called "Home", including completed items from a February'
-    print "    python ofexport.py --open -o ~/Desktop/x.tp --fi '^Home$' --tci 'Feb' --prune"
-    print
-    print "  The TODO.tp file was created with:"
-    print "    python ofexport.py --open -o TODO.tp --pi OmniPythonLib --tce '.' --prune -F"
-    print
-    print "filtering:"
-    print "  Filtering is based on regular expressions that match an items text. When an item is matched"
-    print "  Then all it's direct ancestors to the root and all it's descendants are selected. If a single"
-    print "  filter doesn't do quite what you want it's possible to provide several which are executed in order."
-    print "  By using several inclusion/exclusion filters and fancy regular expressions it's possible to be very"
-    print "  specific about what gets included in the final report." 
-    print
-    print "completion dates:"
-    print "  Completion date matches are matched against a string of the form:"
-    print "  '%Y-%m-%d %A %B' e.g. '2013-02-16 Saturday February -44d'"
-    print "  This allows matches on day, date, how many days ago completion occurred or even days of the week."
-    
 
 if __name__ == "__main__":
     
@@ -97,6 +75,7 @@ if __name__ == "__main__":
                                                        'pci=','pce=',
                                                        'ti=','te=',
                                                        'tci=','tce=',
+                                                       'tfi','tfe',
                                                        'tsc',
                                                        'help',
                                                        'open',
@@ -162,11 +141,17 @@ if __name__ == "__main__":
             print 'include task completion', arg
             traverse_list (TaskCompletionFilterVisitor (arg, include=False), items)
         elif '--pci' == opt:
-            print 'project completion', arg
+            print 'include project completion', arg
             traverse_list (ProjectCompletionFilterVisitor (arg, include=True), items)
         elif '--pce' == opt:
-            print 'project completion', arg
+            print 'exclude project completion', arg
             traverse_list (ProjectCompletionFilterVisitor (arg, include=False), items)
+        elif '--tfi' == opt:
+            print 'include flagged tasks'
+            traverse_list (TaskFlaggedFilterVisitor (include=True), items)
+        elif '--tfe' == opt:
+            print 'exclude flagged tasks'
+            traverse_list (TaskFlaggedFilterVisitor (include=False), items)
         elif '--tsc' == opt:
             print 'sort by task completion'
             traverse_list (TaskCompletionSortingVisitor (), items)

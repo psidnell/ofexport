@@ -11,6 +11,9 @@ def match_name (item, regexp):
 def match_completed (item, regexp):
     return match_date (datetime.now(), item.date_completed, regexp)
 
+def match_flagged (item, ignore):
+        return item.flagged
+
 '''
 When we explicitly match an item we want all it's descendants
 matched unconditionally - even if they would have failed the match
@@ -103,6 +106,10 @@ class ProjectCompletionFilterVisitor(ProjectFilterVisitor):
 class TaskCompletionFilterVisitor(TaskFilterVisitor):
     def __init__(self, filtr, include=True):
         TaskFilterVisitor.__init__(self, filtr, match_completed, include)
+        
+class TaskFlaggedFilterVisitor(TaskFilterVisitor):
+    def __init__(self, include=True):
+        TaskFilterVisitor.__init__(self, None, match_flagged, include)
 
 class FlatteningVisitor (Visitor):
     def __init__(self):

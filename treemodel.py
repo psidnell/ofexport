@@ -96,6 +96,7 @@ class Folder(Node):
                        children=children,
                        attribs=attribs)
 class Project(Node):
+    flagged = TypeOf ('flagged', bool)
     date_completed = TypeOf ('date_completed', datetime)
     folder = TypeOf ('folder', Folder)
     def __init__ (self,
@@ -104,6 +105,7 @@ class Project(Node):
                   marked=True,
                   children=[],
                   attribs = {},
+                  flagged = False,
                   date_completed=None,
                   folder=None):
         Node.__init__ (self, PROJECT,
@@ -112,6 +114,7 @@ class Project(Node):
                        marked=marked,
                        children=children,
                        attribs=attribs)
+        self.flagged = flagged
         self.date_completed = date_completed
         self.folder = folder
     

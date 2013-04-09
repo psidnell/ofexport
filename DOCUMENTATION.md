@@ -77,6 +77,8 @@ The core filters are:-
         --pce regexp: exclude projects with completion matching regexp
         --tci regexp: include tasks with completion matching regexp
         --tce regexp: exclude tasks with completion matching regexp
+        --tfi: include flagged tasks
+        --tfe: exclude flagged tasks
         --tsc: sort tasks by completion
         -F: flatten project/task structure
 
@@ -145,3 +147,6 @@ This produces a document containing all tasks completed today from any folder wi
 This produces a report showing all tasks that contain "Beth" and their enclosing projects:-
 			
         ofexport -o report.tp --ti 'Beth' --prune --open -F
+
+This produces the report of what I have yet to do on this project			
+        ofexport -o TODO.md --open --pi 'OmniPythonLib Todo' -F

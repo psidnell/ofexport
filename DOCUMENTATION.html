@@ -1,15 +1,8 @@
-<!DOCTYPE html>
-	<html>
-	<head>
-	<title></title>
-	<meta charset="utf-8"/>
-	</head>
-<body>
-<h1 id="ofexportcommand:">ofexport command:</h1>
+<h1>ofexport command:</h1>
 
-<h2 id="overview:">Overview:</h2>
+<h2>Overview:</h2>
 
-<p>ofexport is a command line utility that reads the OmniFocus database. It&#8217;s a work in progress but currently it&#8217;s capabilities include:-</p>
+<p>ofexport is a command line utility that reads the OmniFocus database. It's a work in progress but currently it's capabilities include:-</p>
 
 <p>Exports it to a number of text based file formats:</p>
 
@@ -25,7 +18,7 @@
 
 <ul>
 <li>Include/exclude tasks, projects, contexts and folders with text searches (regular expressions)</li>
-<li>Include/exclude tasks and projects by completion date (regular expressions and &#8220;human&#8221; ones)</li>
+<li>Include/exclude tasks and projects by completion date (regular expressions and "human" ones)</li>
 </ul>
 
 <p>Perform some restructuring of the data:</p>
@@ -35,13 +28,13 @@
 <li>Sort by various criteria</li>
 </ul>
 
-<h2 id="installation:">Installation:</h2>
+<h2>Installation:</h2>
 
 <ul>
-<li>Write this (&#8220;it&#8217;s just python&#8221;) @todo</li>
+<li>Write this ("it's just python") @todo</li>
 </ul>
 
-<h2 id="tutorial:">Tutorial:</h2>
+<h2>Tutorial:</h2>
 
 <p>To get help on usage and the full list of options ,run the command with no arguments:-</p>
 
@@ -57,31 +50,31 @@
 
 <p>To get useful data out we want to start using more structured formats and filters.</p>
 
-<h3 id="fileformats:">File Formats:</h3>
+<h3>File Formats:</h3>
 
 <p>The format of the report file is controlled by the suffix of the output file. So by running:-</p>
 
 <pre><code>    ofexport -o report.txt
 </code></pre>
 
-<p>you&#8217;ll get a text file. By changing the suffix you&#8217;ll get different formats:-
+<p>you'll get a text file. By changing the suffix you'll get different formats:-
 - .txt or .text: a simple text file
 - .md or .markdown: a Markdown file
 - .ft or .foldingtext: a Folding Text document (the same as .md)
 - .tp or .taskpaper: a taskpaper document
 - .opml: an OPML document
-- .html or .htm: an HTML document </p>
+- .html or .htm: an HTML document            </p>
 
-<h3 id="filters:">Filters:</h3>
+<h3>Filters:</h3>
 
 <p>Filters are a powerful way of controlling the content or structure of your report. A minimal useful example is:-</p>
 
 <pre><code>    ofexport -o report.tp --open --tci 'this week' --prune
 </code></pre>
 
-<p>This exports everything you&#8217;ve completed this week to a taskpaper document (report.tp) and opens it. The &#8211;tci and &#8211;prune options are both examples of filters.</p>
+<p>This exports everything you've completed this week to a taskpaper document (report.tp) and opens it. The --tci and --prune options are both examples of filters.</p>
 
-<p>In this case, the &#8211;tci filter (task completion include) includes only those tasks that were completed this week, eliminating all others. The resultant document would probably have a lot of empty folders and projects in it (because so many tasks have been filtered out). The &#8211;prune filter eliminates any and all projects and folders that contain no tasks. The resultant document should be a pretty readable summary of what you&#8217;ve completed this week.</p>
+<p>In this case, the --tci filter (task completion include) includes only those tasks that were completed this week, eliminating all others. The resultant document would probably have a lot of empty folders and projects in it (because so many tasks have been filtered out). The  --prune filter eliminates any and all projects and folders that contain no tasks. The resultant document should be a pretty readable summary of what you've completed this week.</p>
 
 <p>The core filters are:-</p>
 
@@ -97,85 +90,89 @@
     --pce regexp: exclude projects with completion matching regexp
     --tci regexp: include tasks with completion matching regexp
     --tce regexp: exclude tasks with completion matching regexp
+    --tfi: include flagged tasks
+    --tfe: exclude flagged tasks
     --tsc: sort tasks by completion
     -F: flatten project/task structure
 </code></pre>
 
 <p>The important thing to note about filters is that you can specify as many as you like and they are executed in the order you specify.</p>
 
-<p>It&#8217;s possible to create quite sophisticated queries on your OmniFocus database by using a series of queries and regular expressions but even without an in-depth knowledge of what a regular expression is it&#8217;s possible to achieve white a lot.</p>
+<p>It's possible to create quite sophisticated queries on your OmniFocus database by using a series of queries and regular expressions but even without an in-depth knowledge of what a regular expression is it's possible to achieve white a lot.</p>
 
-<p>Filters respect the tree structure of the tasks in your OmniFocus database. Filters are applied to all the items (folders, tasks, projects or contexts) in your database. When the filter is applied to an item, if it matches then it and all it&#8217;s descendent&#8217;s will appear in the output report. If the match fails on an item then that item (and all it&#8217;s descendants) are eliminated from the output report.</p>
+<p>Filters respect the tree structure of the tasks in your OmniFocus database. Filters are applied to all the items (folders, tasks, projects or contexts) in your database. When the filter is applied to an item, if it matches then it and all it's descendent's will appear in the output report. If the match fails on an item then that item (and all it's descendants) are eliminated from the output report.</p>
 
 <p>If there are multiple filters then the output of one is passed to the next and so on.</p>
 
 <p>Most of the filters come in two flavours, include and exclude with one being the inverse of the other.</p>
 
-<h3 id="filteringondates:">Filtering on Dates:</h3>
+<h3>Filtering on Dates:</h3>
 
 <p>The core date format is YYYY-MM-DD (sorry America) largely because Taskpaper requires this format so that sorting works (I may provide configuration in the future).</p>
 
 <p>The following are examples of dates that can be given as arguments to the date based filters:-</p>
 
 <ul>
-<li>A specific date: &#8220;2013&#8211;04&#8211;08&#8221;</li>
-<li>A date range: &#8220;2013&#8211;03&#8211;28 to 2013&#8211;04&#8211;02&#8221;</li>
-<li>This week: &#8220;this week&#8221;</li>
-<li>Today: &#8220;today&#8221;</li>
-<li>Yesterday: &#8220;yesterday&#8221;</li>
-<li>The last few days: &#8220;from wed&#8221; or &#8220;from wednesday&#8221; or &#8220;from 2013&#8211;03&#8211;28&#8221;</li>
-<li>All Mondays: &#8220;Mon&#8221; or &#8220;Monday&#8221;</li>
-<li>A particular month: &#8220;Jan&#8221;, &#8220;January&#8221;, &#8220;2013&#8211;01&#8221;</li>
-<li>The one day 50 days ago: &#8220;&#8211;50d&#8221;</li>
+<li>A specific date: "2013-04-08"</li>
+<li>A date range: "2013-03-28 to 2013-04-02"</li>
+<li>This week: "this week"</li>
+<li>Today: "today"</li>
+<li>Yesterday: "yesterday"</li>
+<li>The last few days: "from wed" or "from wednesday" or "from 2013-03-28"</li>
+<li>All Mondays: "Mon" or "Monday"</li>
+<li>A particular month: "Jan", "January", "2013-01"</li>
+<li>The one day 50 days ago: "-50d"</li>
 </ul>
 
 <p>Some details:-</p>
 
 <ul>
 <li>Date matches are case insensitive</li>
-<li>Date formats like &#8220;today&#8221;, &#8220;X to Y&#8221; or &#8220;from …&#8221; are tested for first</li>
+<li>Date formats like "today", "X to Y" or "from …" are tested for first</li>
 <li>Anything else is assumed to be a regular expression</li>
 </ul>
 
 <p>Under the hood item dates are converted to the following format :-</p>
 
 <ul>
-<li>&#8220;2005&#8211;06&#8211;01 wednesday june &#8211;4d&#8221; (if the date is 4 days ago)</li>
-<li>&#8220;2005&#8211;06&#8211;01 wednesday june &#8211;0d today&#8221; (only if the date is today)</li>
-<li>&#8220;2005&#8211;06&#8211;01 wednesday june &#8211;1d yesterday&#8221; (only if the date was yesterday)</li>
+<li>"2005-06-01 wednesday june -4d" (if the date is 4 days ago)</li>
+<li>"2005-06-01 wednesday june -0d today" (only if the date is today)</li>
+<li>"2005-06-01 wednesday june -1d yesterday" (only if the date was yesterday)</li>
 </ul>
 
-<p>So if you wanted to get clever with regular expressions, this is what you&#8217;re matching against. If you really wanted to match all Wednesdays that happened to fall on the first or second of the month then &#8220;&#8211;0[12] w&#8221; would do the trick.</p>
+<p>So if you wanted to get clever with regular expressions, this is what you're matching against. If you really wanted to match all Wednesdays that happened to fall on the first or second of the month then "-0[12] w" would do the trick.</p>
 
-<h3 id="examples:">Examples:</h3>
+<h3>Examples:</h3>
 
-<p>This produces a document containing all tasks completed today from any folder with &#8220;Work&#8221; in it&#8217;s title:-</p>
+<p>This produces a document containing all tasks completed today from any folder with "Work" in it's title:-</p>
 
 <pre><code>    ofexport -o report.tp --fi Work --tci 'today' --prune --open
 </code></pre>
 
-<p>This uses a little regular expression magic to create a document containing all tasks completed today from any folder with the exact name &#8220;Work&#8221;:-</p>
+<p>This uses a little regular expression magic to create a document containing all tasks completed today from any folder with the exact name "Work":-</p>
 
 <pre><code>    ofexport -o report.tp --fi '^Work$' --tci 'today' --prune --open
 </code></pre>
 
-<p>This produces a document containing all tasks completed today from any folder that does NOT have &#8220;Work&#8221; in it&#8217;s title:-</p>
+<p>This produces a document containing all tasks completed today from any folder that does NOT have "Work" in it's title:-</p>
 
 <pre><code>    ofexport -o report.tp --fe Work --tci 'today' --prune --open
 </code></pre>
 
-<p>This uses a little regular expression magic to create a document containing all tasks completed today from any folder with the exact name &#8220;Work&#8221; or &#8220;Home&#8221;.</p>
+<p>This uses a little regular expression magic to create a document containing all tasks completed today from any folder with the exact name "Work" or "Home".</p>
 
 <pre><code>    ofexport -o report.tp --fi '^Work$|^Home$' --tci 'today' --prune --open
 </code></pre>
 
-<p>This produces a document containing all tasks completed today from any folder with &#8220;Work&#8221; in it&#8217;s title and the flattens/simplifies the indenting:-</p>
+<p>This produces a document containing all tasks completed today from any folder with "Work" in it's title and the flattens/simplifies the indenting:-</p>
 
 <pre><code>    ofexport -o report.tp --fi Work --tci 'today' --prune -F --open
 </code></pre>
 
-<p>This produces a report showing all tasks that contain &#8220;Beth&#8221; and their enclosing projects:-</p>
+<p>This produces a report showing all tasks that contain "Beth" and their enclosing projects:-</p>
 
 <pre><code>    ofexport -o report.tp --ti 'Beth' --prune --open -F
 </code></pre>
-</body></html>
+
+<p>This produces the report of what I have yet to do on this project <br />
+        ofexport -o TODO.md --open --pi 'OmniPythonLib Todo' -F</p>
