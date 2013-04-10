@@ -124,55 +124,27 @@ The core date format is YYYY-MM-DD (sorry America) largely because Taskpaper req
 
 A week is considered to start on Monday.
 
-A day of the week can be expressed as:
+A specific day can be expressed as:
 
 - "Monday" - the monday that occurs within this week.
 - "th" - Days of the week can be abbreviated down to 2 characters.
-- "yesterday"
-- "today"
-- "tomorrow"
+- "yesterday", "today",  "tomorrow"
 - "last tuesday" - the Tuesday that occurs in the previous week.
 - "next sat" - the Saturday that occurs in the next week.
-
-A specific date can be expressed as:
-
-- "2013-04-09"
+-  "2013-04-09"
 
 A range of dates can be expressed as:
 
+- "July", "jul" - every day in July of this year.
 - "to 2013-05-10" - everything on or before the date.
 - "from yesterday" - everything on or after yesterday.
 - "yesterday to 2014-10-01" everything between the two days
 - "this week" - everything from this Monday to this Sunday.
 - "next week"
 - "last week"
-
-The following are examples of dates that can be given as arguments to the date based filters:-
-
-- A specific date: "2013-04-08"
-- A date range: "2013-03-28 to 2013-04-02"
-- This week: "this week"
-- Today: "today"
-- Yesterday: "yesterday"
-- The last few days: "from wed" or "from wednesday" or "from 2013-03-28"
-- All Mondays: "Mon" or "Monday"
-- A particular month: "Jan", "January", "2013-01"
-- The one day 50 days ago: "-50d"
-
-Some details:-
-
-- Date matches are case insensitive
-- Date formats like "today", "X to Y" or "from …" are tested for first
-- Anything else is assumed to be a regular expression
-
-Under the hood item dates are converted to the following format :-
-
-- "2005-06-01 wednesday june -4d" (if the date is 4 days ago)
-- "2005-06-01 wednesday june -0d today" (only if the date is today)
-- "2005-06-01 wednesday june -1d yesterday" (only if the date was yesterday)
-
-So if you wanted to get clever with regular expressions, this is what you're matching against. If you really wanted to match all Wednesdays that happened to fall on the first or second of the month then "-0[12] w" would do the trick.
-			
+- "none" or "" - only matches items with no date
+- "any" - only matches items with a date
+	
 ### Examples:
 
 This produces a document containing all tasks completed today from any folder with "Work" in it's title:-
@@ -200,4 +172,5 @@ This produces a report showing all tasks that contain "Beth" and their enclosing
         ofexport -o report.tp --ti 'Beth' --prune --open -F
 
 This produces the report of what I have yet to do on this project			
+
         ofexport -o TODO.md --open --pi 'OmniPythonLib Todo' -F

@@ -140,66 +140,30 @@
 
 <p>A week is considered to start on Monday.</p>
 
-<p>A day of the week can be expressed as:</p>
+<p>A specific day can be expressed as:</p>
 
 <ul>
 <li>"Monday" - the monday that occurs within this week.</li>
 <li>"th" - Days of the week can be abbreviated down to 2 characters.</li>
-<li>"yesterday"</li>
-<li>"today"</li>
-<li>"tomorrow"</li>
+<li>"yesterday", "today",  "tomorrow"</li>
 <li>"last tuesday" - the Tuesday that occurs in the previous week.</li>
 <li>"next sat" - the Saturday that occurs in the next week.</li>
-</ul>
-
-<p>A specific date can be expressed as:</p>
-
-<ul>
 <li>"2013-04-09"</li>
 </ul>
 
 <p>A range of dates can be expressed as:</p>
 
 <ul>
+<li>"July", "jul" - every day in July of this year.</li>
 <li>"to 2013-05-10" - everything on or before the date.</li>
 <li>"from yesterday" - everything on or after yesterday.</li>
 <li>"yesterday to 2014-10-01" everything between the two days</li>
 <li>"this week" - everything from this Monday to this Sunday.</li>
 <li>"next week"</li>
 <li>"last week"</li>
+<li>"none" or "" - only matches items with no date</li>
+<li>"any" - only matches items with a date</li>
 </ul>
-
-<p>The following are examples of dates that can be given as arguments to the date based filters:-</p>
-
-<ul>
-<li>A specific date: "2013-04-08"</li>
-<li>A date range: "2013-03-28 to 2013-04-02"</li>
-<li>This week: "this week"</li>
-<li>Today: "today"</li>
-<li>Yesterday: "yesterday"</li>
-<li>The last few days: "from wed" or "from wednesday" or "from 2013-03-28"</li>
-<li>All Mondays: "Mon" or "Monday"</li>
-<li>A particular month: "Jan", "January", "2013-01"</li>
-<li>The one day 50 days ago: "-50d"</li>
-</ul>
-
-<p>Some details:-</p>
-
-<ul>
-<li>Date matches are case insensitive</li>
-<li>Date formats like "today", "X to Y" or "from …" are tested for first</li>
-<li>Anything else is assumed to be a regular expression</li>
-</ul>
-
-<p>Under the hood item dates are converted to the following format :-</p>
-
-<ul>
-<li>"2005-06-01 wednesday june -4d" (if the date is 4 days ago)</li>
-<li>"2005-06-01 wednesday june -0d today" (only if the date is today)</li>
-<li>"2005-06-01 wednesday june -1d yesterday" (only if the date was yesterday)</li>
-</ul>
-
-<p>So if you wanted to get clever with regular expressions, this is what you're matching against. If you really wanted to match all Wednesdays that happened to fall on the first or second of the month then "-0[12] w" would do the trick.</p>
 
 <h3>Examples:</h3>
 
@@ -233,5 +197,7 @@
 <pre><code>    ofexport -o report.tp --ti 'Beth' --prune --open -F
 </code></pre>
 
-<p>This produces the report of what I have yet to do on this project <br />
-        ofexport -o TODO.md --open --pi 'OmniPythonLib Todo' -F</p>
+<p>This produces the report of what I have yet to do on this project           </p>
+
+<pre><code>    ofexport -o TODO.md --open --pi 'OmniPythonLib Todo' -F
+</code></pre>

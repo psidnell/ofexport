@@ -1,5 +1,5 @@
 from treemodel import Visitor
-from datematch import match_date
+from datematch import process_date_specifier
 import re
 from datetime import datetime
 
@@ -8,14 +8,27 @@ SELECTED='visitors.selected'
 def match_name (item, regexp):
         return re.search (regexp, item.name) != None
 
-def match_completed (item, regexp):
-    return match_date (datetime.now(), item.date_completed, regexp)
+def match_date_against_range (thedate, date_range):
+    start, end = date_range
+    if start == None and end == None:
+        return thedate == None
+    elif thedate == None:
+        return start == None and end == None
+    elif start != None and end != None:
+        return thedate.date() >= start.date() and thedate.date() <= end.date ()
+    elif start != None:
+        return thedate.date() >= start.date()
+    else:
+        return thedate.date() <= end.date ()
+        
+def match_start (item, date_range):
+    return match_date_against_range (item.date_to_start, date_range)
 
-def match_start (item, regexp):
-    return match_date (datetime.now(), item.date_to_start, regexp)
+def match_due (item, date_range):
+    return match_date_against_range (item.date_due, date_range)
 
-def match_due (item, regexp):
-    return match_date (datetime.now(), item.date_due, regexp)
+def match_completed (item, date_range):
+    return match_date_against_range (item.date_completed, date_range)
 
 def match_flagged (item, ignore):
         return item.flagged
@@ -30,6 +43,7 @@ done with a node or subsequent filters won't work properly
 '''
 class BaseFilterVisitor(Visitor):
     def __init__(self, include=True):
+        self.filter = None
         self.include = include
     def begin_any (self, item):
         # inherit the SELECTED status
@@ -44,10 +58,6 @@ class BaseFilterVisitor(Visitor):
             matched = not matched
         item.marked = matched
         item.attribs[SELECTED] = True
-    def match_name (self, item, regexp):
-        return re.search (regexp, item.name) != None
-    def match_completed (self, item, range_or_regexp):
-        return match_date (datetime.today(), item.date_completed, range_or_regexp)
 
 class FolderFilterVisitor(BaseFilterVisitor):
     def __init__(self, filtr, match_fn, include=True):
@@ -89,53 +99,98 @@ class ContextFilterVisitor(BaseFilterVisitor):
             matched = self.match_fn(context, self.filter)
             self.set_item_matched(context, matched);
 
+def includes (include):
+    if include:
+        return 'includes'
+    else:
+        return 'excludes'
+    
+def date_range_to_str (spec):
+    fmt = "[%a %b %d %Y]"
+    start, end = spec
+    if start == None and end == None:
+        return 'none'
+    elif start == None and end != None:
+        return 'everything until ' + end.strftime (fmt)
+    elif start != None and end == None:
+        return 'everything after ' + start.strftime (fmt)
+    elif start == end:
+        return 'on ' + start.strftime (fmt)
+    else:
+        return 'from ' + start.strftime (fmt) + ' to ' + end.strftime (fmt)
+    
+
 class FolderNameFilterVisitor(FolderFilterVisitor):
     def __init__(self, filtr, include=True):
         FolderFilterVisitor.__init__(self, filtr, match_name, include)
+    def __str__(self):
+        return 'Folder name ' + includes (self.include) + ' "' + self.filter + '"'
 
 class ProjectNameFilterVisitor(ProjectFilterVisitor):
     def __init__(self, filtr, include=True):
         ProjectFilterVisitor.__init__(self, filtr, match_name, include)
+    def __str__(self):
+        return 'Project name ' + includes (self.include) + ' "' + self.filter + '"'
 
 class ContextNameFilterVisitor(ContextFilterVisitor):
     def __init__(self, filtr, include=True):
         ContextFilterVisitor.__init__(self, filtr, match_name, include)
+    def __str__(self):
+        return 'Context name ' + includes (self.include) + ' "' + self.filter + '"'
             
 class TaskNameFilterVisitor(TaskFilterVisitor):
     def __init__(self, filtr, include=True):
         TaskFilterVisitor.__init__(self, filtr, match_name, include)
+    def __str__(self):
+        return 'Task name ' + includes (self.include) + ' "' + self.filter + '"'
             
 class ProjectCompletionFilterVisitor(ProjectFilterVisitor):
     def __init__(self, filtr, include=True):
-        ProjectFilterVisitor.__init__(self, filtr, match_completed, include)
+        ProjectFilterVisitor.__init__(self, process_date_specifier (datetime.now(), filtr), match_completed, include)
+    def __str__(self):
+        return 'Project completion ' + includes (self.include) + ' ' + date_range_to_str(self.filter)
         
 class ProjectStartFilterVisitor(ProjectFilterVisitor):
     def __init__(self, filtr, include=True):
-        ProjectFilterVisitor.__init__(self, filtr, match_start, include)
+        ProjectFilterVisitor.__init__(self, process_date_specifier (datetime.now(), filtr), match_start, include)
+    def __str__(self):
+        return 'Project start ' + includes (self.include) + ' ' + date_range_to_str(self.filter)
         
 class ProjectDueFilterVisitor(ProjectFilterVisitor):
     def __init__(self, filtr, include=True):
-        ProjectFilterVisitor.__init__(self, filtr, match_due, include)
+        ProjectFilterVisitor.__init__(self, process_date_specifier (datetime.now(), filtr), match_due, include)
+    def __str__(self):
+        return 'Project due ' + includes (self.include) + ' ' + date_range_to_str(self.filter)
         
 class ProjectFlaggedFilterVisitor(ProjectFilterVisitor):
     def __init__(self, include=True):
         ProjectFilterVisitor.__init__(self, None, match_flagged, include)
+    def __str__(self):
+        return 'Project flagged ' + includes (self.include) + ' flagged'
 
 class TaskCompletionFilterVisitor(TaskFilterVisitor):
     def __init__(self, filtr, include=True):
-        TaskFilterVisitor.__init__(self, filtr, match_completed, include)
+        TaskFilterVisitor.__init__(self, process_date_specifier (datetime.now(), filtr), match_completed, include)
+    def __str__(self):
+        return 'Task completion ' + includes (self.include) + ' ' + date_range_to_str(self.filter)
 
 class TaskDueFilterVisitor(TaskFilterVisitor):
     def __init__(self, filtr, include=True):
-        TaskFilterVisitor.__init__(self, filtr, match_due, include)
+        TaskFilterVisitor.__init__(self, process_date_specifier (datetime.now(), filtr), match_due, include)
+    def __str__(self):
+        return 'Task due ' + includes (self.include) + ' ' + date_range_to_str(self.filter)
         
 class TaskStartFilterVisitor(TaskFilterVisitor):
     def __init__(self, filtr, include=True):
-        TaskFilterVisitor.__init__(self, filtr, match_start, include)
+        TaskFilterVisitor.__init__(self, process_date_specifier (datetime.now(), filtr), match_start, include)
+    def __str__(self):
+        return 'Task start ' + includes (self.include) + ' ' + date_range_to_str(self.filter)
         
 class TaskFlaggedFilterVisitor(TaskFilterVisitor):
     def __init__(self, include=True):
         TaskFilterVisitor.__init__(self, None, match_flagged, include)
+    def __str__(self):
+        return 'Task flagged ' + includes (self.include) + ' flagged'
 
 class FlatteningVisitor (Visitor):
     def __init__(self):
@@ -150,6 +205,8 @@ class FlatteningVisitor (Visitor):
             task.parent.children.insert (mypos, child)
             child.parent = task.parent
         task.children = []
+    def __str__ (self):
+        return 'Flatten'
         
 class TaskCompletionSortingVisitor (Visitor):
     def end_project (self, project):
@@ -158,6 +215,8 @@ class TaskCompletionSortingVisitor (Visitor):
         if item.date_completed != None:
             return item.date_completed
         return datetime.today()
+    def __str__ (self):
+        return 'Sort'
     
 class PruningFilterVisitor (Visitor):
     def end_project (self, project):
@@ -170,4 +229,6 @@ class PruningFilterVisitor (Visitor):
         if item.marked:
             empty = len ([x for x in item.children if x.marked]) == 0
             if empty:
-                item.marked = False         
+                item.marked = False
+    def __str__ (self):
+        return 'Prune'     

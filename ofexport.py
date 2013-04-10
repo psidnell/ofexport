@@ -12,7 +12,7 @@ from of_to_opml import PrintOpmlVisitor
 from of_to_html import PrintHtmlVisitor
 from visitors import FolderNameFilterVisitor, ProjectNameFilterVisitor, ProjectFlaggedFilterVisitor, ProjectDueFilterVisitor, ProjectStartFilterVisitor, ContextNameFilterVisitor, TaskDueFilterVisitor, TaskNameFilterVisitor, TaskStartFilterVisitor, TaskCompletionFilterVisitor, ProjectCompletionFilterVisitor, TaskCompletionSortingVisitor, TaskFlaggedFilterVisitor, PruningFilterVisitor, FlatteningVisitor
 
-VERSION = "1.0.0 (2013-04-09)" 
+VERSION = "1.0.1 (2013-04-10)" 
      
 def print_structure (visitor, root_projects_and_folders, root_contexts, project_mode):
     if project_mode:
@@ -142,93 +142,120 @@ if __name__ == "__main__":
         
         # FOLDER
         if '--fi' == opt:
-            print 'include folders', arg
-            traverse_list (FolderNameFilterVisitor (arg, include=True), items)
+            visitor = FolderNameFilterVisitor (arg, include=True)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
         elif '--fe' == opt:
-            print 'exclude folders', arg
-            traverse_list (FolderNameFilterVisitor (arg, include=False), items)
+            visitor = FolderNameFilterVisitor (arg, include=False)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
         
         # PROJECT
         elif '--pi' == opt:
-            print 'include project', arg
-            traverse_list (ProjectNameFilterVisitor (arg, include=True), items)
+            visitor = ProjectNameFilterVisitor (arg, include=True)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
         elif '--pe' == opt:
-            print 'exclude project', arg
-            traverse_list (ProjectNameFilterVisitor (arg, include=False), items)
+            visitor = ProjectNameFilterVisitor (arg, include=False)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
         elif '--psi' == opt:
-            print 'include project start', arg
-            traverse_list (ProjectStartFilterVisitor (arg, include=True), items)
+            visitor = ProjectStartFilterVisitor (arg, include=True)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
         elif '--pse' == opt:
-            print 'exclude project start', arg
-            traverse_list (ProjectStartFilterVisitor (arg, include=False), items)
+            visitor = ProjectStartFilterVisitor (arg, include=False)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
         elif '--pdi' == opt:
-            print 'include project due', arg
-            traverse_list (ProjectDueFilterVisitor (arg, include=True), items)
+            visitor = ProjectDueFilterVisitor (arg, include=True)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
         elif '--psc' == opt:
-            print 'exclude project due', arg
-            traverse_list (ProjectDueFilterVisitor (arg, include=False), items)
+            visitor = ProjectDueFilterVisitor (arg, include=False)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
         elif '--pci' == opt:
-            print 'include project completion', arg
-            traverse_list (ProjectCompletionFilterVisitor (arg, include=True), items)
+            visitor = ProjectCompletionFilterVisitor (arg, include=True)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
         elif '--pce' == opt:
-            print 'exclude project completion', arg
-            traverse_list (ProjectCompletionFilterVisitor (arg, include=False), items)
+            visitor = ProjectCompletionFilterVisitor (arg, include=False)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
         elif '--pfi' == opt:
-            print 'include project completion'
-            traverse_list (ProjectFlaggedFilterVisitor (arg, include=True), items)
+            visitor = ProjectFlaggedFilterVisitor (include=True)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
         elif '--pfe' == opt:
-            print 'exclude project completion'
-            traverse_list (ProjectFlaggedFilterVisitor (arg, include=False), items)
+            visitor = ProjectFlaggedFilterVisitor (include=False)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
             
         # CONTEXT
         elif '--ci' == opt:
-            print 'include contexts', arg
-            traverse_list (ContextNameFilterVisitor (arg, include=True), items)
+            visitor = ContextNameFilterVisitor (arg, include=True)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
         elif '--ce' == opt:
-            print 'exclude contexts', arg
-            traverse_list (ContextNameFilterVisitor (arg, include=False), items)
+            visitor = ContextNameFilterVisitor (arg, include=False)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
         
         # TASK
         elif '--ti' == opt:
-            print 'include tasks', arg
-            traverse_list (TaskNameFilterVisitor (arg, include=True), items)
+            visitor = TaskNameFilterVisitor (arg, include=True)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
         elif '--te' == opt:
-            print 'exclude tasks', arg
-            traverse_list (TaskNameFilterVisitor (arg, include=False), items)
+            visitor = TaskNameFilterVisitor (arg, include=False)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
         elif '--tci' == opt:
-            print 'include task completion', arg
-            traverse_list (TaskCompletionFilterVisitor (arg, include=True), items)
+            visitor = TaskCompletionFilterVisitor (arg, include=True)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
         elif '--tce' == opt:
-            print 'exclude task completion', arg
-            traverse_list (TaskCompletionFilterVisitor (arg, include=False), items)
+            visitor = TaskCompletionFilterVisitor (arg, include=False)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
         elif '--tsi' == opt:
-            print 'include task start', arg
-            traverse_list (TaskStartFilterVisitor (arg, include=True), items)
+            visitor = TaskStartFilterVisitor (arg, include=True)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
         elif '--tse' == opt:
-            print 'exclude task start', arg
-            traverse_list (TaskStartFilterVisitor (arg, include=False), items)
+            visitor = TaskStartFilterVisitor (arg, include=False)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
         elif '--tdi' == opt:
-            print 'include task due', arg
-            traverse_list (TaskDueFilterVisitor (arg, include=True), items)
+            visitor = TaskDueFilterVisitor (arg, include=True)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
         elif '--tde' == opt:
-            print 'exclude task due', arg
-            traverse_list (TaskDueFilterVisitor (arg, include=False), items)
+            visitor = TaskDueFilterVisitor (arg, include=False)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
         elif '--tfi' == opt:
-            print 'include flagged tasks'
-            traverse_list (TaskFlaggedFilterVisitor (include=True), items)
+            visitor = TaskFlaggedFilterVisitor (include=True)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
         elif '--tfe' == opt:
-            print 'exclude flagged tasks'
-            traverse_list (TaskFlaggedFilterVisitor (include=False), items)
+            visitor = TaskFlaggedFilterVisitor (include=False)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
         elif '--tsc' == opt:
-            print 'sort by task completion'
-            traverse_list (TaskCompletionSortingVisitor (), items)
+            visitor = TaskCompletionSortingVisitor ()
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
         
         # MISC
         elif '--prune' == opt:
-            print 'pruning empty folders, projects, contexts'
-            traverse_list (PruningFilterVisitor (), items)
+            visitor = PruningFilterVisitor ()
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
         elif '-F' == opt:
             visitor = FlatteningVisitor ()
+            print opt + '\t= ' + str (visitor)
             traverse_list (visitor, root_projects_and_folders)
             root_projects_and_folders = visitor.projects
 

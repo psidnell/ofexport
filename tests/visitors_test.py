@@ -1,7 +1,6 @@
 import unittest
 from visitors import FolderNameFilterVisitor, TaskNameFilterVisitor, ProjectNameFilterVisitor, ContextNameFilterVisitor
 from treemodel import Folder, Task, Project, Context, traverse_list, traverse
-from datetime import datetime
 
 class Test_visitors(unittest.TestCase):
     
