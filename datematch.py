@@ -1,3 +1,19 @@
+'''
+Copyright 2013 Paul Sidnell
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+'''
+
 import re
 from datetime import datetime, timedelta
 
@@ -101,9 +117,14 @@ def date_from_string (now, date_str):
         return datetime.strptime(date_str, '%Y-%m-%d')
     else:
         return None
+    
+def tidy_space_separated_fields (string):
+    # eliminate multiple spaces
+    elements = str.split (string)
+    return ' '.join(elements)
 
 def process_date_specifier (now, date_spec):
-    date_spec = date_spec.lower().strip()
+    date_spec = tidy_space_separated_fields (date_spec).lower()
     
     if date_spec == '' or date_spec == 'none':
         return (None, None)

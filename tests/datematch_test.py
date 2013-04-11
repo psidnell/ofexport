@@ -1,5 +1,5 @@
 import unittest
-from datematch import process_date_specifier, hunt_for_day, find_first_of_month, find_next_month, find_prev_month, find_end_of_month, find_january_this_year, hunt_for_month, find_monday_this_week, find_monday_next_week
+from datematch import tidy_space_separated_fields, process_date_specifier, hunt_for_day, find_first_of_month, find_next_month, find_prev_month, find_end_of_month, find_january_this_year, hunt_for_month, find_monday_this_week, find_monday_next_week
 from datetime import datetime
 
 def process_date_specifier_to_datestr (now, spec):
@@ -16,6 +16,9 @@ def process_date_specifier_to_datestr (now, spec):
             return start.strftime ("%Y-%m-%d") + '..' + end.strftime ("%Y-%m-%d")
     
 class Test_datematch(unittest.TestCase):
+    
+    def test_tidy_space_separated_fields(self):
+        self.assertEquals ("a bb ccc dddd", tidy_space_separated_fields (" a   bb ccc   dddd  "))
     
     def test_hunt_for_day (self):
         tue = datetime.strptime('Apr 9 2013 11:33PM', '%b %d %Y %I:%M%p')

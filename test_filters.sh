@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -o xtrace
+rm *.pyc
 
 # Folder
 

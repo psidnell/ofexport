@@ -1,5 +1,10 @@
 # Changes #
 
+## 1.0.2 (2013-12) ##
+- Added the Apache V2 License to the source and documentation.
+- Fix a bug caused by allowing newlines in task titles.
+- Improved the documentation
+
 ## 1.0.1 (2013-04-10) ##
 
 - Extended date filters to recognise month names.

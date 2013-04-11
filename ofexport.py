@@ -1,3 +1,19 @@
+'''
+Copyright 2013 Paul Sidnell
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+'''
+
 import os
 import codecs
 import getopt
@@ -12,7 +28,7 @@ from of_to_opml import PrintOpmlVisitor
 from of_to_html import PrintHtmlVisitor
 from visitors import FolderNameFilterVisitor, ProjectNameFilterVisitor, ProjectFlaggedFilterVisitor, ProjectDueFilterVisitor, ProjectStartFilterVisitor, ContextNameFilterVisitor, TaskDueFilterVisitor, TaskNameFilterVisitor, TaskStartFilterVisitor, TaskCompletionFilterVisitor, ProjectCompletionFilterVisitor, TaskCompletionSortingVisitor, TaskFlaggedFilterVisitor, PruningFilterVisitor, FlatteningVisitor
 
-VERSION = "1.0.1 (2013-04-10)" 
+VERSION = "1.0.2 (2013-04-12)" 
      
 def print_structure (visitor, root_projects_and_folders, root_contexts, project_mode):
     if project_mode:
@@ -21,9 +37,10 @@ def print_structure (visitor, root_projects_and_folders, root_contexts, project_
         traverse_list (visitor, root_contexts)
 
 class CustomPrintTaskpaperVisitor (PrintTaskpaperVisitor):
-    def tags (self, completed):
-        if completed != None:
-            return completed.strftime(" @%Y-%m-%d-%a")
+    pass
+    def tags (self, item):
+        if item.date_completed != None:
+            return item.date_completed.strftime(" @%Y-%m-%d-%a")
         else:
             return ""
         
@@ -91,6 +108,7 @@ if __name__ == "__main__":
     opn=False
     project_mode=True
     file_name = None
+    paul = False
         
     opts, args = getopt.optlist, args = getopt.getopt(sys.argv[1:], 'hFC?o:',
                                                       ['fi=','fe=',
@@ -108,10 +126,13 @@ if __name__ == "__main__":
                                                        'tsc',
                                                        'help',
                                                        'open',
-                                                       'prune'])
+                                                       'prune',
+                                                       'paul'])
     for opt, arg in opts:
         if '--open' == opt:
             opn = True
+        elif '--paul' == opt:
+            paul = True
         elif '-C' == opt:
             project_mode = False
         elif '-o' == opt:
@@ -282,8 +303,12 @@ if __name__ == "__main__":
     # TASKPAPER            
     elif fmt == 'tp' or fmt == 'taskpaper':
         out=codecs.open(file_name, 'w', 'utf-8')
-
-        print_structure (CustomPrintTaskpaperVisitor (out), root_projects_and_folders, root_contexts, project_mode)
+        visitor = None
+        if paul:
+            visitor = CustomPrintTaskpaperVisitor (out)
+        else:
+            visitor = PrintTaskpaperVisitor (out)
+        print_structure (visitor, root_projects_and_folders, root_contexts, project_mode)
     
     # OPML
     elif fmt == 'opml':
