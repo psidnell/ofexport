@@ -71,12 +71,12 @@ The core filters are:-
 
         --pi regexp: include projects matching regexp
         --pe regexp: exclude projects matching regexp
-        --psi regexp: include projects with start matching regexp
-        --pse regexp: exclude projects with start matching regexp
-        --pci regexp: include projects with completion matching regexp
-        --pce regexp: exclude projects with completion matching regexp
-        --pdi regexp: include projects with due matching regexp
-        --pde regexp: exclude projects with due matching regexp
+        --psi spec: include projects with start matching spec
+        --pse spec: exclude projects with start matching spec
+        --pci spec: include projects with completion matching spec
+        --pce spec: exclude projects with completion matching spec
+        --pdi spec: include projects with due matching spec
+        --pde spec: exclude projects with due matching spec
         --pfi: include flagged projects
         --pfe: exclude flagged projects
 
@@ -84,12 +84,12 @@ The core filters are:-
 
         --ti regexp: include tasks matching regexp
         --te regexp: exclude tasks matching regexp
-        --tsi regexp: include tasks with start matching regexp
-        --tse regexp: exclude tasks with start matching regexp
-        --tdi regexp: include tasks with due matching regexp
-        --tde regexp: exclude tasks with due matching regexp
-        --tci regexp: include tasks with completion matching regexp
-        --tce regexp: exclude tasks with completion matching regexp
+        --tsi spec: include tasks with start matching spec
+        --tse spec: exclude tasks with start matching spec
+        --tdi spec: include tasks with due matching spec
+        --tde spec: exclude tasks with due matching spec
+        --tci spec: include tasks with completion matching spec
+        --tce spec: exclude tasks with completion matching spec
         --tfi: include flagged tasks
         --tfe: exclude flagged tasks
         --tsc: sort tasks by completion

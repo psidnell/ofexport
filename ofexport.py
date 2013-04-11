@@ -21,9 +21,10 @@ def print_structure (visitor, root_projects_and_folders, root_contexts, project_
         traverse_list (visitor, root_contexts)
 
 class CustomPrintTaskpaperVisitor (PrintTaskpaperVisitor):
-    def tags (self, completed):
-        if completed != None:
-            return completed.strftime(" @%Y-%m-%d-%a")
+    pass
+    def tags (self, item):
+        if item.date_completed != None:
+            return item.date_completed.strftime(" @%Y-%m-%d-%a")
         else:
             return ""
         
@@ -91,6 +92,7 @@ if __name__ == "__main__":
     opn=False
     project_mode=True
     file_name = None
+    paul = False
         
     opts, args = getopt.optlist, args = getopt.getopt(sys.argv[1:], 'hFC?o:',
                                                       ['fi=','fe=',
@@ -108,10 +110,13 @@ if __name__ == "__main__":
                                                        'tsc',
                                                        'help',
                                                        'open',
-                                                       'prune'])
+                                                       'prune',
+                                                       'paul'])
     for opt, arg in opts:
         if '--open' == opt:
             opn = True
+        elif '--paul' == opt:
+            paul = True
         elif '-C' == opt:
             project_mode = False
         elif '-o' == opt:
@@ -282,8 +287,12 @@ if __name__ == "__main__":
     # TASKPAPER            
     elif fmt == 'tp' or fmt == 'taskpaper':
         out=codecs.open(file_name, 'w', 'utf-8')
-
-        print_structure (CustomPrintTaskpaperVisitor (out), root_projects_and_folders, root_contexts, project_mode)
+        visitor = None
+        if paul:
+            visitor = CustomPrintTaskpaperVisitor (out)
+        else:
+            visitor = PrintTaskpaperVisitor (out)
+        print_structure (visitor, root_projects_and_folders, root_contexts, project_mode)
     
     # OPML
     elif fmt == 'opml':

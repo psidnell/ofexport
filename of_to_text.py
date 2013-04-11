@@ -1,6 +1,6 @@
 import os
 import codecs
-from treemodel import traverse_list, traverse_list, Visitor
+from treemodel import traverse_list, Visitor
 from omnifocus import build_model, find_database
 
 class PrintTextVisitor(Visitor):
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     visitor = PrintTextVisitor (out)
     root_projects_and_folders, root_contexts = build_model (find_database ())
     traverse_list (visitor, root_projects_and_folders)
-    traverse_contexts (visitor, root_contexts)
+    traverse_list (visitor, root_contexts)
         
     os.system("open '" + file_name + "'")
     

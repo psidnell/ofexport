@@ -1,5 +1,9 @@
 # Changes #
 
+## 1.0.2 (2013-??) ##
+
+- ???
+
 ## 1.0.1 (2013-04-10) ##
 
 - Extended date filters to recognise month names.

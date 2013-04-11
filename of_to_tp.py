@@ -1,4 +1,4 @@
-from treemodel import traverse_list, traverse_list, Visitor
+from treemodel import traverse_list, Visitor
 from omnifocus import build_model, find_database
 import os
 import codecs
@@ -23,7 +23,7 @@ class PrintTaskpaperVisitor(Visitor):
         self.depth-=1
     def begin_task (self, task):
         if len(task.children) == 0:
-            print >>self.out, self.tabs() + '- ' + task.name + self.tags(task.date_completed)
+            print >>self.out, self.tabs() + '- ' + task.name + self.tags(task)
         else:
             print >>self.out, self.tabs() + task.name + ':'
         self.depth+=1
@@ -34,11 +34,22 @@ class PrintTaskpaperVisitor(Visitor):
         self.depth+=1
     def end_context (self, context):
         self.depth-=1
-    def tags (self, completed):
-        if completed != None:
-            return completed.strftime(" @done(%Y-%m-%d-%a)")
+    def tags (self, item):
+        tags = ''
+        if item.date_completed != None:
+            tags = tags + item.date_completed.strftime(" @done(%Y-%m-%d)")
         else:
-            return " @todo"
+            tags = tags + " @todo"
+        if item.flagged:
+            tags = tags + " @flagged"
+        if item.date_to_start != None:
+            tags = tags + item.date_to_start.strftime(" @start(%Y-%m-%d)")
+        if item.date_due != None:
+            tags = tags + item.date_due.strftime(" @due(%Y-%m-%d)")
+        # This may be too noisy
+        #if item.context != None:
+        #    tags = tags + ' @' + ''.join (item.context.name.split ())
+        return tags
     def tabs (self):
         return '\t' * (self.depth)
 
@@ -53,7 +64,7 @@ if __name__ == "__main__":
     print >>out, 'Projects:'
     traverse_list (PrintTaskpaperVisitor (out, depth=1), root_projects_and_folders)
     print >>out, 'Contexts:'
-    traverse_contexts (PrintTaskpaperVisitor (out, depth=1), root_contexts)
+    traverse_list (PrintTaskpaperVisitor (out, depth=1), root_contexts)
     
     out.close()
     
