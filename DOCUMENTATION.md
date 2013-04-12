@@ -1,9 +1,10 @@
-# Ofexport Command: #
+# ofexport Command: #
 
 Avenues for abuse:
 
 - Blog: [Poor Signal](http://poor-signal.blogspot.co.uk)
 - Twitter: [@psidnell](http://twitter.com/psidnell)
+- [OmniFocus Extras Forum Thread](http://forums.omnigroup.com/showthread.php?t=29081)
 
 ## Overview:
 
