@@ -26,7 +26,7 @@ from of_to_text import PrintTextVisitor
 from of_to_md import PrintMarkdownVisitor
 from of_to_opml import PrintOpmlVisitor
 from of_to_html import PrintHtmlVisitor
-from visitors import FolderNameFilterVisitor, ProjectNameFilterVisitor, ProjectFlaggedFilterVisitor, ProjectDueFilterVisitor, ProjectStartFilterVisitor, ContextNameFilterVisitor, TaskDueFilterVisitor, TaskNameFilterVisitor, TaskStartFilterVisitor, TaskCompletionFilterVisitor, ProjectCompletionFilterVisitor, TaskCompletionSortingVisitor, TaskFlaggedFilterVisitor, PruningFilterVisitor, FlatteningVisitor
+from visitors import FolderNameFilterVisitor, ProjectNameFilterVisitor, ProjectFlaggedFilterVisitor, FolderNameSortingVisitor, ProjectDueFilterVisitor, ProjectStartFilterVisitor, ContextNameFilterVisitor, TaskDueFilterVisitor, TaskNameFilterVisitor, TaskStartFilterVisitor, TaskCompletionFilterVisitor, ProjectCompletionFilterVisitor, TaskCompletionSortingVisitor, TaskFlaggedFilterVisitor, PruningFilterVisitor, FlatteningVisitor
 
 VERSION = "1.0.3 (????-??-??)" 
      
@@ -97,6 +97,7 @@ def print_help ():
     print '  --tfe: exclude flagged tasks'
     
     print '  --tsc: sort tasks by completion'
+    print '  --fsa: sort folders/projects alphabetically'
     
     print '  -F: flatten project/task structure'
     print '  --prune: prune empty projects or folders'
@@ -124,6 +125,7 @@ if __name__ == "__main__":
                                                        'tdi=','tde=',
                                                        'tfi','tfe',
                                                        'tsc',
+                                                       'fsa',
                                                        'help',
                                                        'open',
                                                        'prune',
@@ -211,6 +213,11 @@ if __name__ == "__main__":
         elif '--pfe' == opt:
             visitor = ProjectFlaggedFilterVisitor (include=False)
             print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
+        elif '--fsa' == opt:
+            visitor = FolderNameSortingVisitor ()
+            print opt + '\t= ' + str (visitor)
+            root_projects_and_folders.sort(key=lambda item:item.name) # Have to sort the top level list too
             traverse_list (visitor, items)
             
         # CONTEXT

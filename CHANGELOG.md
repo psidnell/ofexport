@@ -2,7 +2,7 @@
 
 ## 1.0.3 (????-??-??) ##
 
-- ???
+- Added a alphabetic project/folder sorting filter
 
 ## 1.0.2 (2013-12) ##
 

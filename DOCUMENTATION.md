@@ -2,13 +2,21 @@
 
 Avenues for abuse:
 
-- Blog: [Poor Signal](http://poor-signal.blogspot.co.uk)
-- Twitter: [@psidnell](http://twitter.com/psidnell)
-- [OmniFocus Extras Forum Thread](http://forums.omnigroup.com/showthread.php?t=29081)
+- [Blog: Poor Signal](http://poor-signal.blogspot.co.uk)
+- [Twitter: @psidnell](http://twitter.com/psidnell)
+
+Related Applications:
+
+- [OmniFocus](http://www.omnigroup.com/products/omnifocus/)
+- [OmniFocus Extras ofexport Forum Thread](http://forums.omnigroup.com/showthread.php?t=29081)
+- [Taskpaper](http://www.hogbaysoftware.com/products/taskpaper)
+- [TaskPaper ofexport Forum Thread](https://groups.google.com/forum/?fromgroups=#!topic/taskpaper/7xQ4lE_1O9I)
+- [Hazel](http://www.noodlesoft.com/hazel.php)
+- [Dropbox](http://www.dropbox.com)
 
 ## Overview:
 
-**ofexport** is a command line utility that reads and exports the OmniFocus database.
+**ofexport** is a command line utility that reads and exports the task database from the OmniFocus application.
 
 For example:
 
@@ -19,9 +27,9 @@ will produce a TaskPaper document on your desktop containing all items completed
 ### Example Uses ###
 
 - Generating project/time specific reports.
-- Exporting key tasks to devices/OSs that don't support OmniFocus.
+- Exporting key tasks to devices/OSs that don't support OmniFocus via Dropbox.
 - Backing up the OmniFocus database to a form searchable by other tools.
-- Automatically creating reports on demand with Hazel.
+- Automatically creating reports on demand with Hazel
 
 ### Features
 

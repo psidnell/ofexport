@@ -232,7 +232,13 @@ class TaskCompletionSortingVisitor (Visitor):
             return item.date_completed
         return datetime.today()
     def __str__ (self):
-        return 'Sort'
+        return 'Tasks sorted by completion'
+    
+class FolderNameSortingVisitor (Visitor):
+    def end_folder (self, folder):
+        folder.children.sort(key=lambda item:item.name)
+    def __str__ (self):
+        return 'Folders/Projects sorted by name'
     
 class PruningFilterVisitor (Visitor):
     def end_project (self, project):
