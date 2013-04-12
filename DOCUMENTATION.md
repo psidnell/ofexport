@@ -3,7 +3,7 @@
 Avenues for abuse:
 
 - Blog: [Poor Signal](http://poor-signal.blogspot.co.uk)
-- Twitted: [@psidnell](http://twitter.com/psidnell)
+- Twitter: [@psidnell](http://twitter.com/psidnell)
 
 ## Overview:
 
@@ -57,7 +57,7 @@ will produce a TaskPaper document on your desktop containing all items completed
 
 This pre-supposes a certain familiarity with the command line.
 
-- The sources is on [github](https://github.com/psidnell/ofexport).
+- The source is on [github](https://github.com/psidnell/ofexport).
 - Download the [zip file](https://github.com/psidnell/ofexport/archive/master.zip).
 - Double click on the zip file to unpack it.
 - Rename and move the folder to wherever you want it to live.
