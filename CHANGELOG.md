@@ -1,6 +1,11 @@
 # Changes #
 
+## 1.0.3 (????-??-??) ##
+
+- ???
+
 ## 1.0.2 (2013-12) ##
+
 - Added the Apache V2 License to the source and documentation.
 - Fix a bug caused by allowing newlines in task titles.
 - Improved the documentation

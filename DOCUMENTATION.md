@@ -1,5 +1,10 @@
-# Ofexport Command: #
+# ofexport Command: #
 
+Avenues for abuse:
+
+- Blog: [Poor Signal](http://poor-signal.blogspot.co.uk)
+- Twitter: [@psidnell](http://twitter.com/psidnell)
+- [OmniFocus Extras Forum Thread](http://forums.omnigroup.com/showthread.php?t=29081)
 
 ## Overview:
 
@@ -53,8 +58,8 @@ will produce a TaskPaper document on your desktop containing all items completed
 
 This pre-supposes a certain familiarity with the command line.
 
-- The sources is on [github](https://github.com/psidnell/omnifocus).
-- Download the [zip file](https://github.com/psidnell/omnifocus/archive/master.zip).
+- The source is on [github](https://github.com/psidnell/ofexport).
+- Download the [zip file](https://github.com/psidnell/ofexport/archive/master.zip).
 - Double click on the zip file to unpack it.
 - Rename and move the folder to wherever you want it to live.
 - Edit the **ofexport** script and change the path to reflect the correct new location of  your files.
