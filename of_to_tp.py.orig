@@ -1,3 +1,5 @@
+<<<<<<< HEAD
+=======
 '''
 Copyright 2013 Paul Sidnell
 
@@ -14,6 +16,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
+>>>>>>> feature/V_1.0.1
 from treemodel import traverse_list, Visitor
 from omnifocus import build_model, find_database
 import os
@@ -51,6 +54,23 @@ class PrintTaskpaperVisitor(Visitor):
     def end_context (self, context):
         self.depth-=1
     def tags (self, item):
+<<<<<<< HEAD
+        tags = ''
+        if item.date_completed != None:
+            tags = tags + item.date_completed.strftime(" @done(%Y-%m-%d)")
+        else:
+            tags = tags + " @todo"
+        if item.flagged:
+            tags = tags + " @flagged"
+        if item.date_to_start != None:
+            tags = tags + item.date_to_start.strftime(" @start(%Y-%m-%d)")
+        if item.date_due != None:
+            tags = tags + item.date_due.strftime(" @due(%Y-%m-%d)")
+        # This may be too noisy
+        #if item.context != None:
+        #    tags = tags + ' @' + ''.join (item.context.name.split ())
+        return tags
+=======
         tags = []
         if item.date_completed != None:
             tags.append(item.date_completed.strftime("@done(%Y-%m-%d)"))
@@ -67,6 +87,7 @@ class PrintTaskpaperVisitor(Visitor):
         if len (tags) > 0:
             return ' ' + ' '.join(tags)
         return ''
+>>>>>>> feature/V_1.0.1
     def tabs (self):
         return '\t' * (self.depth)
 
