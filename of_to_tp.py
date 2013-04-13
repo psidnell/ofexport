@@ -59,7 +59,7 @@ class PrintTaskpaperVisitor(Visitor):
         if item.flagged:
             tags.append ("@flagged")
         if item.date_to_start != None:
-            tags.append ("@start(%Y-%m-%d)")
+            tags.append(item.date_to_start.strftime("@done(%Y-%m-%d)"))
         if item.date_due != None:
             tags.append (item.date_due.strftime("@due(%Y-%m-%d)"))
         if item.context != None:

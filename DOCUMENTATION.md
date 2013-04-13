@@ -2,26 +2,35 @@
 
 Avenues for abuse:
 
-- Blog: [Poor Signal](http://poor-signal.blogspot.co.uk)
-- Twitter: [@psidnell](http://twitter.com/psidnell)
-- [OmniFocus Extras Forum Thread](http://forums.omnigroup.com/showthread.php?t=29081)
+- [Blog: Poor Signal](http://poor-signal.blogspot.co.uk)
+- [Twitter: @psidnell](http://twitter.com/psidnell)
+
+Related Applications:
+
+- [OmniFocus](http://www.omnigroup.com/products/omnifocus/)
+- [OmniFocus Extras ofexport Forum Thread](http://forums.omnigroup.com/showthread.php?t=29081)
+- [Taskpaper](http://www.hogbaysoftware.com/products/taskpaper)
+- [TaskPaper ofexport Forum Thread](https://groups.google.com/forum/?fromgroups=#!topic/taskpaper/7xQ4lE_1O9I)
+- [Hazel](http://www.noodlesoft.com/hazel.php)
+- [Dropbox](http://www.dropbox.com)
 
 ## Overview:
 
-**ofexport** is a command line utility that reads and exports the OmniFocus database.
+**ofexport** is a command line utility that reads and exports the task database from the OmniFocus application.
 
 For example:
 
-        ofexport --fi '^Work' --tci 'this week' --prune -o ~/Desktop/doc.taskpaper --open
+        ofexport -i Work --tci "this week" -o ~/Desktop/doc.taskpaper --open
 
-will produce a TaskPaper document on your desktop containing all items completed this week from your work folder and open it (if you have TaskPaper installed).
+will produce a TaskPaper document on your desktop containing all items completed this week related to "Work" and open it (if you have TaskPaper installed).
 
 ### Example Uses ###
 
 - Generating project/time specific reports.
-- Exporting key tasks to devices/OSs that don't support OmniFocus.
+- Creating web content.
+- Exporting key tasks to devices/OSs that don't support OmniFocus via Dropbox.
 - Backing up the OmniFocus database to a form searchable by other tools.
-- Automatically creating reports on demand with Hazel.
+- Automatically creating reports on demand with Hazel whenever OmniFocus writes its database.
 
 ### Features
 
@@ -35,23 +44,26 @@ will produce a TaskPaper document on your desktop containing all items completed
 
 **Filter what gets exported:**
 
-- Include/exclude tasks, projects, contexts and folders with text searches (regular expressions)
-- Include/exclude tasks and projects by completion date (regular expressions and "human" ones)
+- Include/exclude tasks, projects and folders with text searches (regular expressions)
+- Include/exclude tasks and projects by flag state.
+- Include/exclude, tasks and projects by start/completion/due date.
 
-**Perform some restructuring of the data:**
+**Restructure the data:**
 
 - Flatten the outport document to create a simpler document (just projects containing tasks)
-- Sort by various criteria
+- Sort tasks by completion date or projects by name.
+- Eliminate empty projects/folders.
 
 **Open**
 
-- **ofexport** is build on a re-useable python library.
+- **ofexport** is built on a re-useable python library.
 - You can use this in your own tools.
 - The code is licenced under the [Apache License](http://opensource.org/licenses/Apache-2.0)
 
-**Coming Soon**
+**Planned Features**
 
-- Custom formatting for document types.
+- Context Mode.
+- Custom template based formatting for document types.
 - "Tagging related" features.
 
 ## Download/Installation:
@@ -70,7 +82,7 @@ This pre-supposes a certain familiarity with the command line.
 
 ## Tutorial:
 		
-To get help on usage and the full list of options ,run the command with no arguments:-
+To get help on usage and the full list of options, run the command with no arguments:-
 
         ofexport
 
@@ -78,17 +90,18 @@ A simple example of usage is:-
 
         ofexport -o report.txt
 
-This produces a not particularly useful text file (report.txt) of your entire task database.
+This produces a not particularly useful and possibly huge text file (report.txt) of your entire task database.
 
-To get useful data out we want to start using more structured formats and filters.
+To get useful data out we want to start using more structured file formats and filters.
 
 ### File Formats:
 
-The format of the report file is controlled by the suffix of the output file. So by running:-
+The format of the report file is controlled by the suffix of the output file. So by running:
 
         ofexport -o report.txt
 
-you'll get a text file. By changing the suffix you'll get different formats:-
+you'll get a text file. By changing the suffix you'll get different formats:
+
 - .txt or .text: a simple text file
 - .md or .markdown: a Markdown file
 - .ft or .foldingtext: a Folding Text document (the same as .md)
@@ -98,15 +111,77 @@ you'll get a text file. By changing the suffix you'll get different formats:-
 
 ### Filters:
 
-Filters are a powerful way of controlling the content or structure of your report. A minimal useful example is:-
+Filters are a powerful way of controlling the content or structure of your report.
 
-        ofexport -o report.tp --open --tci 'this week' --prune
+Filters generally have two forms: **include** and **exclude**.
 
-This exports everything you've completed this week to a taskpaper document (report.tp) and opens it. The --tci and --prune options are both examples of filters.
+We'll be referring to the following structure:
 
-In this case, the --tci filter (task completion include) includes only those tasks that were completed this week, eliminating all others. The resultant document would probably have a lot of empty folders and projects in it (because so many tasks have been filtered out). The  --prune filter eliminates any and all projects and folders that contain no tasks. The resultant document should be a pretty readable summary of what you've completed this week.
+    Folder: Home
+        Project: Cat
+                Task: Feed the cat junk
+                Task: Train Tiddles to juggle
+    Folder Work
+        Project: Mail
+                Task: Send receipts
+                Task: Purge junk
+ 
+#### Include Filters
 
-The core filters are:-
+When an include filter matches an item then it (and it's descendants, and all items to the root) will appear in the report. All other items will be eliminated.
+
+If you ran an include filter searching for "Work" you'd get:
+
+    Folder Work
+        Project: Mail
+                Task: Send receipts
+                Task: Purge junk
+
+If you ran a filter searching for "junk" you'd get:
+
+    Folder: Home
+        Project: Cat
+                Task: Feed the cat junk
+    Folder Work
+        Project: Mail
+                Task: Purge junk
+
+If you ran a filter searching for "Cat" you'd get:
+
+    Folder: Home
+        Project: Cat
+                Task: Feed the cat junk
+                Task: Train Tiddles to juggle
+ 
+#### Exclude Filters ####
+
+When an exclude filter matches an item then it (and it's descendants) will not in the report. All other items will be retained.
+
+If you ran an exclude filter searching for 'junk' you'd get:
+
+    Folder: Home
+        Project: Cat
+                Task: Train Tiddles to juggle
+    Folder Work
+        Project: Mail
+                Task: Send receipts
+ 
+If you ran an exclude filter searching for ''Cat" you'd get:
+
+    Folder: Home
+    Folder Work
+        Project: Mail
+                Task: Send receipts
+                Task: Purge junk
+
+#### Filter List ####
+
+**Generic**
+
+        -i regexp: include anything matching regexp
+        -e regexp: exclude anything matching regexp
+        --Fi regexp: include anything flagged
+        --Fe regexp: exclude anything flagged
 
 **Projects**
 
@@ -148,24 +223,17 @@ The core filters are:-
 **Misc**
 
         -F: flatten project/task structure
+        --prune: Remove empty projects/folders
 
-The important thing to note about filters is that you can specify as many as you like and they are executed in the order you specify.
+#### Multiple Filters ####
 
-It's possible to create quite sophisticated queries on your OmniFocus database by using a series of queries and regular expressions but even without an in-depth knowledge of what a regular expression is it's possible to achieve white a lot.
+The important thing to note about filters is that you can specify as many as you like and they are executed in the order you specify. If there are multiple filters then the output of one is passed to the next and so on.
 
-Filters respect the tree structure of the tasks in your OmniFocus database. Filters are applied to all the items (folders, tasks, projects or contexts) in your database. When the filter is applied to an item, if it matches then it and all it's descendent's will appear in the output report. If the match fails on an item then that item (and all it's descendants) are eliminated from the output report.
+So you might start by including only your work folder, then exclude any project with "Routine" in the title, the include only items completed today.
 
-If there are multiple filters then the output of one is passed to the next and so on.
-
-Most of the filters come in two flavours, include and exclude with one being the inverse of the other.
-
-Filters are type specific: if you use a folder filter to include or exclude a folder and you have projects at the root level then the filter will ignore it and it will appear in your report.
+It's possible to create quite sophisticated queries on your OmniFocus database by using a series of includes, excludes and regular expressions but even without an in-depth knowledge of what a regular expressions are it's possible to achieve white a lot.
 
 ### Filtering on Dates:
-
-The core date format is YYYY-MM-DD (sorry America) largely because Taskpaper requires this format so that sorting works (I may provide configuration in the future).
-
-A week is considered to start on Monday.
 
 A specific day can be expressed as:
 
@@ -187,18 +255,22 @@ A range of dates can be expressed as:
 - "last week"
 - "none" or "" - only matches items with no date
 - "any" - only matches items with a date
-	
+
+#### Pruning ####
+
+You might run a filter that eliminates a lot of tasks and leaves a lot of empty projects or folders in your report. If you don't want to see these then use the prune option.
+
 ### Examples:
 
-This produces a document containing all tasks completed today from any folder with "Work" in it's title:-
+This produces a document containing all tasks completed yesterday from any folder with "Work" in it's title:
 	
-        ofexport -o report.tp --fi Work --tci 'today' --prune --open
+        ofexport -o report.tp --fi Work --tci 'yesterday' --prune --open
 	
-This uses a little regular expression magic to create a document containing all tasks completed today from any folder with the exact name "Work":-
+This uses a little regular expression magic to create a document containing all tasks completed today from any folder with the exact name "Work":
 	
         ofexport -o report.tp --fi '^Work$' --tci 'today' --prune --open
 	
-This produces a document containing all tasks completed today from any folder that does NOT have "Work" in it's title:-
+This produces a document containing all tasks completed today from any folder that does NOT have "Work" in it's title:
 	
         ofexport -o report.tp --fe Work --tci 'today' --prune --open
 
@@ -206,13 +278,13 @@ This uses a little regular expression magic to create a document containing all 
 	
         ofexport -o report.tp --fi '^Work$|^Home$' --tci 'today' --prune --open
 
-This produces a document containing all tasks completed today from any folder with "Work" in it's title and the flattens/simplifies the indenting:-
+This produces a document containing all tasks completed today from any folder with "Work" in it's title and the flattens/simplifies the indenting:
 	
         ofexport -o report.tp --fi Work --tci 'today' --prune -F --open
 
 This produces a report showing all tasks that contain "Beth" and their enclosing projects:-
 			
-        ofexport -o report.tp --ti 'Beth' --prune --open -F
+        ofexport -o report.tp -i 'Beth' --prune --open -F
 
 This produces the report of what I have yet to do on this project			
 
@@ -220,11 +292,12 @@ This produces the report of what I have yet to do on this project
 
 ### Tips and Tricks ###
 
-- If you're generating a TaskPaper file you can include @tags in your task text and they'll be recognised by Taskpaper when it loads the fie.
+- If you're generating a TaskPaper file you can include @tags in your task text and they'll be recognised by TaskPaper when it loads the fie.
+- Add filters one at a time and see what happens. Add the flatten/prune filters last since they can make it hard to diagnose why you're getting unexpected items in your output.
 
 ### Pitfalls ###
 
-**Seeing things you don't expect in the report:** This happens a lot with task groups. If you create a filter to show all completed tasks then you'll get them in your report - and all their children even if they are completed. That's the way filters are designed. This seems intuitive for folders (show me everything in X) but less so here. If you then flatten the report you'll see a mix of completed/uncompleted tasks and probably assume it's a bug (which is arguable). You wight want to consider flattening before filtering on completion or alternatively including all completed tasks then excluding uncompleted tasks. Nobody said it was easy.
+**Seeing things you don't expect in the report:** This happens a lot with task groups. If you create a filter to show all completed tasks then you'll get them in your report - and all their children even if they are completed. That's the way filters are designed. This seems intuitive for folders (show me everything in X) but less so here. If you then flatten the report you'll see a mix of completed/uncompleted tasks and probably assume it's a bug (which is arguable). You might want to consider flattening before filtering on completion or alternatively including all completed tasks then excluding uncompleted tasks. Nobody said it was easy.
 
 # License #
 

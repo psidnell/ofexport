@@ -1,6 +1,15 @@
 # Changes #
 
+## 1.0.3 (2013-04-13) ##
+
+- Big reworking of filter logic to squash a design bug. 
+- Added a alphabetic project/folder sorting filter.
+- Added -i/-e simple filters that searches all text types.
+- Added --Fi/--Fe simple filters that work on any flagged type.
+- More documentation.
+
 ## 1.0.2 (2013-12) ##
+
 - Added the Apache V2 License to the source and documentation.
 - Fix a bug caused by allowing newlines in task titles.
 - Improved the documentation

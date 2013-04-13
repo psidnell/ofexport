@@ -14,12 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-from treemodel import Visitor
+from treemodel import Visitor, TASK, PROJECT
 from datematch import process_date_specifier
 import re
 from datetime import datetime
 
-SELECTED='visitors.selected'
+INCLUDED='INCLUDED'
+PATH_TO_INCLUDED='PATH_TO_INCLUDED'
 
 def match_name (item, regexp):
         return re.search (regexp, item.name) != None
@@ -49,31 +50,73 @@ def match_completed (item, date_range):
 def match_flagged (item, ignore):
         return item.flagged
 
-'''
-When we explicitly match an item we want all it's descendants
-matched unconditionally - even if they would have failed the match
-we're running. The marked flag isn't enough since it's set by default
-so we need another to represent the selection status just while we're
-running a particular filter. We must remember to remove it when we're
-done with a node or subsequent filters won't work properly
-'''
+def set_attrib_to_root (item, name, value):
+    if item != None:
+        item.attribs[name] = value
+        set_attrib_to_root (item.parent, name, value)
+    
 class BaseFilterVisitor(Visitor):
     def __init__(self, include=True):
         self.filter = None
         self.include = include
     def begin_any (self, item):
-        # inherit the SELECTED status
-        if item.parent == None:
-            item.attribs[SELECTED] = False
+        
+        item.attribs[PATH_TO_INCLUDED] = False
+        if item.parent != None:
+            # Inherit this attribute
+            item.attribs[INCLUDED] = item.parent.attribs[INCLUDED]
         else:
-            item.attribs[SELECTED] = item.parent.attribs[SELECTED]
+            item.attribs[INCLUDED] = False
     def end_any (self, item):
-        del item.attribs[SELECTED] # for the next filter
+        if self.include and not (item.attribs[INCLUDED] or item.attribs[PATH_TO_INCLUDED]):
+            item.marked = False
+        # We've finished processing the node, tidy up
+        # and avoid confusing the next filter.
+        del (item.attribs[INCLUDED])
+        del (item.attribs[PATH_TO_INCLUDED])
     def set_item_matched (self, item, matched):
-        if not self.include:
-            matched = not matched
-        item.marked = matched
-        item.attribs[SELECTED] = True
+        # invoked from begin_XXX
+        if item.attribs[INCLUDED]:
+            # The decision has already been made
+            return
+    
+        if self.include:
+            if matched:
+                # Then we want this node in the output and want to stop
+                # this filter testing removing any parents or children of this node
+                item.attribs[INCLUDED] = True
+                set_attrib_to_root (item.parent, PATH_TO_INCLUDED, True)
+        else: # In exclude mode
+            if matched:
+                # This node is toast
+                item.marked = False
+            else:
+                # We haven't excluded it so it stays
+                pass
+
+class AnyNameFilterVisitor(BaseFilterVisitor):
+    def __init__(self, filtr, include=True):
+        BaseFilterVisitor.__init__(self, include)
+        self.filter = filtr
+        self.match_fn = match_name
+    def begin_any (self, item):
+        BaseFilterVisitor.begin_any (self, item)
+        matched = self.match_fn(item, self.filter)
+        self.set_item_matched(item, matched);
+    def __str__(self):
+        return 'name ' + includes (self.include) + ' "' + self.filter + '"'
+    
+class AnyFlaggedFilterVisitor(BaseFilterVisitor):
+    def __init__(self, include=True):
+        BaseFilterVisitor.__init__(self, include)
+        self.match_fn = match_flagged
+    def begin_any (self, item):
+        BaseFilterVisitor.begin_any (self, item)
+        if item.type == PROJECT or item.type == TASK:
+            matched = self.match_fn(item, self.filter)
+            self.set_item_matched(item, matched);
+    def __str__(self):
+        return 'name ' + includes (self.include) + ' flagged'
 
 class FolderFilterVisitor(BaseFilterVisitor):
     def __init__(self, filtr, match_fn, include=True):
@@ -81,9 +124,8 @@ class FolderFilterVisitor(BaseFilterVisitor):
         self.filter = filtr
         self.match_fn = match_fn
     def begin_folder (self, folder):
-        if not folder.attribs[SELECTED]:
-            matched = self.match_fn(folder, self.filter)
-            self.set_item_matched(folder, matched);
+        matched = self.match_fn(folder, self.filter)
+        self.set_item_matched(folder, matched);
             
 class TaskFilterVisitor(BaseFilterVisitor):
     def __init__(self, filtr, match_fn, include=True):
@@ -91,9 +133,8 @@ class TaskFilterVisitor(BaseFilterVisitor):
         self.filter = filtr
         self.match_fn = match_fn
     def begin_task (self, task):
-        if not task.attribs[SELECTED]:
-            matched = self.match_fn(task, self.filter)
-            self.set_item_matched(task, matched);
+        matched = self.match_fn(task, self.filter)
+        self.set_item_matched(task, matched);
             
 class ProjectFilterVisitor(BaseFilterVisitor):
     def __init__(self, filtr, match_fn, include=True):
@@ -101,9 +142,8 @@ class ProjectFilterVisitor(BaseFilterVisitor):
         self.filter = filtr
         self.match_fn = match_fn
     def begin_project (self, project):
-        if not project.attribs[SELECTED]:
-            matched = self.match_fn(project, self.filter)
-            self.set_item_matched(project, matched);
+        matched = self.match_fn(project, self.filter)
+        self.set_item_matched(project, matched);
             
 class ContextFilterVisitor(BaseFilterVisitor):
     def __init__(self, filtr, match_fn, include=True):
@@ -111,9 +151,8 @@ class ContextFilterVisitor(BaseFilterVisitor):
         self.filter = filtr
         self.match_fn = match_fn
     def begin_context (self, context):
-        if not context.attribs[SELECTED]:
-            matched = self.match_fn(context, self.filter)
-            self.set_item_matched(context, matched);
+        matched = self.match_fn(context, self.filter)
+        self.set_item_matched(context, matched);
 
 def includes (include):
     if include:
@@ -232,7 +271,13 @@ class TaskCompletionSortingVisitor (Visitor):
             return item.date_completed
         return datetime.today()
     def __str__ (self):
-        return 'Sort'
+        return 'Tasks sorted by completion'
+    
+class FolderNameSortingVisitor (Visitor):
+    def end_folder (self, folder):
+        folder.children.sort(key=lambda item:item.name)
+    def __str__ (self):
+        return 'Folders/Projects sorted by name'
     
 class PruningFilterVisitor (Visitor):
     def end_project (self, project):
