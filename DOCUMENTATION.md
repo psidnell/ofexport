@@ -53,7 +53,7 @@ will produce a TaskPaper document on your desktop containing all items completed
 
 **Open**
 
-- **ofexport** is build on a re-useable python library.
+- **ofexport** is built on a re-useable python library.
 - You can use this in your own tools.
 - The code is licenced under the [Apache License](http://opensource.org/licenses/Apache-2.0)
 
@@ -229,6 +229,7 @@ This produces the report of what I have yet to do on this project
 ### Tips and Tricks ###
 
 - If you're generating a TaskPaper file you can include @tags in your task text and they'll be recognised by Taskpaper when it loads the fie.
+- Add filters one at a time and see what happens. Add the flatten/prune filters last since they can make it hard to diagnose why you're getting unexpected items in your output.
 
 ### Pitfalls ###
 
