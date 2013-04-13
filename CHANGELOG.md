@@ -2,7 +2,9 @@
 
 ## 1.0.3 (????-??-??) ##
 
-- Added a alphabetic project/folder sorting filter
+- Big reworking of filter logic to squash a design bug. 
+- Added a alphabetic project/folder sorting filter.
+- Added -i/-e simple filter that searches all text types.
 
 ## 1.0.2 (2013-12) ##
 

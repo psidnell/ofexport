@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-from treemodel import Visitor
+from treemodel import Visitor, TASK, PROJECT
 from datematch import process_date_specifier
 import re
 from datetime import datetime
@@ -105,6 +105,18 @@ class AnyNameFilterVisitor(BaseFilterVisitor):
         self.set_item_matched(item, matched);
     def __str__(self):
         return 'name ' + includes (self.include) + ' "' + self.filter + '"'
+    
+class AnyFlaggedFilterVisitor(BaseFilterVisitor):
+    def __init__(self, include=True):
+        BaseFilterVisitor.__init__(self, include)
+        self.match_fn = match_flagged
+    def begin_any (self, item):
+        BaseFilterVisitor.begin_any (self, item)
+        if item.type == PROJECT or item.type == TASK:
+            matched = self.match_fn(item, self.filter)
+            self.set_item_matched(item, matched);
+    def __str__(self):
+        return 'name ' + includes (self.include) + ' flagged'
 
 class FolderFilterVisitor(BaseFilterVisitor):
     def __init__(self, filtr, match_fn, include=True):

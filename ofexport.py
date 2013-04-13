@@ -26,7 +26,7 @@ from of_to_text import PrintTextVisitor
 from of_to_md import PrintMarkdownVisitor
 from of_to_opml import PrintOpmlVisitor
 from of_to_html import PrintHtmlVisitor
-from visitors import AnyNameFilterVisitor, FolderNameFilterVisitor, ProjectNameFilterVisitor, ProjectFlaggedFilterVisitor, FolderNameSortingVisitor, ProjectDueFilterVisitor, ProjectStartFilterVisitor, ContextNameFilterVisitor, TaskDueFilterVisitor, TaskNameFilterVisitor, TaskStartFilterVisitor, TaskCompletionFilterVisitor, ProjectCompletionFilterVisitor, TaskCompletionSortingVisitor, TaskFlaggedFilterVisitor, PruningFilterVisitor, FlatteningVisitor
+from visitors import AnyNameFilterVisitor, AnyFlaggedFilterVisitor, FolderNameFilterVisitor, ProjectNameFilterVisitor, ProjectFlaggedFilterVisitor, FolderNameSortingVisitor, ProjectDueFilterVisitor, ProjectStartFilterVisitor, ContextNameFilterVisitor, TaskDueFilterVisitor, TaskNameFilterVisitor, TaskStartFilterVisitor, TaskCompletionFilterVisitor, ProjectCompletionFilterVisitor, TaskCompletionSortingVisitor, TaskFlaggedFilterVisitor, PruningFilterVisitor, FlatteningVisitor
 
 VERSION = "1.0.3 (????-??-??)" 
      
@@ -54,7 +54,8 @@ def print_help ():
     print
     print 'options:'
     print '  -h,-?,--help'
-    print '  -C: context mode (as opposed to project mode)'
+    # This is broken - keep quiet about it for now:
+    # print '  -C: context mode (as opposed to project mode)'
     print '  -o file_name: the output file name, must end in a recognised suffix - see documentation'
     print '  --open: open the output file with the registered application (if one is installed)'
     print
@@ -62,6 +63,9 @@ def print_help ():
     
     print '  -i regexp: include anything matching regexp'
     print '  -e regexp: exclude anything matching regexp'
+    
+    print '  --Fi regexp: include anything flagged'
+    print '  --Fe regexp: exclude anything flagged'
     
     print '  --pi regexp: include projects matching regexp'
     print '  --pe regexp: exclude projects matching regexp'
@@ -127,6 +131,7 @@ if __name__ == "__main__":
                                                        'tsi=','tse=',
                                                        'tdi=','tde=',
                                                        'tfi','tfe',
+                                                       'Fi','Fe',
                                                        'tsc',
                                                        'fsa',
                                                        'help',
@@ -175,7 +180,15 @@ if __name__ == "__main__":
             visitor = AnyNameFilterVisitor (arg, include=False)
             print opt + '\t= ' + str (visitor)
             traverse_list (visitor, items)
-            
+        elif '--Fi' == opt:
+            visitor = AnyFlaggedFilterVisitor (include=True)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
+        elif '--Fe' == opt:
+            visitor = AnyFlaggedFilterVisitor (include=False)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
+        
         # FOLDER
         elif '--fi' == opt:
             visitor = FolderNameFilterVisitor (arg, include=True)
