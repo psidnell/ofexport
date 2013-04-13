@@ -28,7 +28,7 @@ from of_to_opml import PrintOpmlVisitor
 from of_to_html import PrintHtmlVisitor
 from visitors import AnyNameFilterVisitor, AnyFlaggedFilterVisitor, FolderNameFilterVisitor, ProjectNameFilterVisitor, ProjectFlaggedFilterVisitor, FolderNameSortingVisitor, ProjectDueFilterVisitor, ProjectStartFilterVisitor, ContextNameFilterVisitor, TaskDueFilterVisitor, TaskNameFilterVisitor, TaskStartFilterVisitor, TaskCompletionFilterVisitor, ProjectCompletionFilterVisitor, TaskCompletionSortingVisitor, TaskFlaggedFilterVisitor, PruningFilterVisitor, FlatteningVisitor
 
-VERSION = "1.0.3 (????-??-??)" 
+VERSION = "1.0.3 (2013-04-13)" 
      
 def print_structure (visitor, root_projects_and_folders, root_contexts, project_mode):
     if project_mode:
