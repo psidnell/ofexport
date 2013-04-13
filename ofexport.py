@@ -26,9 +26,9 @@ from of_to_text import PrintTextVisitor
 from of_to_md import PrintMarkdownVisitor
 from of_to_opml import PrintOpmlVisitor
 from of_to_html import PrintHtmlVisitor
-from visitors import FolderNameFilterVisitor, ProjectNameFilterVisitor, ProjectFlaggedFilterVisitor, ProjectDueFilterVisitor, ProjectStartFilterVisitor, ContextNameFilterVisitor, TaskDueFilterVisitor, TaskNameFilterVisitor, TaskStartFilterVisitor, TaskCompletionFilterVisitor, ProjectCompletionFilterVisitor, TaskCompletionSortingVisitor, TaskFlaggedFilterVisitor, PruningFilterVisitor, FlatteningVisitor
+from visitors import AnyNameFilterVisitor, AnyFlaggedFilterVisitor, FolderNameFilterVisitor, ProjectNameFilterVisitor, ProjectFlaggedFilterVisitor, FolderNameSortingVisitor, ProjectDueFilterVisitor, ProjectStartFilterVisitor, ContextNameFilterVisitor, TaskDueFilterVisitor, TaskNameFilterVisitor, TaskStartFilterVisitor, TaskCompletionFilterVisitor, ProjectCompletionFilterVisitor, TaskCompletionSortingVisitor, TaskFlaggedFilterVisitor, PruningFilterVisitor, FlatteningVisitor
 
-VERSION = "1.0.2 (2013-04-12)" 
+VERSION = "1.0.3 (2013-04-13)" 
      
 def print_structure (visitor, root_projects_and_folders, root_contexts, project_mode):
     if project_mode:
@@ -54,11 +54,18 @@ def print_help ():
     print
     print 'options:'
     print '  -h,-?,--help'
-    print '  -C: context mode (as opposed to project mode)'
+    # This is broken - keep quiet about it for now:
+    # print '  -C: context mode (as opposed to project mode)'
     print '  -o file_name: the output file name, must end in a recognised suffix - see documentation'
     print '  --open: open the output file with the registered application (if one is installed)'
     print
     print 'filters:'
+    
+    print '  -i regexp: include anything matching regexp'
+    print '  -e regexp: exclude anything matching regexp'
+    
+    print '  --Fi regexp: include anything flagged'
+    print '  --Fe regexp: exclude anything flagged'
     
     print '  --pi regexp: include projects matching regexp'
     print '  --pe regexp: exclude projects matching regexp'
@@ -97,6 +104,7 @@ def print_help ():
     print '  --tfe: exclude flagged tasks'
     
     print '  --tsc: sort tasks by completion'
+    print '  --fsa: sort folders/projects alphabetically'
     
     print '  -F: flatten project/task structure'
     print '  --prune: prune empty projects or folders'
@@ -110,7 +118,7 @@ if __name__ == "__main__":
     file_name = None
     paul = False
         
-    opts, args = getopt.optlist, args = getopt.getopt(sys.argv[1:], 'hFC?o:',
+    opts, args = getopt.optlist, args = getopt.getopt(sys.argv[1:], 'hFC?o:i:e:',
                                                       ['fi=','fe=',
                                                        'ci=','ce=',
                                                        'pi=','pe=',
@@ -123,7 +131,9 @@ if __name__ == "__main__":
                                                        'tsi=','tse=',
                                                        'tdi=','tde=',
                                                        'tfi','tfe',
+                                                       'Fi','Fe',
                                                        'tsc',
+                                                       'fsa',
                                                        'help',
                                                        'open',
                                                        'prune',
@@ -161,8 +171,26 @@ if __name__ == "__main__":
         
     for opt, arg in opts:
         
+        # ANYTHING
+        if '-i' == opt:
+            visitor = AnyNameFilterVisitor (arg, include=True)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
+        elif '-e' == opt:
+            visitor = AnyNameFilterVisitor (arg, include=False)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
+        elif '--Fi' == opt:
+            visitor = AnyFlaggedFilterVisitor (include=True)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
+        elif '--Fe' == opt:
+            visitor = AnyFlaggedFilterVisitor (include=False)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
+        
         # FOLDER
-        if '--fi' == opt:
+        elif '--fi' == opt:
             visitor = FolderNameFilterVisitor (arg, include=True)
             print opt + '\t= ' + str (visitor)
             traverse_list (visitor, items)
@@ -211,6 +239,11 @@ if __name__ == "__main__":
         elif '--pfe' == opt:
             visitor = ProjectFlaggedFilterVisitor (include=False)
             print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
+        elif '--fsa' == opt:
+            visitor = FolderNameSortingVisitor ()
+            print opt + '\t= ' + str (visitor)
+            root_projects_and_folders.sort(key=lambda item:item.name) # Have to sort the top level list too
             traverse_list (visitor, items)
             
         # CONTEXT
