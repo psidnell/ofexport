@@ -94,6 +94,18 @@ class BaseFilterVisitor(Visitor):
                 # We haven't excluded it so it stays
                 pass
 
+class AnyNameFilterVisitor(BaseFilterVisitor):
+    def __init__(self, filtr, include=True):
+        BaseFilterVisitor.__init__(self, include)
+        self.filter = filtr
+        self.match_fn = match_name
+    def begin_any (self, item):
+        BaseFilterVisitor.begin_any (self, item)
+        matched = self.match_fn(item, self.filter)
+        self.set_item_matched(item, matched);
+    def __str__(self):
+        return 'name ' + includes (self.include) + ' "' + self.filter + '"'
+
 class FolderFilterVisitor(BaseFilterVisitor):
     def __init__(self, filtr, match_fn, include=True):
         BaseFilterVisitor.__init__(self, include)

@@ -26,7 +26,7 @@ from of_to_text import PrintTextVisitor
 from of_to_md import PrintMarkdownVisitor
 from of_to_opml import PrintOpmlVisitor
 from of_to_html import PrintHtmlVisitor
-from visitors import FolderNameFilterVisitor, ProjectNameFilterVisitor, ProjectFlaggedFilterVisitor, FolderNameSortingVisitor, ProjectDueFilterVisitor, ProjectStartFilterVisitor, ContextNameFilterVisitor, TaskDueFilterVisitor, TaskNameFilterVisitor, TaskStartFilterVisitor, TaskCompletionFilterVisitor, ProjectCompletionFilterVisitor, TaskCompletionSortingVisitor, TaskFlaggedFilterVisitor, PruningFilterVisitor, FlatteningVisitor
+from visitors import AnyNameFilterVisitor, FolderNameFilterVisitor, ProjectNameFilterVisitor, ProjectFlaggedFilterVisitor, FolderNameSortingVisitor, ProjectDueFilterVisitor, ProjectStartFilterVisitor, ContextNameFilterVisitor, TaskDueFilterVisitor, TaskNameFilterVisitor, TaskStartFilterVisitor, TaskCompletionFilterVisitor, ProjectCompletionFilterVisitor, TaskCompletionSortingVisitor, TaskFlaggedFilterVisitor, PruningFilterVisitor, FlatteningVisitor
 
 VERSION = "1.0.3 (????-??-??)" 
      
@@ -59,6 +59,9 @@ def print_help ():
     print '  --open: open the output file with the registered application (if one is installed)'
     print
     print 'filters:'
+    
+    print '  -i regexp: include anything matching regexp'
+    print '  -e regexp: exclude anything matching regexp'
     
     print '  --pi regexp: include projects matching regexp'
     print '  --pe regexp: exclude projects matching regexp'
@@ -111,7 +114,7 @@ if __name__ == "__main__":
     file_name = None
     paul = False
         
-    opts, args = getopt.optlist, args = getopt.getopt(sys.argv[1:], 'hFC?o:',
+    opts, args = getopt.optlist, args = getopt.getopt(sys.argv[1:], 'hFC?o:i:e:',
                                                       ['fi=','fe=',
                                                        'ci=','ce=',
                                                        'pi=','pe=',
@@ -163,8 +166,18 @@ if __name__ == "__main__":
         
     for opt, arg in opts:
         
+        # ANYTHING
+        if '-i' == opt:
+            visitor = AnyNameFilterVisitor (arg, include=True)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
+        elif '-e' == opt:
+            visitor = AnyNameFilterVisitor (arg, include=False)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items)
+            
         # FOLDER
-        if '--fi' == opt:
+        elif '--fi' == opt:
             visitor = FolderNameFilterVisitor (arg, include=True)
             print opt + '\t= ' + str (visitor)
             traverse_list (visitor, items)
