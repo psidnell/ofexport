@@ -1,7 +1,9 @@
 # ofexport Command: #
 
-Avenues for abuse:
+Avenues for help/abuse:
 
+- [Wiki](https://github.com/psidnell/ofexport/wiki)
+- [Bugs](https://github.com/psidnell/ofexport/issues)
 - [Blog: Poor Signal](http://poor-signal.blogspot.co.uk)
 - [Twitter: @psidnell](http://twitter.com/psidnell)
 
