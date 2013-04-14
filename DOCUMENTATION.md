@@ -1,4 +1,8 @@
-# ofexport Command: #
+# ofexport V1.0.4 #
+
+- [Changelog](https://github.com/psidnell/ofexport/blob/master/CHANGELOG.md)
+
+**WARNING:** If you don't know what a bash script is, have never used the command line or don't know what a correct $PATH variable looks like then reading on is probably just going to give you a headache.
 
 Avenues for help/abuse:
 

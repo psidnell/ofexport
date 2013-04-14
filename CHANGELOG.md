@@ -1,5 +1,6 @@
 # Changes #
 
+## 1.0.4 (??)
 ## 1.0.3 (2013-04-13) ##
 
 - Big reworking of filter logic to squash a design bug. 
