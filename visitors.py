@@ -20,6 +20,7 @@ import re
 from datetime import datetime
 
 INCLUDED='INCLUDED'
+EXCLUDED='EXCLUDED'
 PATH_TO_INCLUDED='PATH_TO_INCLUDED'
 
 def match_name (item, regexp):
@@ -63,23 +64,27 @@ class BaseFilterVisitor(Visitor):
         
         item.attribs[PATH_TO_INCLUDED] = False
         if item.parent != None:
-            # Inherit this attribute
+            # Inherit these attribute
             item.attribs[INCLUDED] = item.parent.attribs[INCLUDED]
+            item.attribs[EXCLUDED] = item.parent.attribs[EXCLUDED]
         else:
             item.attribs[INCLUDED] = False
+            item.attribs[EXCLUDED] = False
     def end_any (self, item):
         if self.include and not (item.attribs[INCLUDED] or item.attribs[PATH_TO_INCLUDED]):
             item.marked = False
         # We've finished processing the node, tidy up
         # and avoid confusing the next filter.
         del (item.attribs[INCLUDED])
+        del (item.attribs[EXCLUDED])
         del (item.attribs[PATH_TO_INCLUDED])
+    def match_required (self, item):
+        if item.attribs[INCLUDED] or item.attribs[EXCLUDED]:
+            # The decision has already been made
+            return False
+        return True
     def set_item_matched (self, item, matched):
         # invoked from begin_XXX
-        if item.attribs[INCLUDED]:
-            # The decision has already been made
-            return
-    
         if self.include:
             if matched:
                 # Then we want this node in the output and want to stop
@@ -101,8 +106,9 @@ class AnyNameFilterVisitor(BaseFilterVisitor):
         self.match_fn = match_name
     def begin_any (self, item):
         BaseFilterVisitor.begin_any (self, item)
-        matched = self.match_fn(item, self.filter)
-        self.set_item_matched(item, matched);
+        if self.match_required(item):
+            matched = self.match_fn(item, self.filter)
+            self.set_item_matched(item, matched);
     def __str__(self):
         return 'name ' + includes (self.include) + ' "' + self.filter + '"'
     
@@ -112,9 +118,10 @@ class AnyFlaggedFilterVisitor(BaseFilterVisitor):
         self.match_fn = match_flagged
     def begin_any (self, item):
         BaseFilterVisitor.begin_any (self, item)
-        if item.type == PROJECT or item.type == TASK:
-            matched = self.match_fn(item, self.filter)
-            self.set_item_matched(item, matched);
+        if self.match_required(item):
+            if item.type == PROJECT or item.type == TASK:
+                matched = self.match_fn(item, self.filter)
+                self.set_item_matched(item, matched);
     def __str__(self):
         return 'name ' + includes (self.include) + ' flagged'
 
@@ -124,8 +131,9 @@ class FolderFilterVisitor(BaseFilterVisitor):
         self.filter = filtr
         self.match_fn = match_fn
     def begin_folder (self, folder):
-        matched = self.match_fn(folder, self.filter)
-        self.set_item_matched(folder, matched);
+        if self.match_required(folder):
+            matched = self.match_fn(folder, self.filter)
+            self.set_item_matched(folder, matched);
             
 class TaskFilterVisitor(BaseFilterVisitor):
     def __init__(self, filtr, match_fn, include=True):
@@ -133,8 +141,9 @@ class TaskFilterVisitor(BaseFilterVisitor):
         self.filter = filtr
         self.match_fn = match_fn
     def begin_task (self, task):
-        matched = self.match_fn(task, self.filter)
-        self.set_item_matched(task, matched);
+        if self.match_required(task):
+            matched = self.match_fn(task, self.filter)
+            self.set_item_matched(task, matched);
             
 class ProjectFilterVisitor(BaseFilterVisitor):
     def __init__(self, filtr, match_fn, include=True):
@@ -142,8 +151,9 @@ class ProjectFilterVisitor(BaseFilterVisitor):
         self.filter = filtr
         self.match_fn = match_fn
     def begin_project (self, project):
-        matched = self.match_fn(project, self.filter)
-        self.set_item_matched(project, matched);
+        if self.match_required(project):
+            matched = self.match_fn(project, self.filter)
+            self.set_item_matched(project, matched);
             
 class ContextFilterVisitor(BaseFilterVisitor):
     def __init__(self, filtr, match_fn, include=True):
@@ -151,8 +161,9 @@ class ContextFilterVisitor(BaseFilterVisitor):
         self.filter = filtr
         self.match_fn = match_fn
     def begin_context (self, context):
-        matched = self.match_fn(context, self.filter)
-        self.set_item_matched(context, matched);
+        if self.match_required(context):
+            matched = self.match_fn(context, self.filter)
+            self.set_item_matched(context, matched);
 
 def includes (include):
     if include:

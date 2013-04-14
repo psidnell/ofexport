@@ -1,6 +1,10 @@
 # Changes #
 
-## 1.0.4 (??)
+## 1.0.4 (??) ##
+
+- Improved test script
+- Speed optimisation in filters
+
 ## 1.0.3 (2013-04-13) ##
 
 - Big reworking of filter logic to squash a design bug. 
