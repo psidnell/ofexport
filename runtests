@@ -1,0 +1,66 @@
+#!/bin/bash
+
+set -o xtrace
+set -e
+export PYTHONPATH=`pwd`
+
+################
+# Run unit tests
+################
+
+cd tests
+rm *.pyc
+for i in $( ls ); do
+        echo Run test: $i
+        MODULE=`echo $i | sed -e 's/\.py$//'`
+        echo $MODULE
+        python -m unittest -f -v $MODULE
+done
+cd ..
+
+#########################################################
+# Run some tests against a test folder in my OmniFocus DB
+#########################################################
+
+rm *.pyc
+
+TEST_FOLDER="^Test$"
+
+# Folder
+
+python ofexport.py -o tmp/fi.tp --fi "$TEST_FOLDER"
+python ofexport.py -o tmp/fe.tp --fe "$TEST_FOLDER"
+
+# Project
+
+python ofexport.py -o tmp/pi.tp --pi "$TEST_FOLDER"
+python ofexport.py -o tmp/pe.tp --pi "$TEST_FOLDER"
+
+python ofexport.py -o tmp/pci.tp --fi "$TEST_FOLDER" --pci none
+python ofexport.py -o tmp/pce.tp --fi "$TEST_FOLDER" --pce none
+
+python ofexport.py -o tmp/pdi.tp --fi "$TEST_FOLDER" --pdi none
+python ofexport.py -o tmp/pde.tp --fi "$TEST_FOLDER" --pde none
+
+python ofexport.py -o tmp/psi.tp --fi "$TEST_FOLDER" --psi none
+python ofexport.py -o tmp/pse.tp --fi "$TEST_FOLDER" --pse none
+
+python ofexport.py -o tmp/pfi.tp --fi "$TEST_FOLDER" --pfi none
+python ofexport.py -o tmp/pfe.tp --fi "$TEST_FOLDER" --pfe none
+
+# Task
+
+python ofexport.py -o tmp/ti.tp --pi "$TEST_FOLDER"
+python ofexport.py -o tmp/te.tp --pi "$TEST_FOLDER"
+
+python ofexport.py -o tmp/tci.tp --fi "$TEST_FOLDER" --tci none
+python ofexport.py -o tmp/tce.tp --fi "$TEST_FOLDER" --tce none
+
+python ofexport.py -o tmp/tdi.tp --fi "$TEST_FOLDER" --tdi none
+python ofexport.py -o tmp/tde.tp --fi "$TEST_FOLDER" --tde none
+
+python ofexport.py -o tmp/tsi.tp --fi "$TEST_FOLDER" --tsi none
+python ofexport.py -o tmp/tse.tp --fi "$TEST_FOLDER" --tse none
+
+python ofexport.py -o tmp/tfi.tp --fi "$TEST_FOLDER" --tfi none
+python ofexport.py -o tmp/tfe.tp --fi "$TEST_FOLDER" --tfe none
