@@ -37,7 +37,8 @@ def print_structure (visitor, root_projects_and_folders, root_contexts, project_
         traverse_list (visitor, root_contexts, project_mode=False)
 
 class CustomPrintTaskpaperVisitor (PrintTaskpaperVisitor):
-    pass
+    def __init__(self, out, project_mode):
+        PrintTaskpaperVisitor.__init__(self, out, project_mode)
     def tags (self, item):
         if item.date_completed != None:
             return item.date_completed.strftime(" @%Y-%m-%d-%a")
@@ -344,9 +345,9 @@ if __name__ == "__main__":
         out=codecs.open(file_name, 'w', 'utf-8')
         visitor = None
         if paul:
-            visitor = CustomPrintTaskpaperVisitor (out)
+            visitor = CustomPrintTaskpaperVisitor (out, project_mode)
         else:
-            visitor = PrintTaskpaperVisitor (out)
+            visitor = PrintTaskpaperVisitor (out, project_mode)
         print_structure (visitor, root_projects_and_folders, root_contexts, project_mode)
     
     # OPML

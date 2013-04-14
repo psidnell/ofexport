@@ -20,9 +20,10 @@ import os
 import codecs
 
 class PrintTaskpaperVisitor(Visitor):
-    def __init__ (self, out, depth=0):
+    def __init__ (self, out, project_mode, depth=0):
         self.depth = depth
         self.out = out
+        self.project_mode = project_mode
     def begin_folder (self, folder):
         print >>self.out, self.tabs() + folder.name + ':'
         self.depth+=1
@@ -34,7 +35,7 @@ class PrintTaskpaperVisitor(Visitor):
     def end_project (self, project):
         self.depth-=1
     def begin_task (self, task):
-        if len(task.children) == 0:
+        if self.is_empty (task) or self.project_mode == False:
             print >>self.out, self.tabs() + '- ' + task.name + self.tags(task)
         else:
             print >>self.out, self.tabs() + task.name + ':'
@@ -63,6 +64,8 @@ class PrintTaskpaperVisitor(Visitor):
         if len (tags) > 0:
             return ' ' + ' '.join(tags)
         return ''
+    def is_empty (self, item):
+        return len ([x for x in item.children if x.marked]) == 0
     def tabs (self):
         return '\t' * (self.depth)
 
@@ -75,9 +78,9 @@ if __name__ == "__main__":
     out=codecs.open(file_name, 'w', 'utf-8')
     
     print >>out, 'Projects:'
-    traverse_list (PrintTaskpaperVisitor (out, depth=1), root_projects_and_folders)
+    traverse_list (PrintTaskpaperVisitor (out, True, depth=1), root_projects_and_folders)
     print >>out, 'Contexts:'
-    traverse_list (PrintTaskpaperVisitor (out, depth=1), root_contexts, project_mode=False)
+    traverse_list (PrintTaskpaperVisitor (out, False, depth=1), root_contexts, project_mode=False)
     
     out.close()
     

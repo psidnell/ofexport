@@ -314,6 +314,8 @@ class PruningFilterVisitor (Visitor):
     def end_project (self, project):
         if self.project_mode:
             self.prune_if_empty(project)
+        else:
+            project.match = False
     def end_folder (self, folder):
         self.prune_if_empty(folder)
     def end_context (self, context):
