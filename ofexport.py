@@ -147,6 +147,7 @@ if __name__ == "__main__":
             project_mode = False
         elif '-o' == opt:
             file_name = arg;
+            print 'Generating', file_name
         elif opt in ('-?', '-h', '--help'):
             print_help ()
             sys.exit()

@@ -1,6 +1,14 @@
 #!/bin/bash
 
-set -o xtrace
+####################
+Run all the tests.
+
+If run with an argument then that argument is expected
+to be a file format and the tool tests are run in
+that format alone
+####################
+
+# set -o xtrace
 set -e
 export PYTHONPATH=`pwd`
 
@@ -10,10 +18,9 @@ export PYTHONPATH=`pwd`
 
 cd tests
 rm *.pyc
-for i in $( ls ); do
-        echo Run test: $i
-        MODULE=`echo $i | sed -e 's/\.py$//'`
-        echo $MODULE
+for FILE in $( ls ); do
+        MODULE=`echo $FILE | sed -e 's/\.py$//'`
+        echo module: $MODULE
         python -m unittest -f -v $MODULE
 done
 cd ..
@@ -26,41 +33,60 @@ rm *.pyc
 
 TEST_FOLDER="^Test$"
 
-# Folder
+function run_tool {
 
-python ofexport.py -o tmp/fi.tp --fi "$TEST_FOLDER"
-python ofexport.py -o tmp/fe.tp --fe "$TEST_FOLDER"
+    FMT=$1
+    
+	set +e
+	mkdir -p tmp/$FMT
+	set -e
+	
+	# Folder
+	
+	python ofexport.py -o tmp/$FMT/fi.$FMT --fi "$TEST_FOLDER"
+	python ofexport.py -o tmp/$FMT/fe.$FMT --fe "$TEST_FOLDER"
+	
+	# Project
+	
+	python ofexport.py -o tmp/$FMT/pi.$FMT --pi "$TEST_FOLDER"
+	python ofexport.py -o tmp/$FMT/pe.$FMT --pi "$TEST_FOLDER"
+	
+	python ofexport.py -o tmp/$FMT/pci.$FMT --fi "$TEST_FOLDER" --pci none
+	python ofexport.py -o tmp/$FMT/pce.$FMT --fi "$TEST_FOLDER" --pce none
+	
+	python ofexport.py -o tmp/$FMT/pdi.$FMT --fi "$TEST_FOLDER" --pdi none
+	python ofexport.py -o tmp/$FMT/pde.$FMT --fi "$TEST_FOLDER" --pde none
+	
+	python ofexport.py -o tmp/$FMT/psi.$FMT --fi "$TEST_FOLDER" --psi none
+	python ofexport.py -o tmp/$FMT/pse.$FMT --fi "$TEST_FOLDER" --pse none
+	
+	python ofexport.py -o tmp/$FMT/pfi.$FMT --fi "$TEST_FOLDER" --pfi none
+	python ofexport.py -o tmp/$FMT/pfe.$FMT --fi "$TEST_FOLDER" --pfe none
+	
+	# Task
+	
+	python ofexport.py -o tmp/$FMT/ti.$FMT --pi "$TEST_FOLDER"
+	python ofexport.py -o tmp/$FMT/te.$FMT --pi "$TEST_FOLDER"
+	
+	python ofexport.py -o tmp/$FMT/tci.$FMT --fi "$TEST_FOLDER" --tci none
+	python ofexport.py -o tmp/$FMT/tce.$FMT --fi "$TEST_FOLDER" --tce none
+	
+	python ofexport.py -o tmp/$FMT/tdi.$FMT --fi "$TEST_FOLDER" --tdi none
+	python ofexport.py -o tmp/$FMT/tde.$FMT --fi "$TEST_FOLDER" --tde none
+	
+	python ofexport.py -o tmp/$FMT/tsi.$FMT --fi "$TEST_FOLDER" --tsi none
+	python ofexport.py -o tmp/$FMT/tse.$FMT --fi "$TEST_FOLDER" --tse none
+	
+	python ofexport.py -o tmp/$FMT/tfi.$FMT --fi "$TEST_FOLDER" --tfi none
+	python ofexport.py -o tmp/$FMT/tfe.$FMT --fi "$TEST_FOLDER" --tfe none
+}
 
-# Project
+FMT=$1
 
-python ofexport.py -o tmp/pi.tp --pi "$TEST_FOLDER"
-python ofexport.py -o tmp/pe.tp --pi "$TEST_FOLDER"
-
-python ofexport.py -o tmp/pci.tp --fi "$TEST_FOLDER" --pci none
-python ofexport.py -o tmp/pce.tp --fi "$TEST_FOLDER" --pce none
-
-python ofexport.py -o tmp/pdi.tp --fi "$TEST_FOLDER" --pdi none
-python ofexport.py -o tmp/pde.tp --fi "$TEST_FOLDER" --pde none
-
-python ofexport.py -o tmp/psi.tp --fi "$TEST_FOLDER" --psi none
-python ofexport.py -o tmp/pse.tp --fi "$TEST_FOLDER" --pse none
-
-python ofexport.py -o tmp/pfi.tp --fi "$TEST_FOLDER" --pfi none
-python ofexport.py -o tmp/pfe.tp --fi "$TEST_FOLDER" --pfe none
-
-# Task
-
-python ofexport.py -o tmp/ti.tp --pi "$TEST_FOLDER"
-python ofexport.py -o tmp/te.tp --pi "$TEST_FOLDER"
-
-python ofexport.py -o tmp/tci.tp --fi "$TEST_FOLDER" --tci none
-python ofexport.py -o tmp/tce.tp --fi "$TEST_FOLDER" --tce none
-
-python ofexport.py -o tmp/tdi.tp --fi "$TEST_FOLDER" --tdi none
-python ofexport.py -o tmp/tde.tp --fi "$TEST_FOLDER" --tde none
-
-python ofexport.py -o tmp/tsi.tp --fi "$TEST_FOLDER" --tsi none
-python ofexport.py -o tmp/tse.tp --fi "$TEST_FOLDER" --tse none
-
-python ofexport.py -o tmp/tfi.tp --fi "$TEST_FOLDER" --tfi none
-python ofexport.py -o tmp/tfe.tp --fi "$TEST_FOLDER" --tfe none
+if [ -z "$FMT" ]; then
+    for FMT in tp md html opml ft; do
+        run_tool $FMT
+    done
+else
+    run_tool $FMT
+fi
