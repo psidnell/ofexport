@@ -2,8 +2,8 @@
 
 ## 1.0.4 (??) ##
 
-- Improved test script
-- Speed optimisation in filters
+- Improved test script.
+- Filter performance improvement.
 
 ## 1.0.3 (2013-04-13) ##
 

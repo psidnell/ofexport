@@ -34,7 +34,7 @@ def print_structure (visitor, root_projects_and_folders, root_contexts, project_
     if project_mode:
         traverse_list (visitor, root_projects_and_folders)
     else:
-        traverse_list (visitor, root_contexts)
+        traverse_list (visitor, root_contexts, project_mode=False)
 
 class CustomPrintTaskpaperVisitor (PrintTaskpaperVisitor):
     pass
@@ -54,8 +54,7 @@ def print_help ():
     print
     print 'options:'
     print '  -h,-?,--help'
-    # This is broken - keep quiet about it for now:
-    # print '  -C: context mode (as opposed to project mode)'
+    print '  -C: context mode (as opposed to project mode)'
     print '  -o file_name: the output file name, must end in a recognised suffix - see documentation'
     print '  --open: open the output file with the registered application (if one is installed)'
     print
@@ -176,143 +175,149 @@ if __name__ == "__main__":
         if '-i' == opt:
             visitor = AnyNameFilterVisitor (arg, include=True)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         elif '-e' == opt:
             visitor = AnyNameFilterVisitor (arg, include=False)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         elif '--Fi' == opt:
             visitor = AnyFlaggedFilterVisitor (include=True)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         elif '--Fe' == opt:
             visitor = AnyFlaggedFilterVisitor (include=False)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         
         # FOLDER
         elif '--fi' == opt:
             visitor = FolderNameFilterVisitor (arg, include=True)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         elif '--fe' == opt:
             visitor = FolderNameFilterVisitor (arg, include=False)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         
         # PROJECT
         elif '--pi' == opt:
             visitor = ProjectNameFilterVisitor (arg, include=True)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         elif '--pe' == opt:
             visitor = ProjectNameFilterVisitor (arg, include=False)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         elif '--psi' == opt:
             visitor = ProjectStartFilterVisitor (arg, include=True)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         elif '--pse' == opt:
             visitor = ProjectStartFilterVisitor (arg, include=False)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         elif '--pdi' == opt:
             visitor = ProjectDueFilterVisitor (arg, include=True)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         elif '--psc' == opt:
             visitor = ProjectDueFilterVisitor (arg, include=False)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         elif '--pci' == opt:
             visitor = ProjectCompletionFilterVisitor (arg, include=True)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         elif '--pce' == opt:
             visitor = ProjectCompletionFilterVisitor (arg, include=False)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         elif '--pfi' == opt:
             visitor = ProjectFlaggedFilterVisitor (include=True)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         elif '--pfe' == opt:
             visitor = ProjectFlaggedFilterVisitor (include=False)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         elif '--fsa' == opt:
             visitor = FolderNameSortingVisitor ()
             print opt + '\t= ' + str (visitor)
             root_projects_and_folders.sort(key=lambda item:item.name) # Have to sort the top level list too
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
             
         # CONTEXT
         elif '--ci' == opt:
             visitor = ContextNameFilterVisitor (arg, include=True)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         elif '--ce' == opt:
             visitor = ContextNameFilterVisitor (arg, include=False)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         
         # TASK
         elif '--ti' == opt:
             visitor = TaskNameFilterVisitor (arg, include=True)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         elif '--te' == opt:
             visitor = TaskNameFilterVisitor (arg, include=False)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         elif '--tci' == opt:
             visitor = TaskCompletionFilterVisitor (arg, include=True)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         elif '--tce' == opt:
             visitor = TaskCompletionFilterVisitor (arg, include=False)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         elif '--tsi' == opt:
             visitor = TaskStartFilterVisitor (arg, include=True)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         elif '--tse' == opt:
             visitor = TaskStartFilterVisitor (arg, include=False)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         elif '--tdi' == opt:
             visitor = TaskDueFilterVisitor (arg, include=True)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         elif '--tde' == opt:
             visitor = TaskDueFilterVisitor (arg, include=False)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         elif '--tfi' == opt:
             visitor = TaskFlaggedFilterVisitor (include=True)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         elif '--tfe' == opt:
             visitor = TaskFlaggedFilterVisitor (include=False)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         elif '--tsc' == opt:
             visitor = TaskCompletionSortingVisitor ()
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         
         # MISC
         elif '--prune' == opt:
-            visitor = PruningFilterVisitor ()
+            visitor = PruningFilterVisitor (project_mode=project_mode)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items)
+            traverse_list (visitor, items, project_mode=project_mode)
         elif '-F' == opt:
-            visitor = FlatteningVisitor ()
+            visitor = FlatteningVisitor (project_mode=project_mode)
             print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, root_projects_and_folders)
-            root_projects_and_folders = visitor.projects
+            if project_mode:
+                traverse_list (visitor, root_projects_and_folders, project_mode=project_mode)
+                root_projects_and_folders = visitor.projects # Really?
+                items = visitor.projects
+            else:
+                traverse_list (visitor, root_contexts, project_mode=project_mode)
+                root_contexts = visitor.contexts # Really?
+                items = visitor.contexts
 
     file_name_base = os.environ['HOME']+'/Desktop/'
     date_str = today.strftime (time_fmt)

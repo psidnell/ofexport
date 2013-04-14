@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-from treemodel import Visitor, TASK, PROJECT
+from treemodel import Visitor, TASK, PROJECT, CONTEXT
 from datematch import process_date_specifier
 import re
 from datetime import datetime
@@ -24,7 +24,7 @@ EXCLUDED='EXCLUDED'
 PATH_TO_INCLUDED='PATH_TO_INCLUDED'
 
 def match_name (item, regexp):
-        return re.search (regexp, item.name) != None
+    return re.search (regexp, item.name) != None
 
 def match_date_against_range (thedate, date_range):
     start, end = date_range
@@ -51,26 +51,32 @@ def match_completed (item, date_range):
 def match_flagged (item, ignore):
         return item.flagged
 
-def set_attrib_to_root (item, name, value):
-    if item != None:
+def set_attrib_to_root (path_to_root, name, value):
+    for item in path_to_root:
         item.attribs[name] = value
-        set_attrib_to_root (item.parent, name, value)
     
 class BaseFilterVisitor(Visitor):
     def __init__(self, include=True):
         self.filter = None
         self.include = include
+        self.traversal_path = []
     def begin_any (self, item):
-        
+        # Can't use the item parent since this only has meaning
+        # in project mode - have to track our own traversal path
+        parent = None
+        if len(self.traversal_path) > 0:
+            parent = self.traversal_path[-1]
         item.attribs[PATH_TO_INCLUDED] = False
-        if item.parent != None:
+        if parent != None:
             # Inherit these attribute
-            item.attribs[INCLUDED] = item.parent.attribs[INCLUDED]
-            item.attribs[EXCLUDED] = item.parent.attribs[EXCLUDED]
+            item.attribs[INCLUDED] = parent.attribs[INCLUDED]
+            item.attribs[EXCLUDED] = parent.attribs[EXCLUDED]
         else:
             item.attribs[INCLUDED] = False
             item.attribs[EXCLUDED] = False
+        self.traversal_path.append(item)
     def end_any (self, item):
+        self.traversal_path.pop()
         if self.include and not (item.attribs[INCLUDED] or item.attribs[PATH_TO_INCLUDED]):
             item.marked = False
         # We've finished processing the node, tidy up
@@ -90,7 +96,7 @@ class BaseFilterVisitor(Visitor):
                 # Then we want this node in the output and want to stop
                 # this filter testing removing any parents or children of this node
                 item.attribs[INCLUDED] = True
-                set_attrib_to_root (item.parent, PATH_TO_INCLUDED, True)
+                set_attrib_to_root (self.traversal_path, PATH_TO_INCLUDED, True)
         else: # In exclude mode
             if matched:
                 # This node is toast
@@ -258,22 +264,6 @@ class TaskFlaggedFilterVisitor(TaskFilterVisitor):
     def __str__(self):
         return 'Task flagged ' + includes (self.include) + ' flagged'
 
-class FlatteningVisitor (Visitor):
-    def __init__(self):
-        self.projects = []
-    def begin_project (self, project):
-        self.projects.append(project)
-    def end_task (self, task):
-        mypos = task.parent.children.index (task)
-        # Add this nodes children above itself,
-        # this is the omnifocus way.
-        for child in task.children:
-            task.parent.children.insert (mypos, child)
-            child.parent = task.parent
-        task.children = []
-    def __str__ (self):
-        return 'Flatten'
-        
 class TaskCompletionSortingVisitor (Visitor):
     def end_project (self, project):
         project.children.sort(key=lambda item:self.get_key(item))
@@ -289,10 +279,41 @@ class FolderNameSortingVisitor (Visitor):
         folder.children.sort(key=lambda item:item.name)
     def __str__ (self):
         return 'Folders/Projects sorted by name'
-    
+
+class FlatteningVisitor (Visitor):
+    def __init__(self, project_mode=True):
+        self.projects = []
+        self.contexts = []
+        self.project_mode = project_mode
+    def begin_project (self, project):
+        self.projects.append(project)
+    def end_task (self, task):
+        if self.project_mode:
+            mypos = task.parent.children.index (task)
+            # Add this nodes children above itself,
+            # this is the omnifocus way.
+            for child in task.children:
+                task.parent.children.insert (mypos, child)
+                child.parent = task.parent
+            task.children = []
+    def end_context (self, context):
+        self.contexts.append(context)
+        not_contexts = []
+        for child in context.children:
+            if child.type == CONTEXT:
+                child.parent = None
+            else:
+                not_contexts.append (child)
+        context.children = not_contexts
+    def __str__ (self):
+        return 'Flatten'
+
 class PruningFilterVisitor (Visitor):
+    def __init__(self, project_mode=True):
+        self.project_mode = project_mode
     def end_project (self, project):
-        self.prune_if_empty(project)
+        if self.project_mode:
+            self.prune_if_empty(project)
     def end_folder (self, folder):
         self.prune_if_empty(folder)
     def end_context (self, context):

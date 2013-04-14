@@ -162,44 +162,46 @@ def sort (items):
         child.children.sort(key=lambda item:item.get_sort_key ())
         sort(child.children)
 
-def traverse_list (visitor, lst, ignore_marked=False):
+def traverse_list (visitor, lst, ignore_marked=False, project_mode=True):
     for item in lst:
-        traverse (visitor, item, ignore_marked = ignore_marked)
+        traverse (visitor, item, ignore_marked=ignore_marked, project_mode=project_mode)
 
-def traverse (visitor, item, ignore_marked=False):       
+def traverse (visitor, item, ignore_marked=False, project_mode=True):
     if item.type == FOLDER:
-        traverse_folder (visitor, item, ignore_marked = ignore_marked)
+        traverse_folder (visitor, item, ignore_marked=ignore_marked)
     elif item.type == CONTEXT:
-        traverse_context (visitor, item, ignore_marked = ignore_marked)
+        traverse_context (visitor, item, ignore_marked=ignore_marked)
     elif item.type == PROJECT:
-        traverse_project (visitor, item, ignore_marked = ignore_marked)
+        traverse_project (visitor, item, ignore_marked=ignore_marked, project_mode=project_mode)
     elif item.type == TASK:
-        traverse_task (visitor, item, ignore_marked = ignore_marked)
+        traverse_task (visitor, item, ignore_marked=ignore_marked, project_mode=project_mode)
 
 def traverse_context (visitor, context, ignore_marked=False):
     if context.marked or ignore_marked:
         visitor.begin_any (context)
         visitor.begin_context (context)
         if context.marked or ignore_marked: # it might have been unmarked in begin_...
-            traverse_list (visitor, context.children, ignore_marked = ignore_marked)
+            traverse_list (visitor, context.children, ignore_marked=ignore_marked, project_mode=False)
         visitor.end_context (context) # must match calls to begin_...
         visitor.end_any (context)
 
-def traverse_task (visitor, task, ignore_marked=False):
+def traverse_task (visitor, task, ignore_marked=False, project_mode=True):
     if task.marked or ignore_marked:
         visitor.begin_any (task)
         visitor.begin_task (task)
-        if task.marked or ignore_marked: # it might have been unmarked in begin_...
-            traverse_list (visitor, task.children, ignore_marked = ignore_marked)
+        if project_mode:
+            if task.marked or ignore_marked: # it might have been unmarked in begin_...
+                traverse_list (visitor, task.children, ignore_marked=ignore_marked, project_mode=project_mode)
         visitor.end_task (task) # must match calls to begin_...
         visitor.end_any (task)
     
-def traverse_project (visitor, project,ignore_marked=False):
+def traverse_project (visitor, project,ignore_marked=False, project_mode=True):
     if project.marked or ignore_marked:
         visitor.begin_any (project)
         visitor.begin_project (project)
-        if project.marked or ignore_marked: # it might have been unmarked in begin_...
-            traverse_list (visitor, project.children, ignore_marked = ignore_marked)
+        if project_mode:
+            if project.marked or ignore_marked: # it might have been unmarked in begin_...
+                traverse_list (visitor, project.children, ignore_marked=ignore_marked, project_mode=project_mode)
         visitor.end_project (project) # must match calls to begin_...
         visitor.end_any (project)
     
@@ -208,6 +210,6 @@ def traverse_folder (visitor, folder, ignore_marked=False):
         visitor.begin_any (folder)
         visitor.begin_folder(folder)
         if folder.marked or ignore_marked: # it might have been unmarked in begin_...
-            traverse_list (visitor, folder.children, ignore_marked = ignore_marked)
+            traverse_list (visitor, folder.children, ignore_marked=ignore_marked)
         visitor.end_folder (folder) # must match calls to begin_...
         visitor.end_any (folder)

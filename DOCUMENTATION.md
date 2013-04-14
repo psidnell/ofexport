@@ -59,6 +59,7 @@ will produce a TaskPaper document on your desktop containing all items completed
 - Flatten the outport document to create a simpler document (just projects containing tasks)
 - Sort tasks by completion date or projects by name.
 - Eliminate empty projects/folders.
+- Organise by project or context hierarchy.
 
 **Open**
 
@@ -68,7 +69,6 @@ will produce a TaskPaper document on your desktop containing all items completed
 
 **Planned Features**
 
-- Context Mode.
 - Custom template based formatting for document types.
 - "Tagging related" features.
 
@@ -115,7 +115,11 @@ you'll get a text file. By changing the suffix you'll get different formats:
 - .opml: an OPML document
 - .html or .htm: an HTML document			 
 
-### Filters:
+### Project or Context Mode ###
+
+By default tasks are organised by project. By selecting **-C** the tool will instead organise by context.
+
+### Filters
 
 Filters are a powerful way of controlling the content or structure of your report.
 
