@@ -64,7 +64,7 @@ if __name__ == "__main__":
     visitor = PrintTextVisitor (out)
     root_projects_and_folders, root_contexts = build_model (find_database ())
     traverse_list (visitor, root_projects_and_folders)
-    traverse_list (visitor, root_contexts)
+    traverse_list (visitor, root_contexts, project_mode=False)
         
     os.system("open '" + file_name + "'")
     

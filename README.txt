@@ -1,1 +1,1 @@
-The documentation is here: https://github.com/psidnell/ofexport/DOCUMENTATION.md
+The documentation is here: https://github.com/psidnell/ofexport/blob/master/DOCUMENTATION.md

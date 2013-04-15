@@ -19,10 +19,6 @@ from omnifocus import build_model, find_database
 import os
 import codecs
 
-'''
-This is a visitor that dumps out an OPML file containing each and every entry
-in the database. You can also specify a particular type, e.g. just 'Task'.
-'''
 class PrintMarkdownVisitor(Visitor):
     def __init__ (self, out, depth=0):
         self.header_depth = depth
@@ -69,7 +65,7 @@ if __name__ == "__main__":
     print >>out, '# Projects:'
     traverse_list (PrintMarkdownVisitor (out, depth=1), root_projects_and_folders)
     print >>out, '# Contexts:'
-    traverse_list (PrintMarkdownVisitor (out, depth=1), root_contexts)
+    traverse_list (PrintMarkdownVisitor (out, depth=1), root_contexts, project_mode=False)
     
     out.close()
     

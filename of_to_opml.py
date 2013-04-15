@@ -19,10 +19,6 @@ from omnifocus import build_model, find_database
 import os
 import codecs
 
-'''
-This is a visitor that dumps out an OPML file containing each and every entry
-in the database. You can also specify a particular type, e.g. just 'Task'.
-'''
 class PrintOpmlVisitor(Visitor):
     def __init__ (self, out, depth=2, indent=2, links=True):
         self.depth = depth
@@ -58,8 +54,10 @@ class PrintOpmlVisitor(Visitor):
         if completed != None:
             print >>self.out, 'completed="' + completed.strftime ("%Y-%m-%d") + '"',
         if self.links:
-            ident = item.ofattribs['persistentIdentifier']
-            print >>self.out,'_note="omnifocus:///' + link_type + '/' + ident + '"',
+            # This happens on "No Context" - we fabricate it and it has no persistentIdentifier
+            if 'persistentIdentifier' in item.ofattribs:
+                ident = item.ofattribs['persistentIdentifier']
+                print >>self.out,'_note="omnifocus:///' + link_type + '/' + ident + '"',
         print >>self.out, ">"
     def print_node_end (self):
         print >>self.out, self.spaces() + '</outline>'
@@ -87,7 +85,7 @@ if __name__ == "__main__":
     traverse_list (PrintOpmlVisitor (out, depth=4), root_projects_and_folders)
     print >>out, '      </outline>'
     print >>out, '      <outline text="Contexts">'
-    traverse_list (PrintOpmlVisitor (out, depth=4), root_contexts)
+    traverse_list (PrintOpmlVisitor (out, depth=4), root_contexts, project_mode=False)
     print >>out, '      </outline>'
     print >>out, '    </outline>'
     print >>out, '  </body>'

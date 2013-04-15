@@ -19,10 +19,6 @@ from omnifocus import build_model, find_database
 import os
 import codecs
 
-'''
-This is a visitor that dumps out html references to each and every entry
-in the database. You can also specify a particular type, e.g. just 'Task'.
-'''
 class PrintHtmlVisitor(Visitor):
     def __init__ (self, out, depth=2, indent=4):
         self.depth = depth
@@ -49,8 +45,10 @@ class PrintHtmlVisitor(Visitor):
     def end_context (self, context):
         self.depth-=1
     def print_link (self, link_type, item):
-        ident = item.ofattribs['persistentIdentifier']
-        print >>self.out, self.spaces() + item.type + ': <a href="omnifocus:///' + link_type + '/' + ident + '">' + self.escape(item.name) + '</a><br>'
+        # This happens on "No Context" - we fabricate it and it has no persistentIdentifier
+        if 'persistentIdentifier' in item.ofattribs:
+            ident = item.ofattribs['persistentIdentifier']
+            print >>self.out, self.spaces() + item.type + ': <a href="omnifocus:///' + link_type + '/' + ident + '">' + self.escape(item.name) + '</a><br>'
     def spaces (self):
         return '&nbsp' * self.depth * self.indent
     def escape (self, val):
@@ -66,7 +64,7 @@ if __name__ == "__main__":
     traverse_list (PrintHtmlVisitor (out), root_projects_and_folders)
     print >>out, '<hr/>'
     
-    traverse_list (PrintHtmlVisitor (out), root_contexts)
+    traverse_list (PrintHtmlVisitor (out), root_contexts, project_mode=False)
     print >>out, '<hr/>'
     print >>out, '</body>'
     out.close()

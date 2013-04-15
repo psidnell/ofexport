@@ -189,12 +189,15 @@ def wire_tasks_to_enclosing_projects (project_infos, tasks):
             project = project_info.project
             task.project = project
        
-def wire_tasks_and_contexts (contexts, tasks):
+def wire_tasks_and_contexts (contexts, tasks, no_context):
     for task in tasks.values():  
         if task.ofattribs['context'] != None:
             context = contexts[task.ofattribs['context']]
             task.context = context
             context.children.append(task)
+        else:
+            task.context = no_context
+            no_context.children.append(task)
             
 def wire_folder_hierarchy (folders):
     for folder in folders.values():
@@ -218,6 +221,7 @@ def only_roots (items):
 def build_model (db):
     conn = sqlite3.connect(db)
     contexts = query (conn, clazz=OFContext)
+    no_context = OFContext({'name' : 'No Context'})
     project_infos = query (conn, clazz=ProjectInfo)
     folders = query (conn, clazz=OFFolder)
     tasks = query (conn, clazz=OFTask)
@@ -226,7 +230,7 @@ def build_model (db):
     wire_projects_and_folders(projects, folders)
     wire_task_hierarchy(tasks)
     wire_tasks_to_enclosing_projects (project_infos, tasks)
-    wire_tasks_and_contexts(contexts, tasks)
+    wire_tasks_and_contexts(contexts, tasks, no_context)
     wire_folder_hierarchy (folders)
     wire_context_hierarchy (contexts)
     
@@ -237,7 +241,7 @@ def build_model (db):
     folder_roots = only_roots (folders.values())
     roots_projects_and_folders = project_roots + folder_roots
     root_contexts = only_roots (contexts.values())
-    
+    root_contexts.insert(0, no_context)
     sort(roots_projects_and_folders)
     sort(root_contexts)
     

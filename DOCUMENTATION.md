@@ -1,4 +1,6 @@
-# ofexport Command: #
+# ofexport V1.0.4 #
+
+- [Changelog](https://github.com/psidnell/ofexport/blob/master/CHANGELOG.md)
 
 Avenues for help/abuse:
 
@@ -55,6 +57,7 @@ will produce a TaskPaper document on your desktop containing all items completed
 - Flatten the outport document to create a simpler document (just projects containing tasks)
 - Sort tasks by completion date or projects by name.
 - Eliminate empty projects/folders.
+- Organise by project or context hierarchy.
 
 **Open**
 
@@ -64,9 +67,14 @@ will produce a TaskPaper document on your desktop containing all items completed
 
 **Planned Features**
 
-- Context Mode.
 - Custom template based formatting for document types.
 - "Tagging related" features.
+
+### WARNING ###
+
+If you don't know what a bash script is, have never used the command line or don't know what a correct $PATH variable looks like then reading on is probably just going to give you a headache.
+
+Also, this program reads your OmniFocus database file directly. While it should be impossible (as written) for it to modify or delete that database, set fire to your Mac, empty your bank accounts or knock the earth out of orbit - bugs happen. But you obviously have backups - right?  
 
 ## Download/Installation:
 
@@ -111,7 +119,11 @@ you'll get a text file. By changing the suffix you'll get different formats:
 - .opml: an OPML document
 - .html or .htm: an HTML document			 
 
-### Filters:
+### Project or Context Mode ###
+
+By default tasks are organised by project. By selecting **-C** the tool will instead organise by context. Usage of **-P** and **-C** can be used between filters to change the nature of the filtering. Whichever mode the tool is in at the end of the filtering dictates whether project or context mode is used to format the output.
+
+### Filters
 
 Filters are a powerful way of controlling the content or structure of your report.
 
@@ -231,9 +243,11 @@ If you ran an exclude filter searching for ''Cat" you'd get:
 
 The important thing to note about filters is that you can specify as many as you like and they are executed in the order you specify. If there are multiple filters then the output of one is passed to the next and so on.
 
-So you might start by including only your work folder, then exclude any project with "Routine" in the title, the include only items completed today.
+So you might start by including only your work folder, then exclude any project with "Routine" in the title, then include only items completed today.
 
-It's possible to create quite sophisticated queries on your OmniFocus database by using a series of includes, excludes and regular expressions but even without an in-depth knowledge of what a regular expressions are it's possible to achieve white a lot.
+It's possible to create quite sophisticated queries on your OmniFocus database by using a series of includes, excludes and regular expressions but even without an in-depth knowledge of what a regular expressions is, it's possible to achieve white a lot.
+
+It's possible to change between project and context mode by adding **-P** or **-C** between filters. The tools's final mode dictates how the report is printed. It's also possible to run all the filters in project mode and flip to context mode just for the output or vice versa. 
 
 ### Filtering on Dates:
 
