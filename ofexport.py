@@ -309,11 +309,11 @@ if __name__ == "__main__":
         
         # MISC
         elif '--prune' == opt:
-            visitor = PruningFilterVisitor (project_mode=project_mode)
+            visitor = PruningFilterVisitor ()
             print opt + '\t= ' + str (visitor)
             traverse_list (visitor, items, project_mode=project_mode)
         elif '-F' == opt:
-            visitor = FlatteningVisitor (project_mode=project_mode)
+            visitor = FlatteningVisitor ()
             print opt + '\t= ' + str (visitor)
             if project_mode:
                 traverse_list (visitor, root_projects_and_folders, project_mode=project_mode)

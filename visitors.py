@@ -55,11 +55,16 @@ def set_attrib_to_root (path_to_root, name, value):
     for item in path_to_root:
         item.attribs[name] = value
 
-def mark_branch_not_marked (item):
+def mark_branch_not_marked (item, project_mode):
     if item.marked:
         item.marked = False
+        if (item.type == TASK or item.type == PROJECT) and not project_mode:
+            # We only got here because we recursed from a context
+            # Tasks/Projects are not a tree in context mode, they're flat so we don't want
+            # to un-mark all the children since they might be in a different context
+            return
         for child in item.children:
-            mark_branch_not_marked (child)
+            mark_branch_not_marked (child, project_mode)
             
 class BaseFilterVisitor(Visitor):
     def __init__(self, include=True):
@@ -77,14 +82,19 @@ class BaseFilterVisitor(Visitor):
             # Inherit these attribute
             item.attribs[INCLUDED] = parent.attribs[INCLUDED]
             item.attribs[EXCLUDED] = parent.attribs[EXCLUDED]
+            assert parent.attribs[INCLUDED] != None, "missing attribute in " + parent.name
+            assert parent.attribs[EXCLUDED] != None, "missing attribute in " + parent.name
         else:
             item.attribs[INCLUDED] = False
             item.attribs[EXCLUDED] = False
         self.traversal_path.append(item)
     def end_any (self, item):
+        assert item.attribs[PATH_TO_INCLUDED] != None, "missing attribute in " + item.name
+        assert item.attribs[INCLUDED] != None, "missing attribute in " + item.name
+        assert item.attribs[EXCLUDED] != None, "missing attribute in " + item.name
         self.traversal_path.pop()
         if self.include and not (item.attribs[INCLUDED] or item.attribs[PATH_TO_INCLUDED]):
-            mark_branch_not_marked (item)
+            mark_branch_not_marked (item, self.project_mode)
         # We've finished processing the node, tidy up
         # and avoid confusing the next filter.
         del (item.attribs[INCLUDED])
@@ -106,7 +116,7 @@ class BaseFilterVisitor(Visitor):
         else: # In exclude mode
             if matched:
                 # This node is toast
-                mark_branch_not_marked (item)
+                mark_branch_not_marked (item, self.project_mode)
             else:
                 # We haven't excluded it so it stays
                 pass
@@ -298,10 +308,9 @@ def flatten (item):
     item.children = new_children
 
 class FlatteningVisitor (Visitor):
-    def __init__(self, project_mode=True):
+    def __init__(self):
         self.projects = []
         self.contexts = []
-        self.project_mode = project_mode
     def end_project (self, project):
         self.projects.append(project)
         flatten (project)
@@ -323,8 +332,6 @@ class FlatteningVisitor (Visitor):
         return 'Flatten'
 
 class PruningFilterVisitor (Visitor):
-    def __init__(self, project_mode=True):
-        self.project_mode = project_mode
     def end_project (self, project):
         if self.project_mode:
             self.prune_if_empty(project)

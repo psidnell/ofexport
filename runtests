@@ -1,11 +1,11 @@
 #!/bin/bash
 
 ####################
-Run all the tests.
-
-If run with an argument then that argument is expected
-to be a file format and the tool tests are run in
-that format alone
+# Run all the tests.
+#
+# If run with an argument then that argument is expected
+# to be a file format and the tool tests are run in
+# that format alone
 ####################
 
 # set -o xtrace

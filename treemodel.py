@@ -136,6 +136,9 @@ class Project(Node):
         self.folder = folder
     
 class Visitor(object):
+    project_mode = TypeOf ('flagged', bool)
+    def __init__(self):
+        self.project_mode = False # set during visitation
     def begin_any (self, item):
         pass
     def end_any (self, item):
@@ -157,16 +160,18 @@ class Visitor(object):
     def end_context (self, context):
         pass
 
-def sort (items):
+def sort (items): # A default sort on the underlying key
     for child in items:
         child.children.sort(key=lambda item:item.get_sort_key ())
         sort(child.children)
 
 def traverse_list (visitor, lst, ignore_marked=False, project_mode=True):
+    visitor.project_mode = project_mode
     for item in lst:
         traverse (visitor, item, ignore_marked=ignore_marked, project_mode=project_mode)
 
 def traverse (visitor, item, ignore_marked=False, project_mode=True):
+    visitor.project_mode = project_mode
     if item.type == FOLDER:
         traverse_folder (visitor, item, ignore_marked=ignore_marked)
     elif item.type == CONTEXT:
@@ -177,6 +182,7 @@ def traverse (visitor, item, ignore_marked=False, project_mode=True):
         traverse_task (visitor, item, ignore_marked=ignore_marked, project_mode=project_mode)
 
 def traverse_context (visitor, context, ignore_marked=False):
+    visitor.project_mode = False
     if context.marked or ignore_marked:
         visitor.begin_any (context)
         visitor.begin_context (context)
@@ -186,6 +192,7 @@ def traverse_context (visitor, context, ignore_marked=False):
         visitor.end_any (context)
 
 def traverse_task (visitor, task, ignore_marked=False, project_mode=True):
+    visitor.project_mode = project_mode
     if task.marked or ignore_marked:
         visitor.begin_any (task)
         visitor.begin_task (task)
@@ -196,6 +203,7 @@ def traverse_task (visitor, task, ignore_marked=False, project_mode=True):
         visitor.end_any (task)
     
 def traverse_project (visitor, project,ignore_marked=False, project_mode=True):
+    visitor.project_mode = project_mode
     if project.marked or ignore_marked:
         visitor.begin_any (project)
         visitor.begin_project (project)
@@ -206,6 +214,7 @@ def traverse_project (visitor, project,ignore_marked=False, project_mode=True):
         visitor.end_any (project)
     
 def traverse_folder (visitor, folder, ignore_marked=False):
+    visitor.project_mode = True
     if folder.marked or ignore_marked:
         visitor.begin_any (folder)
         visitor.begin_folder(folder)

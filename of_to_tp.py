@@ -20,10 +20,9 @@ import os
 import codecs
 
 class PrintTaskpaperVisitor(Visitor):
-    def __init__ (self, out, project_mode, depth=0):
+    def __init__ (self, out, depth=0):
         self.depth = depth
         self.out = out
-        self.project_mode = project_mode
     def begin_folder (self, folder):
         print >>self.out, self.tabs() + folder.name + ':'
         self.depth+=1
