@@ -56,6 +56,7 @@ def print_help ():
     print 'options:'
     print '  -h,-?,--help'
     print '  -C: context mode (as opposed to project mode)'
+    print '  -P: project mode - the default (as opposed to context mode)'
     print '  -o file_name: the output file name, must end in a recognised suffix - see documentation'
     print '  --open: open the output file with the registered application (if one is installed)'
     print
@@ -118,7 +119,7 @@ if __name__ == "__main__":
     file_name = None
     paul = False
         
-    opts, args = getopt.optlist, args = getopt.getopt(sys.argv[1:], 'hFC?o:i:e:',
+    opts, args = getopt.optlist, args = getopt.getopt(sys.argv[1:], 'hFCP?o:i:e:',
                                                       ['fi=','fe=',
                                                        'ci=','ce=',
                                                        'pi=','pe=',
@@ -143,8 +144,6 @@ if __name__ == "__main__":
             opn = True
         elif '--paul' == opt:
             paul = True
-        elif '-C' == opt:
-            project_mode = False
         elif '-o' == opt:
             file_name = arg;
             print 'Generating', file_name
@@ -164,13 +163,18 @@ if __name__ == "__main__":
     fmt = file_name[dot+1:]
     
     root_projects_and_folders, root_contexts = build_model (find_database ())
-    
-    if project_mode:
-        items = root_projects_and_folders
-    else:
-        items = root_contexts
+    items = root_projects_and_folders
         
     for opt, arg in opts:
+        
+        # PROJECT MODE
+        if '-P' == opt:
+            project_mode = True
+            items = root_contexts
+        # CONTEXT MODE
+        elif '-C' == opt:
+            project_mode = False
+            items = root_contexts
         
         # ANYTHING
         if '-i' == opt:

@@ -16,11 +16,14 @@ class Test_visitors(unittest.TestCase):
     def test_FolderNameFilterVisitor_exclude (self):
         n1 = Folder (name=u'n1')
         n2 = Folder (name=u'n2 xxx')
+        n3 = Folder (name=u'n3 child of n2')
         nodes = [n1, n2]
+        n2.add_child(n3)
         visitor = FolderNameFilterVisitor ('xxx', include=False)
         traverse_list (visitor, nodes)
         self.assertTrue(n1.marked)
         self.assertFalse(n2.marked)
+        self.assertFalse(n3.marked)
         
     def test_FolderNameFilterVisitor_include_ignores_children (self):
         n1 = Folder (name=u'n1 xxx')

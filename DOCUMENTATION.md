@@ -117,7 +117,7 @@ you'll get a text file. By changing the suffix you'll get different formats:
 
 ### Project or Context Mode ###
 
-By default tasks are organised by project. By selecting **-C** the tool will instead organise by context.
+By default tasks are organised by project. By selecting **-C** the tool will instead organise by context. Usage of **-P** and **-C** can be used between filters to change the nature of the filtering. Whichever mode the tool is in at the end of the filtering dictates whether project or context mode is used to format the output.
 
 ### Filters
 
@@ -242,6 +242,8 @@ The important thing to note about filters is that you can specify as many as you
 So you might start by including only your work folder, then exclude any project with "Routine" in the title, the include only items completed today.
 
 It's possible to create quite sophisticated queries on your OmniFocus database by using a series of includes, excludes and regular expressions but even without an in-depth knowledge of what a regular expressions are it's possible to achieve white a lot.
+
+It's possible to change between project and context mode by adding **-P** or **-C** between filters. The tools's final mode dictates how the report is printed. It's also possible to run all the filters in project mode and flip to context mode just for the output or vice versa. 
 
 ### Filtering on Dates:
 

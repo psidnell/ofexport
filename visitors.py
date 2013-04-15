@@ -54,7 +54,13 @@ def match_flagged (item, ignore):
 def set_attrib_to_root (path_to_root, name, value):
     for item in path_to_root:
         item.attribs[name] = value
-    
+
+def mark_branch_not_marked (item):
+    if item.marked:
+        item.marked = False
+        for child in item.children:
+            mark_branch_not_marked (child)
+            
 class BaseFilterVisitor(Visitor):
     def __init__(self, include=True):
         self.filter = None
@@ -78,7 +84,7 @@ class BaseFilterVisitor(Visitor):
     def end_any (self, item):
         self.traversal_path.pop()
         if self.include and not (item.attribs[INCLUDED] or item.attribs[PATH_TO_INCLUDED]):
-            item.marked = False
+            mark_branch_not_marked (item)
         # We've finished processing the node, tidy up
         # and avoid confusing the next filter.
         del (item.attribs[INCLUDED])
@@ -100,7 +106,7 @@ class BaseFilterVisitor(Visitor):
         else: # In exclude mode
             if matched:
                 # This node is toast
-                item.marked = False
+                mark_branch_not_marked (item)
             else:
                 # We haven't excluded it so it stays
                 pass
@@ -280,31 +286,39 @@ class FolderNameSortingVisitor (Visitor):
     def __str__ (self):
         return 'Folders/Projects sorted by name'
 
+def flatten (item):
+    new_children = []
+    for child in item.children:
+        # Add this nodes children above itself,
+        # this is the omnifocus way.
+        flatten (child)
+        new_children = new_children + child.children
+        new_children.append(child)
+        child.children = []
+    item.children = new_children
+
 class FlatteningVisitor (Visitor):
     def __init__(self, project_mode=True):
         self.projects = []
         self.contexts = []
         self.project_mode = project_mode
-    def begin_project (self, project):
+    def end_project (self, project):
         self.projects.append(project)
+        flatten (project)
+        for child in project.children:
+            child.parent = project        
     def end_task (self, task):
-        if self.project_mode:
-            mypos = task.parent.children.index (task)
-            # Add this nodes children above itself,
-            # this is the omnifocus way.
-            for child in task.children:
-                task.parent.children.insert (mypos, child)
-                child.parent = task.parent
-            task.children = []
+        flatten (task)
+        for child in task.children:
+            child.parent = task
     def end_context (self, context):
-        self.contexts.append(context)
-        not_contexts = []
+        new_children = []
         for child in context.children:
-            if child.type == CONTEXT:
+            if child.type != CONTEXT:
+                new_children.append (child)
                 child.parent = None
-            else:
-                not_contexts.append (child)
-        context.children = not_contexts
+        context.children = new_children
+        self.contexts.append(context)   
     def __str__ (self):
         return 'Flatten'
 

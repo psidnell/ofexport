@@ -4,6 +4,9 @@
 
 - Improved test script.
 - Filter performance improvement.
+- Added Project and Context modes.
+- Improved flattening algorithm to work in Context mode.
+- Added "No Context" context that all tasks without a context get added to.
 
 ## 1.0.3 (2013-04-13) ##
 
