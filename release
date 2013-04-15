@@ -1,3 +1,0 @@
-#!/bin/bash
-
-ofexport -o TODO.md --open --pi 'OmniPythonLib Todo' --tci none -F
