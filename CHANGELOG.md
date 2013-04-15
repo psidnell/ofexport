@@ -1,10 +1,10 @@
 # Changes #
 
-## 1.0.4 (??) ##
+## 1.0.4 (2013-04-15) ##
 
+- Added Context mode.
 - Improved test script.
 - Filter performance improvement.
-- Added Project and Context modes.
 - Improved flattening algorithm to work in Context mode.
 - Added "No Context" context that all tasks without a context get added to.
 

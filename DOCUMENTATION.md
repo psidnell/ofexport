@@ -2,8 +2,6 @@
 
 - [Changelog](https://github.com/psidnell/ofexport/blob/master/CHANGELOG.md)
 
-**WARNING:** If you don't know what a bash script is, have never used the command line or don't know what a correct $PATH variable looks like then reading on is probably just going to give you a headache.
-
 Avenues for help/abuse:
 
 - [Wiki](https://github.com/psidnell/ofexport/wiki)
@@ -71,6 +69,12 @@ will produce a TaskPaper document on your desktop containing all items completed
 
 - Custom template based formatting for document types.
 - "Tagging related" features.
+
+### WARNING ###
+
+If you don't know what a bash script is, have never used the command line or don't know what a correct $PATH variable looks like then reading on is probably just going to give you a headache.
+
+Also, this program reads your OmniFocus database file directly. While it should be impossible (as written) for it to modify or delete that database, set fire to your Mac, empty your bank accounts or knock the earth out of orbit - bugs happen. But you obviously have backups - right?  
 
 ## Download/Installation:
 
@@ -239,9 +243,9 @@ If you ran an exclude filter searching for ''Cat" you'd get:
 
 The important thing to note about filters is that you can specify as many as you like and they are executed in the order you specify. If there are multiple filters then the output of one is passed to the next and so on.
 
-So you might start by including only your work folder, then exclude any project with "Routine" in the title, the include only items completed today.
+So you might start by including only your work folder, then exclude any project with "Routine" in the title, then include only items completed today.
 
-It's possible to create quite sophisticated queries on your OmniFocus database by using a series of includes, excludes and regular expressions but even without an in-depth knowledge of what a regular expressions are it's possible to achieve white a lot.
+It's possible to create quite sophisticated queries on your OmniFocus database by using a series of includes, excludes and regular expressions but even without an in-depth knowledge of what a regular expressions is, it's possible to achieve white a lot.
 
 It's possible to change between project and context mode by adding **-P** or **-C** between filters. The tools's final mode dictates how the report is printed. It's also possible to run all the filters in project mode and flip to context mode just for the output or vice versa. 
 

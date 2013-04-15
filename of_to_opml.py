@@ -54,8 +54,10 @@ class PrintOpmlVisitor(Visitor):
         if completed != None:
             print >>self.out, 'completed="' + completed.strftime ("%Y-%m-%d") + '"',
         if self.links:
-            ident = item.ofattribs['persistentIdentifier']
-            print >>self.out,'_note="omnifocus:///' + link_type + '/' + ident + '"',
+            # This happens on "No Context" - we fabricate it and it has no persistentIdentifier
+            if 'persistentIdentifier' in item.ofattribs:
+                ident = item.ofattribs['persistentIdentifier']
+                print >>self.out,'_note="omnifocus:///' + link_type + '/' + ident + '"',
         print >>self.out, ">"
     def print_node_end (self):
         print >>self.out, self.spaces() + '</outline>'

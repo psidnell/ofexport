@@ -31,7 +31,9 @@ cd ..
 
 rm *.pyc
 
-TEST_FOLDER="^Test$"
+TEST_FOLDER="^Test Folder$"
+TEST_CONTEXT="^Test Context$"
+
 
 function run_tool {
 
@@ -41,44 +43,88 @@ function run_tool {
 	mkdir -p tmp/$FMT
 	set -e
 	
-	# Folder
+	# PM Any
+    
+    python ofexport.py -o tmp/$FMT/pm-i.$FMT -i "$TEST_FOLDER"
+    python ofexport.py -o tmp/$FMT/pm-e.$FMT -e "$TEST_FOLDER"
+    
+	# PM Folder
 	
-	python ofexport.py -o tmp/$FMT/fi.$FMT --fi "$TEST_FOLDER"
-	python ofexport.py -o tmp/$FMT/fe.$FMT --fe "$TEST_FOLDER"
+	python ofexport.py -o tmp/$FMT/pm-fi.$FMT --fi "$TEST_FOLDER"
+	python ofexport.py -o tmp/$FMT/pm-fe.$FMT --fe "$TEST_FOLDER"
 	
-	# Project
+	# PM Project
 	
-	python ofexport.py -o tmp/$FMT/pi.$FMT --pi "$TEST_FOLDER"
-	python ofexport.py -o tmp/$FMT/pe.$FMT --pi "$TEST_FOLDER"
+	python ofexport.py -o tmp/$FMT/pm-pi.$FMT --fi "$TEST_FOLDER" --pi '.*'
+	python ofexport.py -o tmp/$FMT/pm-pe.$FMT --fi "$TEST_FOLDER" --pe '.*'
 	
-	python ofexport.py -o tmp/$FMT/pci.$FMT --fi "$TEST_FOLDER" --pci none
-	python ofexport.py -o tmp/$FMT/pce.$FMT --fi "$TEST_FOLDER" --pce none
+	python ofexport.py -o tmp/$FMT/pm-pci.$FMT --fi "$TEST_FOLDER" --pci none
+	python ofexport.py -o tmp/$FMT/pm-pce.$FMT --fi "$TEST_FOLDER" --pce none
 	
-	python ofexport.py -o tmp/$FMT/pdi.$FMT --fi "$TEST_FOLDER" --pdi none
-	python ofexport.py -o tmp/$FMT/pde.$FMT --fi "$TEST_FOLDER" --pde none
+	python ofexport.py -o tmp/$FMT/pm-pdi.$FMT --fi "$TEST_FOLDER" --pdi none
+	python ofexport.py -o tmp/$FMT/pm-pde.$FMT --fi "$TEST_FOLDER" --pde none
 	
-	python ofexport.py -o tmp/$FMT/psi.$FMT --fi "$TEST_FOLDER" --psi none
-	python ofexport.py -o tmp/$FMT/pse.$FMT --fi "$TEST_FOLDER" --pse none
+	python ofexport.py -o tmp/$FMT/pm-psi.$FMT --fi "$TEST_FOLDER" --psi none
+	python ofexport.py -o tmp/$FMT/pm-pse.$FMT --fi "$TEST_FOLDER" --pse none
 	
-	python ofexport.py -o tmp/$FMT/pfi.$FMT --fi "$TEST_FOLDER" --pfi none
-	python ofexport.py -o tmp/$FMT/pfe.$FMT --fi "$TEST_FOLDER" --pfe none
+	python ofexport.py -o tmp/$FMT/pm-pfi.$FMT --fi "$TEST_FOLDER" --pfi none
+	python ofexport.py -o tmp/$FMT/pm-pfe.$FMT --fi "$TEST_FOLDER" --pfe none
 	
-	# Task
+	# PM Task
 	
-	python ofexport.py -o tmp/$FMT/ti.$FMT --pi "$TEST_FOLDER"
-	python ofexport.py -o tmp/$FMT/te.$FMT --pi "$TEST_FOLDER"
+	python ofexport.py -o tmp/$FMT/pm-ti.$FMT --fi "$TEST_FOLDER" --ti '.*'
+	python ofexport.py -o tmp/$FMT/pm-te.$FMT --fi "$TEST_FOLDER" --te '.*'
 	
-	python ofexport.py -o tmp/$FMT/tci.$FMT --fi "$TEST_FOLDER" --tci none
-	python ofexport.py -o tmp/$FMT/tce.$FMT --fi "$TEST_FOLDER" --tce none
+	python ofexport.py -o tmp/$FMT/pm-tci.$FMT --fi "$TEST_FOLDER" --tci none
+	python ofexport.py -o tmp/$FMT/pm-tce.$FMT --fi "$TEST_FOLDER" --tce none
 	
-	python ofexport.py -o tmp/$FMT/tdi.$FMT --fi "$TEST_FOLDER" --tdi none
-	python ofexport.py -o tmp/$FMT/tde.$FMT --fi "$TEST_FOLDER" --tde none
+	python ofexport.py -o tmp/$FMT/pm-tdi.$FMT --fi "$TEST_FOLDER" --tdi none
+	python ofexport.py -o tmp/$FMT/pm-tde.$FMT --fi "$TEST_FOLDER" --tde none
 	
-	python ofexport.py -o tmp/$FMT/tsi.$FMT --fi "$TEST_FOLDER" --tsi none
-	python ofexport.py -o tmp/$FMT/tse.$FMT --fi "$TEST_FOLDER" --tse none
+	python ofexport.py -o tmp/$FMT/pm-tsi.$FMT --fi "$TEST_FOLDER" --tsi none
+	python ofexport.py -o tmp/$FMT/pm-tse.$FMT --fi "$TEST_FOLDER" --tse none
 	
-	python ofexport.py -o tmp/$FMT/tfi.$FMT --fi "$TEST_FOLDER" --tfi none
-	python ofexport.py -o tmp/$FMT/tfe.$FMT --fi "$TEST_FOLDER" --tfe none
+	python ofexport.py -o tmp/$FMT/pm-tfi.$FMT --fi "$TEST_FOLDER" --tfi none
+	python ofexport.py -o tmp/$FMT/pm-tfe.$FMT --fi "$TEST_FOLDER" --tfe none
+	
+	# CM Context
+	
+	python ofexport.py -C -o tmp/$FMT/cm-tfi.$FMT --ci "$TEST_CONTEXT"
+    python ofexport.py -C -o tmp/$FMT/cp-tfe.$FMT --ce "$TEST_CONTEXT"
+    
+    # CM Project
+    
+    python ofexport.py -C -o tmp/$FMT/cm-pi.$FMT --fi "$TEST_FOLDER" --pi '.*'
+    python ofexport.py -C -o tmp/$FMT/cm-pe.$FMT --fi "$TEST_FOLDER" --pe '.*'
+    
+    python ofexport.py -C -o tmp/$FMT/cm-pci.$FMT --fi "$TEST_FOLDER" --pci none
+    python ofexport.py -C -o tmp/$FMT/cm-pce.$FMT --fi "$TEST_FOLDER" --pce none
+    
+    python ofexport.py -C -o tmp/$FMT/cm-pdi.$FMT --fi "$TEST_FOLDER" --pdi none
+    python ofexport.py -C -o tmp/$FMT/cm-pde.$FMT --fi "$TEST_FOLDER" --pde none
+    
+    python ofexport.py -C -o tmp/$FMT/cm-psi.$FMT --fi "$TEST_FOLDER" --psi none
+    python ofexport.py -C -o tmp/$FMT/cm-pse.$FMT --fi "$TEST_FOLDER" --pse none
+    
+    python ofexport.py -C -o tmp/$FMT/cm-pfi.$FMT --fi "$TEST_FOLDER" --pfi none
+    python ofexport.py -C -o tmp/$FMT/cm-pfe.$FMT --fi "$TEST_FOLDER" --pfe none
+    
+    # CM Task
+    
+    python ofexport.py -C -o tmp/$FMT/cm-ti.$FMT --fi "$TEST_FOLDER" --ti '.*'
+    python ofexport.py -C -o tmp/$FMT/cm-te.$FMT --fi "$TEST_FOLDER" --te '.*'
+    
+    python ofexport.py -C -o tmp/$FMT/cm-tci.$FMT --fi "$TEST_FOLDER" --tci none
+    python ofexport.py -C -o tmp/$FMT/cm-tce.$FMT --fi "$TEST_FOLDER" --tce none
+    
+    python ofexport.py -C -o tmp/$FMT/cm-tdi.$FMT --fi "$TEST_FOLDER" --tdi none
+    python ofexport.py -C -o tmp/$FMT/cm-tde.$FMT --fi "$TEST_FOLDER" --tde none
+    
+    python ofexport.py -C -o tmp/$FMT/cm-tsi.$FMT --fi "$TEST_FOLDER" --tsi none
+    python ofexport.py -C -o tmp/$FMT/cm-tse.$FMT --fi "$TEST_FOLDER" --tse none
+    
+    python ofexport.py -C -o tmp/$FMT/cm-tfi.$FMT --fi "$TEST_FOLDER" --tfi none
+    python ofexport.py -C -o tmp/$FMT/cm-tfe.$FMT --fi "$TEST_FOLDER" --tfe none
 }
 
 FMT=$1

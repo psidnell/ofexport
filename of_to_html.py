@@ -45,8 +45,10 @@ class PrintHtmlVisitor(Visitor):
     def end_context (self, context):
         self.depth-=1
     def print_link (self, link_type, item):
-        ident = item.ofattribs['persistentIdentifier']
-        print >>self.out, self.spaces() + item.type + ': <a href="omnifocus:///' + link_type + '/' + ident + '">' + self.escape(item.name) + '</a><br>'
+        # This happens on "No Context" - we fabricate it and it has no persistentIdentifier
+        if 'persistentIdentifier' in item.ofattribs:
+            ident = item.ofattribs['persistentIdentifier']
+            print >>self.out, self.spaces() + item.type + ': <a href="omnifocus:///' + link_type + '/' + ident + '">' + self.escape(item.name) + '</a><br>'
     def spaces (self):
         return '&nbsp' * self.depth * self.indent
     def escape (self, val):

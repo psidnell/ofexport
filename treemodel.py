@@ -47,6 +47,8 @@ class Node (NodeFwdDecl):
         self.marked = marked
         self.attribs = dict(attribs)
         self.type = nType
+        if parent != None:
+            parent.add_child (self)
     def add_child (self, child):
         self.children.append(child)
         child.parent = self
@@ -68,6 +70,12 @@ class Context(Node):
                        marked=marked,
                        children=children,
                        attribs=attribs)
+    def add_child (self, child):
+        self.children.append(child)
+        if child.type != CONTEXT:
+            child.context = self
+        else:
+            child.parent = self
         
 class Task(Node):
     flagged = TypeOf ('flagged', bool)
