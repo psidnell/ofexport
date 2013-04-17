@@ -20,8 +20,11 @@ import os
 import codecs
 
 '''
-Experimental!
-Creates a bazillion little html files each of which links back to an OmniFocus project/folder/context.
+Experimental!!!!
+
+A db directory must exist on your desktop first
+ 
+Creates a bazillion little html files each of which links/redirects back to an OmniFocus project/folder/context.
 I'm wondering if I can use openmeta on them to essentially get tags into OF via the back door.
 
 If I extract #tags from the item text then I can put that in the file and autotag can find it

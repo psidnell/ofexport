@@ -327,6 +327,12 @@ class FolderNameSortingVisitor (Visitor):
         folder.children.sort(key=lambda item:item.name)
     def __str__ (self):
         return 'Folders/Projects sorted by name'
+    
+class NameSortingVisitor (Visitor):
+    def end_any (self, item):
+        item.children.sort(key=lambda x:x.name)
+    def __str__ (self):
+        return 'Sort by name'
 
 def flatten (item):
     new_children = []

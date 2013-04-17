@@ -26,7 +26,7 @@ from of_to_text import PrintTextVisitor
 from of_to_md import PrintMarkdownVisitor
 from of_to_opml import PrintOpmlVisitor
 from of_to_html import PrintHtmlVisitor
-from visitors import NameFilterVisitor, StartFilterVisitor, CompletionFilterVisitor, DueFilterVisitor, FlaggedFilterVisitor, FolderNameFilterVisitor, ProjectNameFilterVisitor, ProjectFlaggedFilterVisitor, FolderNameSortingVisitor, ProjectDueFilterVisitor, ProjectStartFilterVisitor, ContextNameFilterVisitor, TaskDueFilterVisitor, TaskNameFilterVisitor, TaskStartFilterVisitor, TaskCompletionFilterVisitor, ProjectCompletionFilterVisitor, TaskCompletionSortingVisitor, TaskFlaggedFilterVisitor, PruningFilterVisitor, FlatteningVisitor
+from visitors import NameFilterVisitor, NameSortingVisitor, StartFilterVisitor, CompletionFilterVisitor, DueFilterVisitor, FlaggedFilterVisitor, FolderNameFilterVisitor, ProjectNameFilterVisitor, ProjectFlaggedFilterVisitor, FolderNameSortingVisitor, ProjectDueFilterVisitor, ProjectStartFilterVisitor, ContextNameFilterVisitor, TaskDueFilterVisitor, TaskNameFilterVisitor, TaskStartFilterVisitor, TaskCompletionFilterVisitor, ProjectCompletionFilterVisitor, TaskCompletionSortingVisitor, TaskFlaggedFilterVisitor, PruningFilterVisitor, FlatteningVisitor
 
 VERSION = "1.0.4 (2013-04-15)" 
      
@@ -116,6 +116,7 @@ def print_help ():
     
     print '  --tsc: sort tasks by completion'
     print '  --fsa: sort folders/projects alphabetically'
+    print '  --sa: sort everything alphabetically'
     
     print '  -F: flatten project/task structure'
     print '  --prune: prune empty projects or folders'
@@ -149,6 +150,7 @@ if __name__ == "__main__":
                                                        'tfi','tfe',
                                                        'Fi','Fe',
                                                        'tsc',
+                                                       'sa',
                                                        'fsa',
                                                        'help',
                                                        'open',
@@ -232,6 +234,16 @@ if __name__ == "__main__":
         elif '--Fe' == opt:
             visitor = FlaggedFilterVisitor (include=False)
             print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items, project_mode=project_mode)
+        elif '--sa' == opt:
+            visitor = NameSortingVisitor ()
+            print opt + '\t= ' + str (visitor)
+            # Is ALL this really necessary? Why?
+            items.sort(key=lambda item:item.name)
+            if project_mode:
+                root_projects_and_folders.sort(key=lambda item:item.name) # Have to sort the top level list too
+            else:
+                root_contexts.sort(key=lambda item:item.name)
             traverse_list (visitor, items, project_mode=project_mode)
         
         # FOLDER

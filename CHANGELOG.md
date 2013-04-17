@@ -5,6 +5,8 @@
 - Added link mode (-l) to add links to omnifocus tasks in TaskPaper documents.
 - Added generic --si/--se/--ci/--ce/--di/--de date filters that work on tasks and projects.
 - Renamed context filter from --ci to --Ci to avoid option clash.
+- Added tags to projects in TaskPaper report.
+- More sorting options.
   
 ## 1.0.4 (2013-04-15) ##
 

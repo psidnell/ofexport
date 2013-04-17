@@ -70,9 +70,19 @@ will produce a TaskPaper document on your desktop containing all items completed
 - Custom template based formatting for document types.
 - "Tagging related" features.
 
-### WARNING ###
+### Limitations ###
+
+Given that ofexport is using a completely undocumented and unsupported means of accessing the OmniFocus database, there are inevitably some shortcomings. The tool doesn't all the metadata you might expect from the OmniFocus database such as:
+
+- Context Status (I don't know where it's in the database yet)
+- Notes/attachments (I'm not completely sure how these are encoded yet)
+- Project Type/Status (I don't know they're stored is in the database yet)
+
+### WARNINGS ###
 
 If you don't know what a bash script is, have never used the command line or don't know what a correct $PATH variable looks like then reading on is probably just going to give you a headache.
+
+If Omni change the format of their database in a future update then of export will need to be fixed.
 
 Also, this program reads your OmniFocus database file directly. While it should be impossible (as written) for it to modify or delete that database, set fire to your Mac, empty your bank accounts or knock the earth out of orbit - bugs happen. But you obviously have backups - right?  
 
