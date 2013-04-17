@@ -14,10 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-import os
-import codecs
-from treemodel import traverse_list, Visitor
-from omnifocus import build_model, find_database
+from treemodel import Visitor
 
 class PrintTextVisitor(Visitor):
     def __init__ (self, out, indent=4):
@@ -55,17 +52,3 @@ class PrintTextVisitor(Visitor):
         return ''
     def spaces (self):
         return ' ' * self.depth * self.indent
-    
-if __name__ == "__main__":
-    file_name=os.environ['HOME'] + '/Desktop/OF.txt'
-    
-    out=codecs.open(file_name, 'w', 'utf-8')
-     
-    visitor = PrintTextVisitor (out)
-    root_projects_and_folders, root_contexts = build_model (find_database ())
-    traverse_list (visitor, root_projects_and_folders)
-    traverse_list (visitor, root_contexts, project_mode=False)
-        
-    os.system("open '" + file_name + "'")
-    
-    out.close()

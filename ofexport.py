@@ -13,12 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
-
+from datetime import datetime
+from datematch import process_date_specifier, date_range_to_str
 import os
 import codecs
 import getopt
 import sys
-from treemodel import traverse_list
+from treemodel import traverse_list, PROJECT, TASK, FOLDER, CONTEXT
 from omnifocus import build_model, find_database
 from datetime import date
 from of_to_tp import PrintTaskpaperVisitor
@@ -26,10 +27,10 @@ from of_to_text import PrintTextVisitor
 from of_to_md import PrintMarkdownVisitor
 from of_to_opml import PrintOpmlVisitor
 from of_to_html import PrintHtmlVisitor
-from visitors import NameFilterVisitor, NameSortingVisitor, StartFilterVisitor, CompletionFilterVisitor, DueFilterVisitor, FlaggedFilterVisitor, FolderNameFilterVisitor, ProjectNameFilterVisitor, ProjectFlaggedFilterVisitor, FolderNameSortingVisitor, ProjectDueFilterVisitor, ProjectStartFilterVisitor, ContextNameFilterVisitor, TaskDueFilterVisitor, TaskNameFilterVisitor, TaskStartFilterVisitor, TaskCompletionFilterVisitor, ProjectCompletionFilterVisitor, TaskCompletionSortingVisitor, TaskFlaggedFilterVisitor, PruningFilterVisitor, FlatteningVisitor
+from visitors import Filter, Sort, match_name, match_start, match_completed, match_due, match_flagged, get_name, get_start, get_due, get_completion, NameFilterVisitor, NameSortingVisitor, ContextNameSortingVisitor, StartFilterVisitor, CompletionFilterVisitor, DueFilterVisitor, FlaggedFilterVisitor, FolderNameFilterVisitor, ProjectNameFilterVisitor, ProjectFlaggedFilterVisitor, FolderNameSortingVisitor, ProjectDueFilterVisitor, ProjectStartFilterVisitor, ContextNameFilterVisitor, TaskDueFilterVisitor, TaskNameFilterVisitor, TaskStartFilterVisitor, TaskCompletionFilterVisitor, ProjectCompletionFilterVisitor, TaskCompletionSortingVisitor, TaskFlaggedFilterVisitor, PruningFilterVisitor, FlatteningVisitor
 
 VERSION = "1.0.4 (2013-04-15)" 
-     
+
 def print_structure (visitor, root_projects_and_folders, root_contexts, project_mode):
     if project_mode:
         traverse_list (visitor, root_projects_and_folders)
@@ -40,11 +41,64 @@ class CustomPrintTaskpaperVisitor (PrintTaskpaperVisitor):
     def __init__(self, out, links=False):
         PrintTaskpaperVisitor.__init__(self, out, links=links)
     def tags (self, item):
-        if item.date_completed != None:
+        if item.date_completed != None and item.type != PROJECT:
             return item.date_completed.strftime(" @%Y-%m-%d-%a")
         else:
             return ""
-        
+    
+def build_filter (item_types, instruction, field, arg):
+    if 'include'.startswith(instruction) or 'exclude'.startswith (instruction):
+        include = 'include'.startswith (instruction)
+        if field in ('title', 'text'):
+            return Filter (item_types, match_name, arg, include, field + ':' + arg)
+        if field in ('start', 'started', 'begin', 'began'):
+            rng = process_date_specifier (datetime.now(), arg)
+            nice_str = date_range_to_str (rng)
+            return Filter (item_types, match_start, rng, include, nice_str)
+        if field in ('end', 'ended', 'complete', 'completed', 'finish', 'finished', 'completion'):
+            rng = process_date_specifier (datetime.now(), arg)
+            nice_str = date_range_to_str (rng)
+            return Filter (item_types, match_completed, rng, include, nice_str)
+        if field in ('due', 'deadline'):
+            rng = process_date_specifier (datetime.now(), arg)
+            nice_str = date_range_to_str (rng)
+            return Filter (item_types, match_due, rng, include, nice_str)
+        if field in ('flag', 'flagged'):
+            return Filter (item_types, match_flagged, None, include, field)
+        else:
+            assert False, 'unsupported field: ' + field
+    elif 'sort'.startswith (instruction):
+        if field in ('title', 'text'):
+            return Sort (item_types, get_name, 'text')
+        if field in ('start', 'started', 'begin', 'began'):
+            return Sort (item_types, get_start, 'start')
+        if field in ('end', 'ended', 'complete', 'completed', 'finish', 'finished', 'completion'):
+            return Sort (item_types, get_completion, 'complete')
+        if field in ('due', 'deadline'):
+            return Sort (item_types, get_due, 'due')
+        else:
+            assert False, 'unsupported field: ' + field
+    
+def parse_command (param):
+    #param = p1[:p2[:p3]]
+    params = param.split(':', 2)
+    instruction = params[0]
+    field = None
+    arg = None
+    if 'include'.startswith(instruction) or 'exclude'.startswith (instruction):
+        assert 'command invalid: ' + param, len (params>=2)
+        field = params[1]
+        arg = None
+        if not 'flagged'.startswith(field):
+            assert 'command invalid: ' + param, len (params==3)
+            arg = params[2]
+    elif 'sort'.startswith (instruction):
+        assert 'command invalid: ' + param, len (params==2)
+        field = params[1]
+    else:
+        assert False, 'command invalid: ' + param
+    return (instruction, field, arg)
+       
 def print_help ():
     print 'Version ' + VERSION
     print 
@@ -116,6 +170,7 @@ def print_help ():
     
     print '  --tsc: sort tasks by completion'
     print '  --fsa: sort folders/projects alphabetically'
+    print '  --csa: sort contexts alphabetically'
     print '  --sa: sort everything alphabetically'
     
     print '  -F: flatten project/task structure'
@@ -131,8 +186,13 @@ if __name__ == "__main__":
     paul = False
     links = False
         
-    opts, args = getopt.optlist, args = getopt.getopt(sys.argv[1:], 'hlFCP?o:i:e:',
-                                                      ['fi=','fe=',
+    opts, args = getopt.optlist, args = getopt.getopt(sys.argv[1:], 'p:c:t:f:a:hlFCP?o:i:e:',
+                                                      ['project=',
+                                                       'context=',
+                                                       'task=',
+                                                       'folder=',
+                                                       'any=',
+                                                       'fi=','fe=',
                                                        'pi=','pe=',
                                                        'Ci=','Ce=',
                                                        'Ci=','Ce=',
@@ -150,6 +210,7 @@ if __name__ == "__main__":
                                                        'tfi','tfe',
                                                        'Fi','Fe',
                                                        'tsc',
+                                                       'csa',
                                                        'sa',
                                                        'fsa',
                                                        'help',
@@ -184,9 +245,35 @@ if __name__ == "__main__":
     items = root_projects_and_folders
         
     for opt, arg in opts:
-        
+        # NEW OPTION SCHEME
+        if opt in ('--project', '-p'):
+            instruction, field, arg = parse_command (arg)
+            visitor = build_filter ([PROJECT], instruction, field, arg)
+            print str (visitor)
+            traverse_list (visitor, items, project_mode=project_mode)
+        elif opt in ('--task', '-t'):
+            instruction, field, arg = parse_command (arg)
+            visitor = build_filter ([TASK], instruction, field, arg)
+            print str (visitor)
+            traverse_list (visitor, items, project_mode=project_mode)
+        if opt in ('--context', '-c'):
+            instruction, field, arg = parse_command (arg)
+            visitor = build_filter ([CONTEXT], instruction, field, arg)
+            print str (visitor)
+            traverse_list (visitor, items, project_mode=project_mode)
+        if opt in ('--folder', '-f'):
+            instruction, field, arg = parse_command (arg)
+            visitor = build_filter ([FOLDER], instruction, field, arg)
+            print str (visitor)
+            traverse_list (visitor, items, project_mode=project_mode)
+        if opt in ('--any', '-a'):
+            instruction, field, arg = parse_command (arg)
+            visitor = build_filter ([TASK,PROJECT,FOLDER,CONTEXT], instruction, field, arg)
+            print str (visitor)
+            traverse_list (visitor, items, project_mode=project_mode)
+            
         # PROJECT MODE
-        if '-P' == opt:
+        elif '-P' == opt:
             project_mode = True
             items = root_contexts
         # CONTEXT MODE
@@ -244,6 +331,13 @@ if __name__ == "__main__":
                 root_projects_and_folders.sort(key=lambda item:item.name) # Have to sort the top level list too
             else:
                 root_contexts.sort(key=lambda item:item.name)
+            traverse_list (visitor, items, project_mode=project_mode)
+        elif '--csa' == opt:
+            visitor = ContextNameSortingVisitor ()
+            print opt + '\t= ' + str (visitor)
+            # Is ALL this really necessary? Why?
+            items.sort(key=lambda item:item.name)
+            root_contexts.sort(key=lambda item:item.name)
             traverse_list (visitor, items, project_mode=project_mode)
         
         # FOLDER

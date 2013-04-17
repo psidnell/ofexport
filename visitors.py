@@ -15,13 +15,31 @@ limitations under the License.
 '''
 
 from treemodel import Visitor, TASK, PROJECT, CONTEXT
-from datematch import process_date_specifier
+from datematch import process_date_specifier, date_range_to_str
 import re
 from datetime import datetime
 
 INCLUDED='INCLUDED'
 EXCLUDED='EXCLUDED'
 PATH_TO_INCLUDED='PATH_TO_INCLUDED'
+
+def get_name (item):
+    return item.name
+
+def get_start (item):
+    if not 'start' in item.__dict__ or  item.start == None:
+        return datetime.now()
+    return item.start
+
+def get_due (item):
+    if not 'due' in item.__dict__ or item.due == None:
+        return datetime.now()
+    return item.due
+
+def get_completion (item):
+    if not 'date_completed' in item.__dict__ or item.date_completed == None:
+        return datetime.now()
+    return item.date_completed
 
 def match_name (item, regexp):
     return re.search (regexp, item.name) != None
@@ -121,6 +139,43 @@ class BaseFilterVisitor(Visitor):
                 # We haven't excluded it so it stays
                 pass
 
+def includes (include):
+    if include:
+        return 'include'
+    else:
+        return 'exclude'
+    
+class Filter(BaseFilterVisitor):
+    def __init__(self, types, match_fn, filtr, include, nice_string):
+        BaseFilterVisitor.__init__(self, include)
+        self.filter = filtr
+        self.types = types
+        self.match_fn = match_fn
+        self.nice_string = nice_string
+    def begin_any (self, item):
+        BaseFilterVisitor.begin_any (self, item)
+        if item.type in self.types and self.match_required(item):
+            matched = self.match_fn(item, self.filter)
+            self.set_item_matched(item, matched);
+    def __str__(self):
+        return includes (self.include) + str(self.types) + ' where ' + self.nice_string
+    
+class Sort(Visitor):
+    def __init__(self, types, get_key_fn, nice_string):
+        Visitor.__init__(self)
+        self.types = types
+        self.get_key_fn = get_key_fn
+        self.nice_string = nice_string
+    def begin_any (self, item):
+        if item.type in self.types:
+            self.sort_list(item.children)
+    def sort_list (self, items):
+        items.sort(key=lambda x:self.get_key_fn (x))
+    def __str__(self):
+        return 'sort ' + str(self.types) + ' ' + self.nice_string
+
+#-----------------------------------
+
 class NameFilterVisitor(BaseFilterVisitor):
     def __init__(self, filtr, include=True):
         BaseFilterVisitor.__init__(self, include)
@@ -200,27 +255,6 @@ class ContextFilterVisitor(BaseFilterVisitor):
         if self.match_required(context):
             matched = self.match_fn(context, self.filter)
             self.set_item_matched(context, matched);
-
-def includes (include):
-    if include:
-        return 'includes'
-    else:
-        return 'excludes'
-    
-def date_range_to_str (spec):
-    fmt = "[%a %b %d %Y]"
-    start, end = spec
-    if start == None and end == None:
-        return 'none'
-    elif start == None and end != None:
-        return 'everything until ' + end.strftime (fmt)
-    elif start != None and end == None:
-        return 'everything after ' + start.strftime (fmt)
-    elif start == end:
-        return 'on ' + start.strftime (fmt)
-    else:
-        return 'from ' + start.strftime (fmt) + ' to ' + end.strftime (fmt)
-    
 
 class FolderNameFilterVisitor(FolderFilterVisitor):
     def __init__(self, filtr, include=True):
@@ -324,6 +358,12 @@ class TaskCompletionSortingVisitor (Visitor):
     
 class FolderNameSortingVisitor (Visitor):
     def end_folder (self, folder):
+        folder.children.sort(key=lambda item:item.name)
+    def __str__ (self):
+        return 'Folders/Projects sorted by name'
+
+class ContextNameSortingVisitor (Visitor):
+    def end_context (self, folder):
         folder.children.sort(key=lambda item:item.name)
     def __str__ (self):
         return 'Folders/Projects sorted by name'

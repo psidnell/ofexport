@@ -14,10 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-from treemodel import traverse_list, Visitor
-from omnifocus import build_model, find_database
-import os
-import codecs
+from treemodel import Visitor
 
 class PrintOpmlVisitor(Visitor):
     def __init__ (self, out, depth=2, indent=2, links=True):
@@ -65,32 +62,3 @@ class PrintOpmlVisitor(Visitor):
         return ' ' * (self.depth * self.indent)
     def escape (self, val):
         return val.replace('"','&quot;').replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
-
-if __name__ == "__main__":
-
-    root_projects_and_folders, root_contexts = build_model (find_database ())
-    
-    file_name=os.environ['HOME'] + '/Desktop/OF.opml'
-    
-    out=codecs.open(file_name, 'w', 'utf-8')
-    
-    print >>out, '<?xml version="1.0" encoding="UTF-8" standalone="no"?>'
-    print >>out, '<opml version="1.0">'
-    print >>out, '  <head>'
-    print >>out, '    <title>OmniFocus</title>'
-    print >>out, '  </head>'
-    print >>out, '  <body>'
-    print >>out, '    <outline text="OmniFocus">'
-    print >>out, '      <outline text="Projects">'
-    traverse_list (PrintOpmlVisitor (out, depth=4), root_projects_and_folders)
-    print >>out, '      </outline>'
-    print >>out, '      <outline text="Contexts">'
-    traverse_list (PrintOpmlVisitor (out, depth=4), root_contexts, project_mode=False)
-    print >>out, '      </outline>'
-    print >>out, '    </outline>'
-    print >>out, '  </body>'
-    print >>out, '</opml>'
-    
-    out.close()
-    
-    os.system("open '" + file_name + "'")

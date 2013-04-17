@@ -262,7 +262,7 @@ It's possible to create quite sophisticated queries on your OmniFocus database b
 
 It's possible to change between project and context mode by adding **-P** or **-C** between filters. The tools's final mode dictates how the report is printed. It's also possible to run all the filters in project mode and flip to context mode just for the output or vice versa. 
 
-### Filtering on Dates:
+#### Filtering on Dates:
 
 A specific day can be expressed as:
 
@@ -271,7 +271,7 @@ A specific day can be expressed as:
 - "yesterday", "today",  "tomorrow"
 - "last tuesday" - the Tuesday that occurs in the previous week.
 - "next sat" - the Saturday that occurs in the next week.
--  "2013-04-09"
+- "2013-04-09"
 
 A range of dates can be expressed as:
 
