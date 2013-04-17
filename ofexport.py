@@ -26,7 +26,7 @@ from of_to_text import PrintTextVisitor
 from of_to_md import PrintMarkdownVisitor
 from of_to_opml import PrintOpmlVisitor
 from of_to_html import PrintHtmlVisitor
-from visitors import AnyNameFilterVisitor, AnyFlaggedFilterVisitor, FolderNameFilterVisitor, ProjectNameFilterVisitor, ProjectFlaggedFilterVisitor, FolderNameSortingVisitor, ProjectDueFilterVisitor, ProjectStartFilterVisitor, ContextNameFilterVisitor, TaskDueFilterVisitor, TaskNameFilterVisitor, TaskStartFilterVisitor, TaskCompletionFilterVisitor, ProjectCompletionFilterVisitor, TaskCompletionSortingVisitor, TaskFlaggedFilterVisitor, PruningFilterVisitor, FlatteningVisitor
+from visitors import NameFilterVisitor, StartFilterVisitor, CompletionFilterVisitor, DueFilterVisitor, FlaggedFilterVisitor, FolderNameFilterVisitor, ProjectNameFilterVisitor, ProjectFlaggedFilterVisitor, FolderNameSortingVisitor, ProjectDueFilterVisitor, ProjectStartFilterVisitor, ContextNameFilterVisitor, TaskDueFilterVisitor, TaskNameFilterVisitor, TaskStartFilterVisitor, TaskCompletionFilterVisitor, ProjectCompletionFilterVisitor, TaskCompletionSortingVisitor, TaskFlaggedFilterVisitor, PruningFilterVisitor, FlatteningVisitor
 
 VERSION = "1.0.4 (2013-04-15)" 
      
@@ -37,8 +37,8 @@ def print_structure (visitor, root_projects_and_folders, root_contexts, project_
         traverse_list (visitor, root_contexts, project_mode=False)
 
 class CustomPrintTaskpaperVisitor (PrintTaskpaperVisitor):
-    def __init__(self, out, project_mode):
-        PrintTaskpaperVisitor.__init__(self, out, project_mode)
+    def __init__(self, out, links=False):
+        PrintTaskpaperVisitor.__init__(self, out, links=links)
     def tags (self, item):
         if item.date_completed != None:
             return item.date_completed.strftime(" @%Y-%m-%d-%a")
@@ -57,6 +57,7 @@ def print_help ():
     print '  -h,-?,--help'
     print '  -C: context mode (as opposed to project mode)'
     print '  -P: project mode - the default (as opposed to context mode)'
+    print '  -l: print links to tasks (in supported file formats)'
     print '  -o file_name: the output file name, must end in a recognised suffix - see documentation'
     print '  --open: open the output file with the registered application (if one is installed)'
     print
@@ -65,20 +66,29 @@ def print_help ():
     print '  -i regexp: include anything matching regexp'
     print '  -e regexp: exclude anything matching regexp'
     
+    print '  --si spec: include anything with start matching spec'
+    print '  --se spec: exclude anything with start matching spec'
+    
+    print '  --di spec: include anything with due matching spec'
+    print '  --de spec: exclude anything with due matching spec'
+    
+    print '  --ci spec: include anything with completion matching spec'
+    print '  --ce spec: exclude anything with completion matching spec'
+    
     print '  --Fi regexp: include anything flagged'
     print '  --Fe regexp: exclude anything flagged'
     
     print '  --pi regexp: include projects matching regexp'
     print '  --pe regexp: exclude projects matching regexp'
     
-    print '  --pci regexp: include projects with completion matching regexp'
-    print '  --pce regexp: exclude projects with completion matching regexp'
+    print '  --pci spec: include projects with completion matching spec'
+    print '  --pce spec: exclude projects with completion matching spec'
     
-    print '  --pdi regexp: include projects with due matching regexp'
-    print '  --pde regexp: exclude projects with due matching regexp'
+    print '  --pdi spec: include projects with due matching spec'
+    print '  --pde spec: exclude projects with due matching spec'
     
-    print '  --psi regexp: include projects with start matching regexp'
-    print '  --pse regexp: exclude projects with start matching regexp'
+    print '  --psi spec: include projects with start matching spec'
+    print '  --pse spec: exclude projects with start matching spec'
     
     print '  --pfi: include flagged projects'
     print '  --pfe: exclude flagged projects'
@@ -89,17 +99,17 @@ def print_help ():
     print '  --ti regexp: include tasks matching regexp'
     print '  --te regexp: exclude tasks matching regexp'
     
-    print '  --ci regexp: include contexts matching regexp'
-    print '  --ce regexp: exclude contexts matching regexp'
+    print '  --Ci regexp: include contexts matching regexp'
+    print '  --Ce regexp: exclude contexts matching regexp'
      
-    print '  --tci regexp: include tasks with completion matching regexp'
-    print '  --tce regexp: exclude tasks with completion matching regexp'
+    print '  --tci spec: include tasks with completion matching spec'
+    print '  --tce spec: exclude tasks with completion matching spec'
     
-    print '  --tsi regexp: include tasks with start matching regexp'
-    print '  --tse regexp: exclude tasks with start matching regexp'
+    print '  --tsi spec: include tasks with start matching spec'
+    print '  --tse spec: exclude tasks with start matching spec'
     
-    print '  --tdi regexp: include tasks with due matching regexp'
-    print '  --tde regexp: exclude tasks with due matching regexp'
+    print '  --tdi spec: include tasks with due matching spec'
+    print '  --tde spec: exclude tasks with due matching spec'
     
     print '  --tfi: include flagged tasks'
     print '  --tfe: exclude flagged tasks'
@@ -118,11 +128,16 @@ if __name__ == "__main__":
     project_mode=True
     file_name = None
     paul = False
+    links = False
         
-    opts, args = getopt.optlist, args = getopt.getopt(sys.argv[1:], 'hFCP?o:i:e:',
+    opts, args = getopt.optlist, args = getopt.getopt(sys.argv[1:], 'hlFCP?o:i:e:',
                                                       ['fi=','fe=',
-                                                       'ci=','ce=',
                                                        'pi=','pe=',
+                                                       'Ci=','Ce=',
+                                                       'Ci=','Ce=',
+                                                       'ci=','ce=',
+                                                       'si=','se=',
+                                                       'di=','de=',
                                                        'pci=','pce=',
                                                        'psi=','pse=',
                                                        'pdi=','pde=',
@@ -144,9 +159,10 @@ if __name__ == "__main__":
             opn = True
         elif '--paul' == opt:
             paul = True
+        elif '-l' == opt:
+            links = True
         elif '-o' == opt:
             file_name = arg;
-            print 'Generating', file_name
         elif opt in ('-?', '-h', '--help'):
             print_help ()
             sys.exit()
@@ -178,19 +194,43 @@ if __name__ == "__main__":
         
         # ANYTHING
         if '-i' == opt:
-            visitor = AnyNameFilterVisitor (arg, include=True)
+            visitor = NameFilterVisitor (arg, include=True)
             print opt + '\t= ' + str (visitor)
             traverse_list (visitor, items, project_mode=project_mode)
         elif '-e' == opt:
-            visitor = AnyNameFilterVisitor (arg, include=False)
+            visitor = NameFilterVisitor (arg, include=False)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items, project_mode=project_mode)
+        elif '--si' == opt:
+            visitor = StartFilterVisitor (arg, include=True)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items, project_mode=project_mode)
+        elif '--se' == opt:
+            visitor = StartFilterVisitor (arg, include=False)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items, project_mode=project_mode)
+        elif '--ci' == opt:
+            visitor = CompletionFilterVisitor (arg, include=True)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items, project_mode=project_mode)
+        elif '--ce' == opt:
+            visitor = CompletionFilterVisitor (arg, include=False)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items, project_mode=project_mode)
+        elif '--di' == opt:
+            visitor = DueFilterVisitor (arg, include=True)
+            print opt + '\t= ' + str (visitor)
+            traverse_list (visitor, items, project_mode=project_mode)
+        elif '--de' == opt:
+            visitor = CompletionFilterVisitor (arg, include=False)
             print opt + '\t= ' + str (visitor)
             traverse_list (visitor, items, project_mode=project_mode)
         elif '--Fi' == opt:
-            visitor = AnyFlaggedFilterVisitor (include=True)
+            visitor = FlaggedFilterVisitor (include=True)
             print opt + '\t= ' + str (visitor)
             traverse_list (visitor, items, project_mode=project_mode)
         elif '--Fe' == opt:
-            visitor = AnyFlaggedFilterVisitor (include=False)
+            visitor = FlaggedFilterVisitor (include=False)
             print opt + '\t= ' + str (visitor)
             traverse_list (visitor, items, project_mode=project_mode)
         
@@ -252,11 +292,11 @@ if __name__ == "__main__":
             traverse_list (visitor, items, project_mode=project_mode)
             
         # CONTEXT
-        elif '--ci' == opt:
+        elif '--Ci' == opt:
             visitor = ContextNameFilterVisitor (arg, include=True)
             print opt + '\t= ' + str (visitor)
             traverse_list (visitor, items, project_mode=project_mode)
-        elif '--ce' == opt:
+        elif '--Ce' == opt:
             visitor = ContextNameFilterVisitor (arg, include=False)
             print opt + '\t= ' + str (visitor)
             traverse_list (visitor, items, project_mode=project_mode)
@@ -323,9 +363,8 @@ if __name__ == "__main__":
                 traverse_list (visitor, root_contexts, project_mode=project_mode)
                 root_contexts = visitor.contexts # Really?
                 items = visitor.contexts
-
-    file_name_base = os.environ['HOME']+'/Desktop/'
-    date_str = today.strftime (time_fmt)
+                    
+    print 'Generating', file_name
     
     if fmt == 'txt' or fmt == 'text':
         out=codecs.open(file_name, 'w', 'utf-8')
@@ -349,9 +388,9 @@ if __name__ == "__main__":
         out=codecs.open(file_name, 'w', 'utf-8')
         visitor = None
         if paul:
-            visitor = CustomPrintTaskpaperVisitor (out, project_mode)
+            visitor = CustomPrintTaskpaperVisitor (out, links=links)
         else:
-            visitor = PrintTaskpaperVisitor (out, project_mode)
+            visitor = PrintTaskpaperVisitor (out, links = links)
         print_structure (visitor, root_projects_and_folders, root_contexts, project_mode)
     
     # OPML

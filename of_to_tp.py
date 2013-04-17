@@ -20,20 +20,23 @@ import os
 import codecs
 
 class PrintTaskpaperVisitor(Visitor):
-    def __init__ (self, out, depth=0):
+    def __init__ (self, out, links = False, depth=0):
         self.depth = depth
         self.out = out
+        self.links = links
     def begin_folder (self, folder):
         print >>self.out, self.tabs() + folder.name + ':'
         self.depth+=1
+        self.print_link ('folder', folder)
     def end_folder (self, folder):
         self.depth-=1
     def begin_project (self, project):
         if self.project_mode:
-            print >>self.out, self.tabs() + project.name + ':'
+            print >>self.out, self.tabs() + project.name + ':' + self.tags(project)
         else:
             print >>self.out, self.tabs() + '- ' + self.remove_trailing_colon(project.name) + self.tags(project)
         self.depth+=1
+        self.print_link ('task', project)
     def end_project (self, project):
         self.depth-=1
     def begin_task (self, task):
@@ -47,6 +50,7 @@ class PrintTaskpaperVisitor(Visitor):
     def begin_context (self, context):
         print >>self.out, self.tabs() + context.name + ':'
         self.depth+=1
+        self.print_link ('context', context)
     def end_context (self, context):
         self.depth-=1
     def tags (self, item):
@@ -74,6 +78,11 @@ class PrintTaskpaperVisitor(Visitor):
         return len ([x for x in item.children if x.marked]) == 0
     def tabs (self):
         return '\t' * (self.depth)
+    def print_link (self, link_type, item):
+        if self.links and 'persistentIdentifier' in item.ofattribs:
+            ident = item.ofattribs['persistentIdentifier']
+            link = 'omnifocus:///' + link_type + '/' + ident
+            print >>self.out, self.tabs() + link
 
 if __name__ == "__main__":
 

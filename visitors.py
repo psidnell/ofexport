@@ -121,7 +121,7 @@ class BaseFilterVisitor(Visitor):
                 # We haven't excluded it so it stays
                 pass
 
-class AnyNameFilterVisitor(BaseFilterVisitor):
+class NameFilterVisitor(BaseFilterVisitor):
     def __init__(self, filtr, include=True):
         BaseFilterVisitor.__init__(self, include)
         self.filter = filtr
@@ -134,7 +134,7 @@ class AnyNameFilterVisitor(BaseFilterVisitor):
     def __str__(self):
         return 'name ' + includes (self.include) + ' "' + self.filter + '"'
     
-class AnyFlaggedFilterVisitor(BaseFilterVisitor):
+class FlaggedFilterVisitor(BaseFilterVisitor):
     def __init__(self, include=True):
         BaseFilterVisitor.__init__(self, include)
         self.match_fn = match_flagged
@@ -172,6 +172,20 @@ class ProjectFilterVisitor(BaseFilterVisitor):
         BaseFilterVisitor.__init__(self, include)
         self.filter = filtr
         self.match_fn = match_fn
+    def begin_project (self, project):
+        if self.match_required(project):
+            matched = self.match_fn(project, self.filter)
+            self.set_item_matched(project, matched);
+                    
+class ProjectAndTaskFilterVisitor(BaseFilterVisitor):
+    def __init__(self, filtr, match_fn, include=True):
+        BaseFilterVisitor.__init__(self, include)
+        self.filter = filtr
+        self.match_fn = match_fn
+    def begin_task (self, task):
+        if self.match_required(task):
+            matched = self.match_fn(task, self.filter)
+            self.set_item_matched(task, matched);
     def begin_project (self, project):
         if self.match_required(project):
             matched = self.match_fn(project, self.filter)
@@ -273,6 +287,24 @@ class TaskStartFilterVisitor(TaskFilterVisitor):
         TaskFilterVisitor.__init__(self, process_date_specifier (datetime.now(), filtr), match_start, include)
     def __str__(self):
         return 'Task start ' + includes (self.include) + ' ' + date_range_to_str(self.filter)
+    
+class StartFilterVisitor(ProjectAndTaskFilterVisitor):
+    def __init__(self, filtr, include=True):
+        ProjectAndTaskFilterVisitor.__init__(self, process_date_specifier (datetime.now(), filtr), match_start, include)
+    def __str__(self):
+        return 'Start ' + includes (self.include) + ' ' + date_range_to_str(self.filter)
+    
+class DueFilterVisitor(ProjectAndTaskFilterVisitor):
+    def __init__(self, filtr, include=True):
+        ProjectAndTaskFilterVisitor.__init__(self, process_date_specifier (datetime.now(), filtr), match_due, include)
+    def __str__(self):
+        return 'Due ' + includes (self.include) + ' ' + date_range_to_str(self.filter)
+    
+class CompletionFilterVisitor(ProjectAndTaskFilterVisitor):
+    def __init__(self, filtr, include=True):
+        ProjectAndTaskFilterVisitor.__init__(self, process_date_specifier (datetime.now(), filtr), match_completed, include)
+    def __str__(self):
+        return 'Completion ' + includes (self.include) + ' ' + date_range_to_str(self.filter)
         
 class TaskFlaggedFilterVisitor(TaskFilterVisitor):
     def __init__(self, include=True):

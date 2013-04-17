@@ -1,5 +1,11 @@
 # Changes #
 
+## 1.0.5 (???) ##
+
+- Added link mode (-l) to add links to omnifocus tasks in TaskPaper documents.
+- Added generic --si/--se/--ci/--ce/--di/--de date filters that work on tasks and projects.
+- Renamed context filter from --ci to --Ci to avoid option clash.
+  
 ## 1.0.4 (2013-04-15) ##
 
 - Added Context mode.

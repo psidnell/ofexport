@@ -194,8 +194,11 @@ If you ran an exclude filter searching for ''Cat" you'd get:
 
         -i regexp: include anything matching regexp
         -e regexp: exclude anything matching regexp
-        --Fi regexp: include anything flagged
-        --Fe regexp: exclude anything flagged
+        --si spec: include anything with start matching spec
+        --se spec: exclude anything with start matching spec
+        --ci spec: include anything with completion matching spec
+        --Fi: include anything flagged
+        --Fe: exclude anything flagged
 
 **Projects**
 
@@ -231,8 +234,8 @@ If you ran an exclude filter searching for ''Cat" you'd get:
 
 **Contexts**
 
-        --ci regexp: include contexts matching regexp
-        --ce regexp: exclude contexts matching regexp
+        --Ci regexp: include contexts matching regexp
+        --Ce regexp: exclude contexts matching regexp
 
 **Misc**
 
