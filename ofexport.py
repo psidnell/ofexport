@@ -19,7 +19,7 @@ import os
 import codecs
 import getopt
 import sys
-from treemodel import traverse_list, PROJECT, TASK, FOLDER, CONTEXT
+from treemodel import traverse, traverse_list, PROJECT, TASK, FOLDER, CONTEXT
 from omnifocus import build_model, find_database
 from datetime import date
 from of_to_tp import PrintTaskpaperVisitor
@@ -27,15 +27,9 @@ from of_to_text import PrintTextVisitor
 from of_to_md import PrintMarkdownVisitor
 from of_to_opml import PrintOpmlVisitor
 from of_to_html import PrintHtmlVisitor
-from visitors import Filter, Sort, match_name, match_start, match_completed, match_due, match_flagged, get_name, get_start, get_due, get_completion, NameFilterVisitor, NameSortingVisitor, ContextNameSortingVisitor, StartFilterVisitor, CompletionFilterVisitor, DueFilterVisitor, FlaggedFilterVisitor, FolderNameFilterVisitor, ProjectNameFilterVisitor, ProjectFlaggedFilterVisitor, FolderNameSortingVisitor, ProjectDueFilterVisitor, ProjectStartFilterVisitor, ContextNameFilterVisitor, TaskDueFilterVisitor, TaskNameFilterVisitor, TaskStartFilterVisitor, TaskCompletionFilterVisitor, ProjectCompletionFilterVisitor, TaskCompletionSortingVisitor, TaskFlaggedFilterVisitor, PruningFilterVisitor, FlatteningVisitor
+from visitors import Filter, Sort, match_name, match_start, match_completed, match_due, match_flagged, get_name, get_start, get_due, get_completion, PruningFilterVisitor, FlatteningVisitor
 
 VERSION = "1.0.4 (2013-04-15)" 
-
-def print_structure (visitor, root_projects_and_folders, root_contexts, project_mode):
-    if project_mode:
-        traverse_list (visitor, root_projects_and_folders)
-    else:
-        traverse_list (visitor, root_contexts, project_mode=False)
 
 class CustomPrintTaskpaperVisitor (PrintTaskpaperVisitor):
     def __init__(self, out, links=False):
@@ -186,37 +180,17 @@ if __name__ == "__main__":
     paul = False
     links = False
         
-    opts, args = getopt.optlist, args = getopt.getopt(sys.argv[1:], 'p:c:t:f:a:hlFCP?o:i:e:',
-                                                      ['project=',
-                                                       'context=',
-                                                       'task=',
-                                                       'folder=',
-                                                       'any=',
-                                                       'fi=','fe=',
-                                                       'pi=','pe=',
-                                                       'Ci=','Ce=',
-                                                       'Ci=','Ce=',
-                                                       'ci=','ce=',
-                                                       'si=','se=',
-                                                       'di=','de=',
-                                                       'pci=','pce=',
-                                                       'psi=','pse=',
-                                                       'pdi=','pde=',
-                                                       'pfi','pfe',
-                                                       'ti=','te=',
-                                                       'tci=','tce=',
-                                                       'tsi=','tse=',
-                                                       'tdi=','tde=',
-                                                       'tfi','tfe',
-                                                       'Fi','Fe',
-                                                       'tsc',
-                                                       'csa',
-                                                       'sa',
-                                                       'fsa',
-                                                       'help',
-                                                       'open',
-                                                       'prune',
-                                                       'paul'])
+    opts, args = getopt.optlist, args = getopt.getopt(sys.argv[1:],
+                'p:c:t:f:a:hlFC?o:',
+                ['project=',
+                 'context=',
+                 'task=',
+                 'folder=',
+                 'any=',
+                 'help',
+                 'open',
+                 'prune',
+                 'paul'])
     for opt, arg in opts:
         if '--open' == opt:
             opn = True
@@ -241,267 +215,56 @@ if __name__ == "__main__":
     
     fmt = file_name[dot+1:]
     
-    root_projects_and_folders, root_contexts = build_model (find_database ())
-    items = root_projects_and_folders
+    root_project, root_context = build_model (find_database ())
+    subject = root_project
         
     for opt, arg in opts:
-        # NEW OPTION SCHEME
+        visitor = None
         if opt in ('--project', '-p'):
             instruction, field, arg = parse_command (arg)
             visitor = build_filter ([PROJECT], instruction, field, arg)
-            print str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
         elif opt in ('--task', '-t'):
             instruction, field, arg = parse_command (arg)
             visitor = build_filter ([TASK], instruction, field, arg)
-            print str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        if opt in ('--context', '-c'):
+        elif opt in ('--context', '-c'):
             instruction, field, arg = parse_command (arg)
             visitor = build_filter ([CONTEXT], instruction, field, arg)
-            print str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        if opt in ('--folder', '-f'):
+        elif opt in ('--folder', '-f'):
             instruction, field, arg = parse_command (arg)
+            print instruction, field, arg
             visitor = build_filter ([FOLDER], instruction, field, arg)
-            print str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        if opt in ('--any', '-a'):
+        elif opt in ('--any', '-a'):
             instruction, field, arg = parse_command (arg)
             visitor = build_filter ([TASK,PROJECT,FOLDER,CONTEXT], instruction, field, arg)
-            print str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-            
-        # PROJECT MODE
-        elif '-P' == opt:
-            project_mode = True
-            items = root_contexts
-        # CONTEXT MODE
-        elif '-C' == opt:
-            project_mode = False
-            items = root_contexts
-        
-        # ANYTHING
-        if '-i' == opt:
-            visitor = NameFilterVisitor (arg, include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '-e' == opt:
-            visitor = NameFilterVisitor (arg, include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--si' == opt:
-            visitor = StartFilterVisitor (arg, include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--se' == opt:
-            visitor = StartFilterVisitor (arg, include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--ci' == opt:
-            visitor = CompletionFilterVisitor (arg, include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--ce' == opt:
-            visitor = CompletionFilterVisitor (arg, include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--di' == opt:
-            visitor = DueFilterVisitor (arg, include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--de' == opt:
-            visitor = CompletionFilterVisitor (arg, include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--Fi' == opt:
-            visitor = FlaggedFilterVisitor (include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--Fe' == opt:
-            visitor = FlaggedFilterVisitor (include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--sa' == opt:
-            visitor = NameSortingVisitor ()
-            print opt + '\t= ' + str (visitor)
-            # Is ALL this really necessary? Why?
-            items.sort(key=lambda item:item.name)
-            if project_mode:
-                root_projects_and_folders.sort(key=lambda item:item.name) # Have to sort the top level list too
-            else:
-                root_contexts.sort(key=lambda item:item.name)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--csa' == opt:
-            visitor = ContextNameSortingVisitor ()
-            print opt + '\t= ' + str (visitor)
-            # Is ALL this really necessary? Why?
-            items.sort(key=lambda item:item.name)
-            root_contexts.sort(key=lambda item:item.name)
-            traverse_list (visitor, items, project_mode=project_mode)
-        
-        # FOLDER
-        elif '--fi' == opt:
-            visitor = FolderNameFilterVisitor (arg, include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--fe' == opt:
-            visitor = FolderNameFilterVisitor (arg, include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        
-        # PROJECT
-        elif '--pi' == opt:
-            visitor = ProjectNameFilterVisitor (arg, include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--pe' == opt:
-            visitor = ProjectNameFilterVisitor (arg, include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--psi' == opt:
-            visitor = ProjectStartFilterVisitor (arg, include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--pse' == opt:
-            visitor = ProjectStartFilterVisitor (arg, include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--pdi' == opt:
-            visitor = ProjectDueFilterVisitor (arg, include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--psc' == opt:
-            visitor = ProjectDueFilterVisitor (arg, include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--pci' == opt:
-            visitor = ProjectCompletionFilterVisitor (arg, include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--pce' == opt:
-            visitor = ProjectCompletionFilterVisitor (arg, include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--pfi' == opt:
-            visitor = ProjectFlaggedFilterVisitor (include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--pfe' == opt:
-            visitor = ProjectFlaggedFilterVisitor (include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--fsa' == opt:
-            visitor = FolderNameSortingVisitor ()
-            print opt + '\t= ' + str (visitor)
-            root_projects_and_folders.sort(key=lambda item:item.name) # Have to sort the top level list too
-            traverse_list (visitor, items, project_mode=project_mode)
-            
-        # CONTEXT
-        elif '--Ci' == opt:
-            visitor = ContextNameFilterVisitor (arg, include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--Ce' == opt:
-            visitor = ContextNameFilterVisitor (arg, include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        
-        # TASK
-        elif '--ti' == opt:
-            visitor = TaskNameFilterVisitor (arg, include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--te' == opt:
-            visitor = TaskNameFilterVisitor (arg, include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--tci' == opt:
-            visitor = TaskCompletionFilterVisitor (arg, include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--tce' == opt:
-            visitor = TaskCompletionFilterVisitor (arg, include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--tsi' == opt:
-            visitor = TaskStartFilterVisitor (arg, include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--tse' == opt:
-            visitor = TaskStartFilterVisitor (arg, include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--tdi' == opt:
-            visitor = TaskDueFilterVisitor (arg, include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--tde' == opt:
-            visitor = TaskDueFilterVisitor (arg, include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--tfi' == opt:
-            visitor = TaskFlaggedFilterVisitor (include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--tfe' == opt:
-            visitor = TaskFlaggedFilterVisitor (include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--tsc' == opt:
-            visitor = TaskCompletionSortingVisitor ()
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        
-        # MISC
         elif '--prune' == opt:
             visitor = PruningFilterVisitor ()
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
         elif '-F' == opt:
             visitor = FlatteningVisitor ()
-            print opt + '\t= ' + str (visitor)
-            if project_mode:
-                traverse_list (visitor, root_projects_and_folders, project_mode=project_mode)
-                root_projects_and_folders = visitor.projects # Really?
-                items = visitor.projects
-            else:
-                traverse_list (visitor, root_contexts, project_mode=project_mode)
-                root_contexts = visitor.contexts # Really?
-                items = visitor.contexts
+        
+        if visitor != None: 
+            print str (visitor)
+            traverse (visitor, subject, project_mode=project_mode)
                     
     print 'Generating', file_name
     
-    if fmt == 'txt' or fmt == 'text':
-        out=codecs.open(file_name, 'w', 'utf-8')
-        
-        print_structure (PrintTextVisitor (out), root_projects_and_folders, root_contexts, project_mode)
-        
-    # MARKDOWN
+    out=codecs.open(file_name, 'w', 'utf-8')
+    
+    if fmt == 'txt' or fmt == 'text':        
+        visitor = PrintTextVisitor (out)
+        traverse_list (visitor, subject.children, project_mode=project_mode)       
     elif fmt == 'md' or fmt == 'markdown':
-        out=codecs.open(file_name, 'w', 'utf-8')
-        
-        print_structure (PrintMarkdownVisitor (out), root_projects_and_folders, root_contexts, project_mode)
-        
-    # FOLDING TEXT
-    elif fmt == 'ft' or fmt == 'foldingtext':
-        out=codecs.open(file_name, 'w', 'utf-8')
-        
-        print_structure (PrintMarkdownVisitor (out), root_projects_and_folders, root_contexts, project_mode)
-                
-    # TASKPAPER            
+        visitor = PrintMarkdownVisitor (out)
+        traverse_list (visitor, subject.children, project_mode=project_mode)       
+    elif fmt == 'ft' or fmt == 'foldingtext':        
+        visitor = PrintMarkdownVisitor (out)
+        traverse_list (visitor, subject.children, project_mode=project_mode)       
     elif fmt == 'tp' or fmt == 'taskpaper':
-        out=codecs.open(file_name, 'w', 'utf-8')
-        visitor = None
         if paul:
             visitor = CustomPrintTaskpaperVisitor (out, links=links)
         else:
             visitor = PrintTaskpaperVisitor (out, links = links)
-        print_structure (visitor, root_projects_and_folders, root_contexts, project_mode)
-    
-    # OPML
+        traverse_list (visitor, subject.children, project_mode=project_mode)       
     elif fmt == 'opml':
-        out=codecs.open(file_name, 'w', 'utf-8')
         print >>out, '<?xml version="1.0" encoding="UTF-8" standalone="no"?>'
         print >>out, '<opml version="1.0">'
         print >>out, '  <head>'
@@ -509,7 +272,8 @@ if __name__ == "__main__":
         print >>out, '  </head>'
         print >>out, '  <body>'
         
-        print_structure (PrintOpmlVisitor (out, depth=1), root_projects_and_folders, root_contexts, project_mode)
+        visitor = PrintOpmlVisitor (out, depth=1)
+        traverse_list (visitor, subject.children, project_mode=project_mode)       
         
         print >>out, '  </body>'
         print >>out, '</opml>'
@@ -523,7 +287,8 @@ if __name__ == "__main__":
         print >>out, '  </head>'
         print >>out, '  <body>'
         
-        print_structure (PrintHtmlVisitor (out, depth=1), root_projects_and_folders, root_contexts, project_mode)
+        visitor - PrintHtmlVisitor (out, depth=1)
+        traverse_list (visitor, subject.children, project_mode=project_mode)       
         
         print >>out, '  </body>'
         print >>out, '<html>'
