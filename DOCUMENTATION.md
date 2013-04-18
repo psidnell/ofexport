@@ -12,9 +12,9 @@ Avenues for help/abuse:
 Related Applications:
 
 - [OmniFocus](http://www.omnigroup.com/products/omnifocus/)
-- [OmniFocus Extras ofexport Forum Thread](http://forums.omnigroup.com/showthread.php?t=29081)
+- [OmniFocus Extras **ofexport** Forum Thread](http://forums.omnigroup.com/showthread.php?t=29081)
 - [Taskpaper](http://www.hogbaysoftware.com/products/taskpaper)
-- [TaskPaper ofexport Forum Thread](https://groups.google.com/forum/?fromgroups=#!topic/taskpaper/7xQ4lE_1O9I)
+- [TaskPaper **ofexport** Forum Thread](https://groups.google.com/forum/?fromgroups=#!topic/taskpaper/7xQ4lE_1O9I)
 - [Hazel](http://www.noodlesoft.com/hazel.php)
 - [Dropbox](http://www.dropbox.com)
 
@@ -72,7 +72,7 @@ will produce a TaskPaper document on your desktop containing all items completed
 
 ### Limitations ###
 
-Given that ofexport is using a completely undocumented and unsupported means of accessing the OmniFocus database, there are inevitably some shortcomings. The tool doesn't all the metadata you might expect from the OmniFocus database such as:
+Given that **ofexport** is using a completely undocumented and unsupported means of accessing the OmniFocus database, there are inevitably some shortcomings. The tool doesn't load all the metadata you might expect from the OmniFocus database such as:
 
 - Context Status (I don't know where it's in the database yet)
 - Notes/attachments (I'm not completely sure how these are encoded yet)
@@ -80,11 +80,9 @@ Given that ofexport is using a completely undocumented and unsupported means of 
 
 ### WARNINGS ###
 
-If you don't know what a bash script is, have never used the command line or don't know what a correct $PATH variable looks like then reading on is probably just going to give you a headache.
-
-If Omni change the format of their database in a future update then of export will need to be fixed.
-
-Also, this program reads your OmniFocus database file directly. While it should be impossible (as written) for it to modify or delete that database, set fire to your Mac, empty your bank accounts or knock the earth out of orbit - bugs happen. But you obviously have backups - right?  
+- If you don't know what a bash script is, have never used the command line or don't know what a correct $PATH variable looks like then reading on is probably just going to give you a headache.
+- If Omni change the format of their database in a future update then **ofexport** will need to be fixed.
+- This program reads your OmniFocus database file directly. While it should be impossible (as written) for it to modify or delete that database, set fire to your Mac, empty your bank accounts or knock the earth out of orbit - bugs happen. But you obviously have backups - right?  
 
 ## Download/Installation:
 
@@ -94,9 +92,9 @@ This pre-supposes a certain familiarity with the command line.
 - Download the [zip file](https://github.com/psidnell/ofexport/archive/master.zip).
 - Double click on the zip file to unpack it.
 - Rename and move the folder to wherever you want it to live.
-- Edit the **ofexport** script and change the path to reflect the correct new location of  your files.
-- From the command line set execute permission on "of export"
-- Add the installation directory to your path.
+- Edit the **ofexport** shell script and change the path to reflect the correct new location of  your files.
+- From the command line set execute permission on the **ofexport** script.
+- Add the installation directory to your **$PATH** in your in whatever shell you use.
 - Run **ofexport** from the command line, if all is well then it should print it's help.
 - If it doesn't then all is not well and I have failed you.
 
@@ -191,7 +189,7 @@ We'll be referring to the following structure:
  
 #### Include Filters
 
-For example: "-t=pig" - any task with "pig" in it's text.
+For example: **-t=Work** - any task with "Work" in it's text.
 
 When an include filter matches an item then it (and it's descendants, and all items to the root) will appear in the report. All other items will be eliminated.
 
@@ -220,7 +218,7 @@ If you ran a filter searching for "Cat" you'd get:
  
 #### Exclude Filters ####
 
-For example: "-t!=pig" - exclude any task with "pig" in it's text.
+For example: **-t!=junk** - exclude any task with "junk" in it's text.
 
 When an exclude filter matches an item then it (and it's descendants) will not in the report. All other items will be retained.
 
@@ -243,7 +241,7 @@ If you ran an exclude filter searching for ''Cat" you'd get:
 
 #### Sorting Filters
 
-To sort items its possible to use a sort filter e.g. "-t sort=due" which will sort all tasks by their due date  (if they have one), or "-p sort=text" which sorts projects alphabetically.
+To sort items its possible to use a sort filter e.g. **-t sort=due** which will sort all tasks by their due date  (if they have one), or **-p sort=text** which sorts projects alphabetically.
 
 Note that when we sort any type, it's it's direct descendants that get sorted, so if you sorted Projects alphabetically, it's the tasks within them that get sorted.
 
@@ -253,11 +251,11 @@ If items are sorted by an attribute they may not all have (like due date) then a
 
 You might run a filter that eliminates a lot of tasks and leaves a lot of empty projects or folders in your report. If you don't want to see these then use the prune option.
 
-It's possible to run a pruning filter: e.g. "-a prune" that can remove any folders, projects or contexts that have no tasks within them.
+It's possible to run a pruning filter: e.g. **-a prune** that can remove any folders, projects or contexts that have no tasks within them.
 
 #### Flattening Filters
 
-If the report is flattened e.g. with "-a flat" then all sub-folders, sub-context, sub-tasks are pulled up to to their parents level leaving a more readable document with a flattened hierarchy. Using the flatten filter on all node types will result in a document that simply has projects/contexts with a single level of tasks beneath.
+If the report is flattened e.g. with **-a flat** then all sub-folders, sub-context, sub-tasks are pulled up to to their parents level leaving a more readable document with a flattened hierarchy. Using the flatten filter on all node types will result in a document that simply has projects/contexts with a single level of tasks beneath.
 
 #### Multiple Filters
 

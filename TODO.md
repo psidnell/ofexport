@@ -3,8 +3,7 @@
 ## ofexport Todo
 
 * V1.0.5
-    * Remove old filters
-    * test script isn't going to work - but less relevant now?
+    * Release
 * V1.0.6
     * use lamdas instead of these ratty little get/match fns
     * move html/opml preamble into visitors
@@ -19,6 +18,7 @@
     * Try ofexport with omnifocus 2
     * Document How I use it
     * from == since in dates? maybe tokenise properly
+    * Summary filter
 * Backlog
     * Allow "weekend", "weekday" in date ranges
     * I don't like the command line parsing, would like +/- switches for include exclude, beyond what getopt can do - I have a sneaky idea

@@ -29,7 +29,7 @@ from of_to_opml import PrintOpmlVisitor
 from of_to_html import PrintHtmlVisitor
 from visitors import Filter, Sort, Prune, Flatten, match_name, match_start, match_completed, match_due, match_flagged, get_name, get_start, get_due, get_completion, get_flagged
 
-VERSION = "1.0.4 (2013-04-15)"
+VERSION = "1.0.5 (2013-04-18)"
 
 NAME_ALIASES = ['title', 'text', 'name', '']
 START_ALIASES = ['start', 'started', 'begin', 'began']
