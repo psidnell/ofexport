@@ -27,9 +27,18 @@ from of_to_text import PrintTextVisitor
 from of_to_md import PrintMarkdownVisitor
 from of_to_opml import PrintOpmlVisitor
 from of_to_html import PrintHtmlVisitor
-from visitors import Filter, Sort, match_name, match_start, match_completed, match_due, match_flagged, get_name, get_start, get_due, get_completion, PruningFilterVisitor, FlatteningVisitor
+from visitors import Filter, Sort, match_name, match_start, match_completed, match_due, match_flagged, get_name, get_start, get_due, get_completion, get_flagged, PruningFilterVisitor, FlatteningVisitor
 
-VERSION = "1.0.4 (2013-04-15)" 
+VERSION = "1.0.4 (2013-04-15)"
+
+NAME_ALIASES = ['title', 'text', 'name', '']
+START_ALIASES = ['start', 'started', 'begin', 'began']
+COMPLETED_ALIASES = ['done', 'end', 'ended', 'complete', 'completed', 'finish', 'finished', 'completion']
+DUE_ALIASES = ['due', 'deadline']
+FLAGGED_ALIASES = ['flag', 'flagged']
+
+def get_not_flagged (item):
+    return not get_flagged (item)
 
 class CustomPrintTaskpaperVisitor (PrintTaskpaperVisitor):
     def __init__(self, out, links=False):
@@ -40,42 +49,69 @@ class CustomPrintTaskpaperVisitor (PrintTaskpaperVisitor):
         else:
             return ""
     
-def build_filter (item_types, instruction, field, arg):
-    if 'include'.startswith(instruction) or 'exclude'.startswith (instruction):
-        include = 'include'.startswith (instruction)
-        if field in ('title', 'text'):
+def build_filter (item_types, include, field, arg):
+    if 'sort' == field:
+        if arg in NAME_ALIASES:
+            return Sort (item_types, get_name, 'text')
+        elif arg in START_ALIASES:
+            item_types = [x for x in item_types if x in [TASK, PROJECT]]
+            return Sort (item_types, get_start, 'start')
+        elif arg in COMPLETED_ALIASES:
+            item_types = [x for x in item_types if x in [TASK, PROJECT]]
+            return Sort (item_types, get_completion, 'complete')
+        elif arg in DUE_ALIASES:
+            item_types = [x for x in item_types if x in [TASK, PROJECT]]
+            return Sort (item_types, get_due, 'due')
+        elif arg in FLAGGED_ALIASES:
+            item_types = [x for x in item_types if x in [TASK, PROJECT]]
+            return Sort (item_types, get_not_flagged, 'flagged')
+        else:
+            assert False, 'unsupported field: ' + field
+    else:
+        if field in NAME_ALIASES:
             return Filter (item_types, match_name, arg, include, field + ':' + arg)
-        if field in ('start', 'started', 'begin', 'began'):
+        elif field in START_ALIASES:
+            item_types = [x for x in item_types if x in [TASK, PROJECT]]
             rng = process_date_specifier (datetime.now(), arg)
             nice_str = date_range_to_str (rng)
             return Filter (item_types, match_start, rng, include, nice_str)
-        if field in ('end', 'ended', 'complete', 'completed', 'finish', 'finished', 'completion'):
+        elif field in COMPLETED_ALIASES:
+            item_types = [x for x in item_types if x in [TASK, PROJECT]]
             rng = process_date_specifier (datetime.now(), arg)
             nice_str = date_range_to_str (rng)
             return Filter (item_types, match_completed, rng, include, nice_str)
-        if field in ('due', 'deadline'):
+        elif field in DUE_ALIASES:
+            item_types = [x for x in item_types if x in [TASK, PROJECT]]
             rng = process_date_specifier (datetime.now(), arg)
             nice_str = date_range_to_str (rng)
             return Filter (item_types, match_due, rng, include, nice_str)
-        if field in ('flag', 'flagged'):
+        elif field in FLAGGED_ALIASES:
+            item_types = [x for x in item_types if x in [TASK, PROJECT]]
             return Filter (item_types, match_flagged, None, include, field)
         else:
             assert False, 'unsupported field: ' + field
-    elif 'sort'.startswith (instruction):
-        if field in ('title', 'text'):
-            return Sort (item_types, get_name, 'text')
-        if field in ('start', 'started', 'begin', 'began'):
-            return Sort (item_types, get_start, 'start')
-        if field in ('end', 'ended', 'complete', 'completed', 'finish', 'finished', 'completion'):
-            return Sort (item_types, get_completion, 'complete')
-        if field in ('due', 'deadline'):
-            return Sort (item_types, get_due, 'due')
-        else:
-            assert False, 'unsupported field: ' + field
+    
     
 def parse_command (param):
-    #param = p1[:p2[:p3]]
-    params = param.split(':', 2)
+    if param.startswith ('flag'):
+        return (True, 'flagged', None)
+    elif param.startswith ('!flag'):
+        return (False, 'flagged', None)
+    
+    params = param.split('=', 1)
+    assert len(params) == 2
+    # We've got x=y or x!=y
+    include = True
+    if params[0].endswith ('!'):
+        include = False
+        field=params[0][:-1]
+        value=params[1]
+    else:
+        field=params[0]
+        value=params[1]
+    return (include, field, value)
+    
+    
     instruction = params[0]
     field = None
     arg = None
@@ -110,65 +146,26 @@ def print_help ():
     print '  --open: open the output file with the registered application (if one is installed)'
     print
     print 'filters:'
-    
-    print '  -i regexp: include anything matching regexp'
-    print '  -e regexp: exclude anything matching regexp'
-    
-    print '  --si spec: include anything with start matching spec'
-    print '  --se spec: exclude anything with start matching spec'
-    
-    print '  --di spec: include anything with due matching spec'
-    print '  --de spec: exclude anything with due matching spec'
-    
-    print '  --ci spec: include anything with completion matching spec'
-    print '  --ce spec: exclude anything with completion matching spec'
-    
-    print '  --Fi regexp: include anything flagged'
-    print '  --Fe regexp: exclude anything flagged'
-    
-    print '  --pi regexp: include projects matching regexp'
-    print '  --pe regexp: exclude projects matching regexp'
-    
-    print '  --pci spec: include projects with completion matching spec'
-    print '  --pce spec: exclude projects with completion matching spec'
-    
-    print '  --pdi spec: include projects with due matching spec'
-    print '  --pde spec: exclude projects with due matching spec'
-    
-    print '  --psi spec: include projects with start matching spec'
-    print '  --pse spec: exclude projects with start matching spec'
-    
-    print '  --pfi: include flagged projects'
-    print '  --pfe: exclude flagged projects'
-    
-    print '  --fi regexp: include folders matching regexp'
-    print '  --fe regexp: exclude folders matching regexp'
-    
-    print '  --ti regexp: include tasks matching regexp'
-    print '  --te regexp: exclude tasks matching regexp'
-    
-    print '  --Ci regexp: include contexts matching regexp'
-    print '  --Ce regexp: exclude contexts matching regexp'
-     
-    print '  --tci spec: include tasks with completion matching spec'
-    print '  --tce spec: exclude tasks with completion matching spec'
-    
-    print '  --tsi spec: include tasks with start matching spec'
-    print '  --tse spec: exclude tasks with start matching spec'
-    
-    print '  --tdi spec: include tasks with due matching spec'
-    print '  --tde spec: exclude tasks with due matching spec'
-    
-    print '  --tfi: include flagged tasks'
-    print '  --tfe: exclude flagged tasks'
-    
-    print '  --tsc: sort tasks by completion'
-    print '  --fsa: sort folders/projects alphabetically'
-    print '  --csa: sort contexts alphabetically'
-    print '  --sa: sort everything alphabetically'
-    
-    print '  -F: flatten project/task structure'
+    print '  -a arg: filter any type against arg'
+    print '  -t arg: filter any task against arg'
+    print '  -p arg: filter any project against arg'
+    print '  -f arg: filter any folder against arg'
+    print '  -c arg: filter any context type against arg'
+    print '  -F: flatten the tree hierarchy to 1 level of project/context'
     print '  --prune: prune empty projects or folders'
+    print 
+    print '  arg may be:'
+    print '    text=regexp'
+    print '    text!=regexp'
+    print '    =regexp (abbrieviation of text=regexp)'
+    print '    !=regexp (abbrieviation of text!=regexp)'
+    print '    flagged'
+    print '    !flagged'
+    print '    due=tomorrow'
+    print '    start!=this week (this will need quoting on the command line)'
+    print '    sort=completed'
+    print
+    print '  See DOCUMENTATION.md for more information'
 
 if __name__ == "__main__":
     
@@ -221,25 +218,28 @@ if __name__ == "__main__":
     for opt, arg in opts:
         visitor = None
         if opt in ('--project', '-p'):
-            instruction, field, arg = parse_command (arg)
-            visitor = build_filter ([PROJECT], instruction, field, arg)
+            included, field, arg = parse_command (arg)
+            visitor = build_filter ([PROJECT], included, field, arg)
         elif opt in ('--task', '-t'):
-            instruction, field, arg = parse_command (arg)
-            visitor = build_filter ([TASK], instruction, field, arg)
+            included, field, arg = parse_command (arg)
+            visitor = build_filter ([TASK], included, field, arg)
         elif opt in ('--context', '-c'):
-            instruction, field, arg = parse_command (arg)
-            visitor = build_filter ([CONTEXT], instruction, field, arg)
+            included, field, arg = parse_command (arg)
+            visitor = build_filter ([CONTEXT], included, field, arg)
         elif opt in ('--folder', '-f'):
-            instruction, field, arg = parse_command (arg)
-            print instruction, field, arg
-            visitor = build_filter ([FOLDER], instruction, field, arg)
+            included, field, arg = parse_command (arg)
+            visitor = build_filter ([FOLDER], included, field, arg)
         elif opt in ('--any', '-a'):
-            instruction, field, arg = parse_command (arg)
-            visitor = build_filter ([TASK,PROJECT,FOLDER,CONTEXT], instruction, field, arg)
+            included, field, arg = parse_command (arg)
+            visitor = build_filter ([TASK,PROJECT,FOLDER,CONTEXT], included, field, arg)
         elif '--prune' == opt:
             visitor = PruningFilterVisitor ()
         elif '-F' == opt:
             visitor = FlatteningVisitor ()
+        elif '-C' == opt:
+            subject = root_context
+        elif '-P' == opt:
+            subject = root_project
         
         if visitor != None: 
             print str (visitor)

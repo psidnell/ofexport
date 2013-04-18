@@ -24,7 +24,7 @@ Related Applications:
 
 For example:
 
-        ofexport -i Work --tci "this week" -o ~/Desktop/doc.taskpaper --open
+        ofexport -a=Work -a completed="this week" -o ~/Desktop/doc.taskpaper --open
 
 will produce a TaskPaper document on your desktop containing all items completed this week related to "Work" and open it (if you have TaskPaper installed).
 
@@ -102,11 +102,50 @@ This pre-supposes a certain familiarity with the command line.
 
 ## Tutorial:
 		
-To get help on usage and the full list of options, run the command with no arguments:-
+To get help on usage and the full list of options, run the command with no arguments:
 
         ofexport
 
-A simple example of usage is:-
+which prints:
+
+        Version 1.0.4 (2013-04-15)
+        
+        Usage:
+        
+        ofexport [options...] -o file_name
+        
+        
+        options:
+          -h,-?,--help
+          -C: context mode (as opposed to project mode)
+          -P: project mode - the default (as opposed to context mode)
+          -l: print links to tasks (in supported file formats)
+          -o file_name: the output file name, must end in a recognised suffix - see documentation
+          --open: open the output file with the registered application (if one is installed)
+        
+        filters:
+          -a arg: filter any type against arg
+          -t arg: filter any task against arg
+          -p arg: filter any project against arg
+          -f arg: filter any folder against arg
+          -c arg: filter any context type against arg
+          -F: flatten the tree hierarchy to 1 level of project/context
+          --prune: prune empty projects or folders
+        
+          arg may be:
+            text=regexp
+            text!=regexp
+            =regexp (abbrieviation of text=regexp)
+            !=regexp (abbrieviation of text!=regexp)
+            flagged
+            !flagged
+            due=tomorrow
+            start!=this week (this will need quoting on the command line)
+            sort=completed
+        
+          See DOCUMENTATION.md for more information
+
+The most simple example of usage is:
 
         ofexport -o report.txt
 
@@ -124,7 +163,7 @@ you'll get a text file. By changing the suffix you'll get different formats:
 
 - .txt or .text: a simple text file
 - .md or .markdown: a Markdown file
-- .ft or .foldingtext: a Folding Text document (the same as .md)
+- .ft or .foldingtext: a Folding Text document (the same format as .md)
 - .tp or .taskpaper: a taskpaper document
 - .opml: an OPML document
 - .html or .htm: an HTML document			 
@@ -151,6 +190,8 @@ We'll be referring to the following structure:
                 Task: Purge junk
  
 #### Include Filters
+
+For example: "-t=pig" - any task with "pig" in it's text.
 
 When an include filter matches an item then it (and it's descendants, and all items to the root) will appear in the report. All other items will be eliminated.
 
@@ -179,6 +220,8 @@ If you ran a filter searching for "Cat" you'd get:
  
 #### Exclude Filters ####
 
+For example: "-t!=pig" - exclude any task with "pig" in it's text.
+
 When an exclude filter matches an item then it (and it's descendants) will not in the report. All other items will be retained.
 
 If you ran an exclude filter searching for 'junk' you'd get:
@@ -198,59 +241,17 @@ If you ran an exclude filter searching for ''Cat" you'd get:
                 Task: Send receipts
                 Task: Purge junk
 
-#### Filter List ####
+#### Sorting Filters ####
 
-**Generic**
+To sort items its possible to use a sort filter e.g. "-t sort=due" which will sort all tasks by their due date  (if they have one), or "-p sort=text" which sorts projects alphabetically.
 
-        -i regexp: include anything matching regexp
-        -e regexp: exclude anything matching regexp
-        --si spec: include anything with start matching spec
-        --se spec: exclude anything with start matching spec
-        --ci spec: include anything with completion matching spec
-        --Fi: include anything flagged
-        --Fe: exclude anything flagged
+Note that when we sort any type, it's it's direct descendants that get sorted, so if you sorted Projects alphabetically, it's the tasks within them that get sorted.
 
-**Projects**
+If items are sorted by an attribute they may not all have (like due date) then any item without that date is assumed to have today's date.
 
-        --pi regexp: include projects matching regexp
-        --pe regexp: exclude projects matching regexp
-        --psi spec: include projects with start matching spec
-        --pse spec: exclude projects with start matching spec
-        --pci spec: include projects with completion matching spec
-        --pce spec: exclude projects with completion matching spec
-        --pdi spec: include projects with due matching spec
-        --pde spec: exclude projects with due matching spec
-        --pfi: include flagged projects
-        --pfe: exclude flagged projects
+#### Pruning ####
 
-**Tasks**
-
-        --ti regexp: include tasks matching regexp
-        --te regexp: exclude tasks matching regexp
-        --tsi spec: include tasks with start matching spec
-        --tse spec: exclude tasks with start matching spec
-        --tdi spec: include tasks with due matching spec
-        --tde spec: exclude tasks with due matching spec
-        --tci spec: include tasks with completion matching spec
-        --tce spec: exclude tasks with completion matching spec
-        --tfi: include flagged tasks
-        --tfe: exclude flagged tasks
-        --tsc: sort tasks by completion
-
-**Folders**
-
-        --fi regexp: include folders matching regexp
-        --fe regexp: exclude folders matching regexp
-
-**Contexts**
-
-        --Ci regexp: include contexts matching regexp
-        --Ce regexp: exclude contexts matching regexp
-
-**Misc**
-
-        -F: flatten project/task structure
-        --prune: Remove empty projects/folders
+You might run a filter that eliminates a lot of tasks and leaves a lot of empty projects or folders in your report. If you don't want to see these then use the prune option.
 
 #### Multiple Filters ####
 
@@ -285,39 +286,45 @@ A range of dates can be expressed as:
 - "none" or "" - only matches items with no date
 - "any" - only matches items with a date
 
-#### Pruning ####
+####  Attributes for filtering  and sorting ####
 
-You might run a filter that eliminates a lot of tasks and leaves a lot of empty projects or folders in your report. If you don't want to see these then use the prune option.
+There are several different attributes, each of which may have alternatives for convenience:
+
+- title, text, name
+- start, started, begin, began
+- done, end, ended, complete, completed, finish, finished, completion
+- due, deadline  
+- flag, flagged
 
 ### Examples:
 
 This produces a document containing all tasks completed yesterday from any folder with "Work" in it's title:
 	
-        ofexport -o report.tp --fi Work --tci 'yesterday' --prune --open
+        ofexport -o report.tp -f=Work -t done=yesterday --prune --open
 	
 This uses a little regular expression magic to create a document containing all tasks completed today from any folder with the exact name "Work":
 	
-        ofexport -o report.tp --fi '^Work$' --tci 'today' --prune --open
+        ofexport -o report.tp -f='^Work$' -t done='today' --prune --open
 	
 This produces a document containing all tasks completed today from any folder that does NOT have "Work" in it's title:
 	
-        ofexport -o report.tp --fe Work --tci 'today' --prune --open
+        ofexport -o report.tp -f!=Work -t done=today --prune --open
 
 This uses a little regular expression magic to create a document containing all tasks completed today from any folder with the exact name "Work" or "Home".
 	
-        ofexport -o report.tp --fi '^Work$|^Home$' --tci 'today' --prune --open
+        ofexport -o report.tp -f='^Work$|^Home$' -t done='today' --prune --open
 
 This produces a document containing all tasks completed today from any folder with "Work" in it's title and the flattens/simplifies the indenting:
 	
-        ofexport -o report.tp --fi Work --tci 'today' --prune -F --open
+        ofexport -o report.tp -f=Work -t done='this week' --prune -F --open
 
-This produces a report showing all tasks that contain "Beth" and their enclosing projects:-
+This produces a report showing all tasks that contain "Beth" and their enclosing projects:
 			
-        ofexport -o report.tp -i 'Beth' --prune --open -F
+        ofexport -o report.tp -a=Beth --prune --open -F
 
 This produces the report of what I have yet to do on this project			
 
-        ofexport -o TODO.md --open --pi 'OmniPythonLib Todo' -F --tci none
+        ofexport -o TODO.md --open -p='OmniPythonLib Todo' -F -t done=none
 
 ### Tips and Tricks ###
 

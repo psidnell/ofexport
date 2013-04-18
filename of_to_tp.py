@@ -52,18 +52,20 @@ class PrintTaskpaperVisitor(Visitor):
         self.depth-=1
     def tags (self, item):
         tags = []
-        if item.date_completed != None:
-            tags.append(item.date_completed.strftime("@done(%Y-%m-%d)"))
-        else:
-            tags.append("@todo")
         if item.flagged:
             tags.append ("@flagged")
+        if item.date_completed == None:
+            tags.append("@todo")
         if item.date_to_start != None:
             tags.append(item.date_to_start.strftime("@start(%Y-%m-%d)"))
         if item.date_due != None:
             tags.append (item.date_due.strftime("@due(%Y-%m-%d)"))
-        if item.context != None:
-            tags.append ('@' + ''.join (item.context.name.split ()))
+        if item.date_completed != None:
+            tags.append(item.date_completed.strftime("@done(%Y-%m-%d)"))
+        if self.project_mode == True and item.context != None:
+            tags.append ('@context(' + ''.join (item.context.name.split ()) + ')')
+        if self.project_mode == False and item.project != None:
+            tags.append ('@project(' + ''.join (item.project.name.split ()) + ')')
         if len (tags) > 0:
             return ' ' + ' '.join(tags)
         return ''

@@ -36,6 +36,9 @@ def get_due (item):
         return datetime.now()
     return item.due
 
+def get_flagged (item):
+    return item.flagged
+
 def get_completion (item):
     if not 'date_completed' in item.__dict__ or item.date_completed == None:
         return datetime.now()
