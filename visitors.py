@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-from treemodel import Visitor, TASK, PROJECT, CONTEXT
+from treemodel import Visitor, TASK, PROJECT, CONTEXT, FOLDER
 from datematch import process_date_specifier, date_range_to_str
 import re
 from datetime import datetime
@@ -161,7 +161,7 @@ class Filter(BaseFilterVisitor):
             matched = self.match_fn(item, self.filter)
             self.set_item_matched(item, matched);
     def __str__(self):
-        return includes (self.include) + str(self.types) + ' where ' + self.nice_string
+        return includes (self.include) + ' ' + str(self.types) + ' where ' + self.nice_string
     
 class Sort(Visitor):
     def __init__(self, types, get_key_fn, nice_string):
@@ -175,8 +175,46 @@ class Sort(Visitor):
     def sort_list (self, items):
         items.sort(key=lambda x:self.get_key_fn (x))
     def __str__(self):
-        return 'sort ' + str(self.types) + ' ' + self.nice_string
+        return 'sort ' + str(self.types) + ' by ' + self.nice_string
 
+class Prune (Visitor):
+    def __init__(self, types):
+        Visitor.__init__(self)
+        self.types = types
+    def end_any (self, item):
+        if item.type in self.types:
+            self.prune_if_empty(item)
+    def prune_if_empty (self, item):
+        if item.marked:
+            empty = len ([x for x in item.children if x.marked]) == 0
+            if empty:
+                item.marked = False
+    def __str__ (self):
+        return 'prune ' + str(self.types)
+
+
+    
+class Flatten (Visitor):
+    def __init__(self, types):
+        Visitor.__init__(self)
+        self.types = types
+    def end_any (self, item):
+        self.flatten (item)
+    def flatten (self, item):
+        new_children = []
+        for child in item.children:
+            if child.type in self.types:
+                for grandchild in list(child.children):
+                    if grandchild.type == child.type or child.type == FOLDER:
+                        new_children.append(grandchild)
+                        child.children.remove (grandchild)
+            new_children.append(child)
+        item.children = []
+        for child in new_children:
+            item.add_child (child)
+    def __str__ (self):
+        return 'Flatten'
+     
 #-----------------------------------
 
 class NameFilterVisitor(BaseFilterVisitor):

@@ -27,7 +27,7 @@ from of_to_text import PrintTextVisitor
 from of_to_md import PrintMarkdownVisitor
 from of_to_opml import PrintOpmlVisitor
 from of_to_html import PrintHtmlVisitor
-from visitors import Filter, Sort, match_name, match_start, match_completed, match_due, match_flagged, get_name, get_start, get_due, get_completion, get_flagged, PruningFilterVisitor, FlatteningVisitor
+from visitors import Filter, Sort, Prune, Flatten, match_name, match_start, match_completed, match_due, match_flagged, get_name, get_start, get_due, get_completion, get_flagged, PruningFilterVisitor, FlatteningVisitor
 
 VERSION = "1.0.4 (2013-04-15)"
 
@@ -50,15 +50,20 @@ class CustomPrintTaskpaperVisitor (PrintTaskpaperVisitor):
             return ""
     
 def build_filter (item_types, include, field, arg):
-    if 'sort' == field:
-        if arg in NAME_ALIASES:
+    if 'prune' == field:
+        item_types = [x for x in item_types if x in [PROJECT, CONTEXT, FOLDER]]
+        return Prune (item_types)
+    elif 'flatten' == field:
+        return Flatten (item_types)
+    elif 'sort' == field:
+        if arg == None or arg in NAME_ALIASES:
             return Sort (item_types, get_name, 'text')
         elif arg in START_ALIASES:
             item_types = [x for x in item_types if x in [TASK, PROJECT]]
             return Sort (item_types, get_start, 'start')
         elif arg in COMPLETED_ALIASES:
             item_types = [x for x in item_types if x in [TASK, PROJECT]]
-            return Sort (item_types, get_completion, 'complete')
+            return Sort (item_types, get_completion, 'completion')
         elif arg in DUE_ALIASES:
             item_types = [x for x in item_types if x in [TASK, PROJECT]]
             return Sort (item_types, get_due, 'due')
@@ -97,6 +102,12 @@ def parse_command (param):
         return (True, 'flagged', None)
     elif param.startswith ('!flag'):
         return (False, 'flagged', None)
+    elif param =='prune':
+        return (True, 'prune', None)
+    elif param == 'sort':
+        return (True, 'sort', None)
+    elif param.startswith('flat'):
+        return (True, 'flatten', None)
     
     params = param.split('=', 1)
     assert len(params) == 2
