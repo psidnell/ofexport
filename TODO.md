@@ -1,18 +1,26 @@
 # Home
-## OmniPythonLib Todo
-* V 1.0.4
-    * Release
+
+## ofexport Todo
+
 * V1.0.5
-    * Error if filter run in the wrong mode
-    * don't need the main entry points in the conversion modules any more
+    * Release
+* V1.0.6
+    * use lamdas instead of these ratty little get/match fns
+    * move html/opml preamble into visitors
+    * merge projects folders etc if they have same name?
     * proper logging: with on/off on the command line
-    * More sorting options - eg. contexts alphabetically
     * Assertions to prevent mis-wiring of type hierarchies
+    * don't need the main entry points in the conversion modules any more
     * A visitor to prepend type to items - for debugging
-    * Allow "weekend", "weekday" in date ranges
     * Where are inbox items stored in in the OF DB?
     * raw arg on command line equivalent to "-i arg"? Might be nice...
+    * Context sort mode and others
+    * Try ofexport with omnifocus 2
+    * Document How I use it
+    * from == since in dates? maybe tokenise properly
+    * Summary filter
 * Backlog
+    * Allow "weekend", "weekday" in date ranges
     * I don't like the command line parsing, would like +/- switches for include exclude, beyond what getopt can do - I have a sneaky idea
     * Json output
     * Allow +-3d, 2w etc
@@ -29,4 +37,5 @@
     * Create a taggable dump of projects as files with links to corresponing Omnifocus entities - for hazel and openmeta scripts
     * Read other file types such as Taskpaper?
     * Resolve utf8/ascii issues - not sure what's going on - redirecting stdout "changes things"?!?!?!
+    * Can I detect a if a project is paused?
 

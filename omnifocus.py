@@ -245,7 +245,15 @@ def build_model (db):
     sort(roots_projects_and_folders)
     sort(root_contexts)
     
-    return roots_projects_and_folders, root_contexts
+    root_folder = Folder (name='')
+    for child in roots_projects_and_folders:
+        root_folder.add_child(child)
+        
+    root_context = Context (name='')
+    for child in root_contexts:
+        root_context.add_child(child)
+        
+    return root_folder, root_context
         
 # The Mac Appstore virsion and the direct sale version have DBs in different locations
 DATABASES = [environ['HOME'] + '/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2',

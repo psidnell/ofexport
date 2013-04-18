@@ -14,14 +14,34 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-from treemodel import Visitor, TASK, PROJECT, CONTEXT
-from datematch import process_date_specifier
+from treemodel import Visitor, TASK, PROJECT, FOLDER
 import re
 from datetime import datetime
 
 INCLUDED='INCLUDED'
 EXCLUDED='EXCLUDED'
 PATH_TO_INCLUDED='PATH_TO_INCLUDED'
+
+def get_name (item):
+    return item.name
+
+def get_start (item):
+    if not 'start' in item.__dict__ or  item.start == None:
+        return datetime.now()
+    return item.start
+
+def get_due (item):
+    if not 'due' in item.__dict__ or item.due == None:
+        return datetime.now()
+    return item.due
+
+def get_flagged (item):
+    return item.flagged
+
+def get_completion (item):
+    if not 'date_completed' in item.__dict__ or item.date_completed == None:
+        return datetime.now()
+    return item.date_completed
 
 def match_name (item, regexp):
     return re.search (regexp, item.name) != None
@@ -121,7 +141,80 @@ class BaseFilterVisitor(Visitor):
                 # We haven't excluded it so it stays
                 pass
 
-class AnyNameFilterVisitor(BaseFilterVisitor):
+def includes (include):
+    if include:
+        return 'include'
+    else:
+        return 'exclude'
+    
+class Filter(BaseFilterVisitor):
+    def __init__(self, types, match_fn, filtr, include, nice_string):
+        BaseFilterVisitor.__init__(self, include)
+        self.filter = filtr
+        self.types = types
+        self.match_fn = match_fn
+        self.nice_string = nice_string
+    def begin_any (self, item):
+        BaseFilterVisitor.begin_any (self, item)
+        if item.type in self.types and self.match_required(item):
+            matched = self.match_fn(item, self.filter)
+            self.set_item_matched(item, matched);
+    def __str__(self):
+        return includes (self.include) + ' ' + str(self.types) + ' where ' + self.nice_string
+    
+class Sort(Visitor):
+    def __init__(self, types, get_key_fn, nice_string):
+        Visitor.__init__(self)
+        self.types = types
+        self.get_key_fn = get_key_fn
+        self.nice_string = nice_string
+    def begin_any (self, item):
+        if item.type in self.types:
+            self.sort_list(item.children)
+    def sort_list (self, items):
+        items.sort(key=lambda x:self.get_key_fn (x))
+    def __str__(self):
+        return 'sort ' + str(self.types) + ' by ' + self.nice_string
+
+class Prune (Visitor):
+    def __init__(self, types):
+        Visitor.__init__(self)
+        self.types = types
+    def end_any (self, item):
+        if item.type in self.types:
+            self.prune_if_empty(item)
+    def prune_if_empty (self, item):
+        if item.marked:
+            empty = len ([x for x in item.children if x.marked]) == 0
+            if empty:
+                item.marked = False
+    def __str__ (self):
+        return 'prune ' + str(self.types)
+
+class Flatten (Visitor):
+    def __init__(self, types):
+        Visitor.__init__(self)
+        self.types = types
+    def end_any (self, item):
+        self.flatten (item)
+    def flatten (self, item):
+        new_children = []
+        for child in item.children:
+            if child.type in self.types:
+                for grandchild in list(child.children):
+                    if grandchild.type == child.type or child.type == FOLDER:
+                        new_children.append(grandchild)
+                        child.children.remove (grandchild)
+            new_children.append(child)
+        item.children = []
+        for child in new_children:
+            item.add_child (child)
+    def __str__ (self):
+        return 'Flatten'
+     
+#-----------------------------------
+'''
+class NameFilterVisitor(BaseFilterVisitor):
     def __init__(self, filtr, include=True):
         BaseFilterVisitor.__init__(self, include)
         self.filter = filtr
@@ -134,7 +227,7 @@ class AnyNameFilterVisitor(BaseFilterVisitor):
     def __str__(self):
         return 'name ' + includes (self.include) + ' "' + self.filter + '"'
     
-class AnyFlaggedFilterVisitor(BaseFilterVisitor):
+class FlaggedFilterVisitor(BaseFilterVisitor):
     def __init__(self, include=True):
         BaseFilterVisitor.__init__(self, include)
         self.match_fn = match_flagged
@@ -176,6 +269,20 @@ class ProjectFilterVisitor(BaseFilterVisitor):
         if self.match_required(project):
             matched = self.match_fn(project, self.filter)
             self.set_item_matched(project, matched);
+                    
+class ProjectAndTaskFilterVisitor(BaseFilterVisitor):
+    def __init__(self, filtr, match_fn, include=True):
+        BaseFilterVisitor.__init__(self, include)
+        self.filter = filtr
+        self.match_fn = match_fn
+    def begin_task (self, task):
+        if self.match_required(task):
+            matched = self.match_fn(task, self.filter)
+            self.set_item_matched(task, matched);
+    def begin_project (self, project):
+        if self.match_required(project):
+            matched = self.match_fn(project, self.filter)
+            self.set_item_matched(project, matched);
             
 class ContextFilterVisitor(BaseFilterVisitor):
     def __init__(self, filtr, match_fn, include=True):
@@ -186,27 +293,6 @@ class ContextFilterVisitor(BaseFilterVisitor):
         if self.match_required(context):
             matched = self.match_fn(context, self.filter)
             self.set_item_matched(context, matched);
-
-def includes (include):
-    if include:
-        return 'includes'
-    else:
-        return 'excludes'
-    
-def date_range_to_str (spec):
-    fmt = "[%a %b %d %Y]"
-    start, end = spec
-    if start == None and end == None:
-        return 'none'
-    elif start == None and end != None:
-        return 'everything until ' + end.strftime (fmt)
-    elif start != None and end == None:
-        return 'everything after ' + start.strftime (fmt)
-    elif start == end:
-        return 'on ' + start.strftime (fmt)
-    else:
-        return 'from ' + start.strftime (fmt) + ' to ' + end.strftime (fmt)
-    
 
 class FolderNameFilterVisitor(FolderFilterVisitor):
     def __init__(self, filtr, include=True):
@@ -273,6 +359,24 @@ class TaskStartFilterVisitor(TaskFilterVisitor):
         TaskFilterVisitor.__init__(self, process_date_specifier (datetime.now(), filtr), match_start, include)
     def __str__(self):
         return 'Task start ' + includes (self.include) + ' ' + date_range_to_str(self.filter)
+    
+class StartFilterVisitor(ProjectAndTaskFilterVisitor):
+    def __init__(self, filtr, include=True):
+        ProjectAndTaskFilterVisitor.__init__(self, process_date_specifier (datetime.now(), filtr), match_start, include)
+    def __str__(self):
+        return 'Start ' + includes (self.include) + ' ' + date_range_to_str(self.filter)
+    
+class DueFilterVisitor(ProjectAndTaskFilterVisitor):
+    def __init__(self, filtr, include=True):
+        ProjectAndTaskFilterVisitor.__init__(self, process_date_specifier (datetime.now(), filtr), match_due, include)
+    def __str__(self):
+        return 'Due ' + includes (self.include) + ' ' + date_range_to_str(self.filter)
+    
+class CompletionFilterVisitor(ProjectAndTaskFilterVisitor):
+    def __init__(self, filtr, include=True):
+        ProjectAndTaskFilterVisitor.__init__(self, process_date_specifier (datetime.now(), filtr), match_completed, include)
+    def __str__(self):
+        return 'Completion ' + includes (self.include) + ' ' + date_range_to_str(self.filter)
         
 class TaskFlaggedFilterVisitor(TaskFilterVisitor):
     def __init__(self, include=True):
@@ -295,6 +399,18 @@ class FolderNameSortingVisitor (Visitor):
         folder.children.sort(key=lambda item:item.name)
     def __str__ (self):
         return 'Folders/Projects sorted by name'
+
+class ContextNameSortingVisitor (Visitor):
+    def end_context (self, folder):
+        folder.children.sort(key=lambda item:item.name)
+    def __str__ (self):
+        return 'Folders/Projects sorted by name'
+    
+class NameSortingVisitor (Visitor):
+    def end_any (self, item):
+        item.children.sort(key=lambda x:x.name)
+    def __str__ (self):
+        return 'Sort by name'
 
 def flatten (item):
     new_children = []
@@ -348,3 +464,4 @@ class PruningFilterVisitor (Visitor):
                 item.marked = False
     def __str__ (self):
         return 'Prune'     
+'''

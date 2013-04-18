@@ -174,3 +174,17 @@ def process_date_specifier (now, date_spec):
         return (start, end)
     else:
         raise Exception ('I don\'t think "' + date_spec + '" is any kind of date specification I recognise')
+    
+def date_range_to_str (spec):
+    fmt = "[%a %b %d %Y]"
+    start, end = spec
+    if start == None and end == None:
+        return 'none'
+    elif start == None and end != None:
+        return 'everything until ' + end.strftime (fmt)
+    elif start != None and end == None:
+        return 'everything after ' + start.strftime (fmt)
+    elif start == end:
+        return 'on ' + start.strftime (fmt)
+    else:
+        return 'from ' + start.strftime (fmt) + ' to ' + end.strftime (fmt)

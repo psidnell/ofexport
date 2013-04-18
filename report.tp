@@ -1,9 +1,0 @@
-Home:
-	OmniPythonLib Todo:
-		V 1.0.3:
-			- Document new flags @done(2013-04-13) @Coding
-			- Python format tag in tp start date @done(2013-04-13) @Coding
-			- Search all types for text without eliminating too much @done(2013-04-13) @Coding
-			- Generic flag filter - projects OR tasks @done(2013-04-13) @Coding
-			- How to replicate the standard OF due+flagged filters? @done(2013-04-13) @Coding
-			- A filter could be run in a mode where it ignores the marked flag - that woul give OR more @done(2013-04-13) @Coding

@@ -31,108 +31,59 @@ cd ..
 
 rm *.pyc
 
-TEST_FOLDER="^Test Folder$"
-TEST_CONTEXT="^Test Context$"
+TEST_FOLDER="^Home$"
+TEST_CONTEXT="\+Times$"
 
 
 function run_tool {
 
     FMT=$1
+    MODE=$2
     
 	set +e
 	mkdir -p tmp/$FMT
 	set -e
 	
-	# PM Any
-    
-    python ofexport.py -o tmp/$FMT/pm-i.$FMT -i "$TEST_FOLDER"
-    python ofexport.py -o tmp/$FMT/pm-e.$FMT -e "$TEST_FOLDER"
-    
-	# PM Folder
+	for TYPE in -t -f -p -c; do
 	
-	python ofexport.py -o tmp/$FMT/pm-fi.$FMT --fi "$TEST_FOLDER"
-	python ofexport.py -o tmp/$FMT/pm-fe.$FMT --fe "$TEST_FOLDER"
+	    # Be nice to my cpu fans...
+        sleep 1; nice -20 python ofexport.py -o tmp/$FMT/01$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER"
+        sleep 1; nice -20 python ofexport.py -o tmp/$FMT/02$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE=a
+        sleep 1; nice -20 python ofexport.py -o tmp/$FMT/03$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE!=a
+        sleep 1; nice -20 python ofexport.py -o tmp/$FMT/04$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE done="this week"
+        sleep 1; nice -20 python ofexport.py -o tmp/$FMT/05$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE done!="this week"
+        sleep 1; nice -20 python ofexport.py -o tmp/$FMT/06$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE due="this week"
+        sleep 1; nice -20 python ofexport.py -o tmp/$FMT/07$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE due!="this week"
+        sleep 1; nice -20 python ofexport.py -o tmp/$FMT/08$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE completed="this week"
+        sleep 1; nice -20 python ofexport.py -o tmp/$FMT/09$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE completed!="this week"
+        sleep 1; nice -20 python ofexport.py -o tmp/$FMT/10$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE start="this week"
+        sleep 1; nice -20 python ofexport.py -o tmp/$FMT/11$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE start!="this week"
+        sleep 1; nice -20 python ofexport.py -o tmp/$FMT/12$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE done="this week"
+        sleep 1; nice -20 python ofexport.py -o tmp/$FMT/13$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE done!="this week"
+        sleep 1; nice -20 python ofexport.py -o tmp/$FMT/14$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE due="this week"
+        sleep 1; nice -20 python ofexport.py -o tmp/$FMT/15$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE due!="this week"
+        sleep 1; nice -20 python ofexport.py -o tmp/$FMT/16$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE flagged
+        sleep 1; nice -20 python ofexport.py -o tmp/$FMT/17$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE !flagged
+        sleep 1; nice -20 python ofexport.py -o tmp/$FMT/18$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE sort
+        sleep 1; nice -20 python ofexport.py -o tmp/$FMT/19$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE sort=start
+        sleep 1; nice -20 python ofexport.py -o tmp/$FMT/20$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE sort=due
+        sleep 1; nice -20 python ofexport.py -o tmp/$FMT/21$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE sort=completed
+        sleep 1; nice -20 python ofexport.py -o tmp/$FMT/22$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE prune
+        sleep 1; nice -20 python ofexport.py -o tmp/$FMT/23$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE flat
+        
+    done
 	
-	# PM Project
-	
-	python ofexport.py -o tmp/$FMT/pm-pi.$FMT --fi "$TEST_FOLDER" --pi '.*'
-	python ofexport.py -o tmp/$FMT/pm-pe.$FMT --fi "$TEST_FOLDER" --pe '.*'
-	
-	python ofexport.py -o tmp/$FMT/pm-pci.$FMT --fi "$TEST_FOLDER" --pci none
-	python ofexport.py -o tmp/$FMT/pm-pce.$FMT --fi "$TEST_FOLDER" --pce none
-	
-	python ofexport.py -o tmp/$FMT/pm-pdi.$FMT --fi "$TEST_FOLDER" --pdi none
-	python ofexport.py -o tmp/$FMT/pm-pde.$FMT --fi "$TEST_FOLDER" --pde none
-	
-	python ofexport.py -o tmp/$FMT/pm-psi.$FMT --fi "$TEST_FOLDER" --psi none
-	python ofexport.py -o tmp/$FMT/pm-pse.$FMT --fi "$TEST_FOLDER" --pse none
-	
-	python ofexport.py -o tmp/$FMT/pm-pfi.$FMT --fi "$TEST_FOLDER" --pfi none
-	python ofexport.py -o tmp/$FMT/pm-pfe.$FMT --fi "$TEST_FOLDER" --pfe none
-	
-	# PM Task
-	
-	python ofexport.py -o tmp/$FMT/pm-ti.$FMT --fi "$TEST_FOLDER" --ti '.*'
-	python ofexport.py -o tmp/$FMT/pm-te.$FMT --fi "$TEST_FOLDER" --te '.*'
-	
-	python ofexport.py -o tmp/$FMT/pm-tci.$FMT --fi "$TEST_FOLDER" --tci none
-	python ofexport.py -o tmp/$FMT/pm-tce.$FMT --fi "$TEST_FOLDER" --tce none
-	
-	python ofexport.py -o tmp/$FMT/pm-tdi.$FMT --fi "$TEST_FOLDER" --tdi none
-	python ofexport.py -o tmp/$FMT/pm-tde.$FMT --fi "$TEST_FOLDER" --tde none
-	
-	python ofexport.py -o tmp/$FMT/pm-tsi.$FMT --fi "$TEST_FOLDER" --tsi none
-	python ofexport.py -o tmp/$FMT/pm-tse.$FMT --fi "$TEST_FOLDER" --tse none
-	
-	python ofexport.py -o tmp/$FMT/pm-tfi.$FMT --fi "$TEST_FOLDER" --tfi none
-	python ofexport.py -o tmp/$FMT/pm-tfe.$FMT --fi "$TEST_FOLDER" --tfe none
-	
-	# CM Context
-	
-	python ofexport.py -C -o tmp/$FMT/cm-tfi.$FMT --ci "$TEST_CONTEXT"
-    python ofexport.py -C -o tmp/$FMT/cp-tfe.$FMT --ce "$TEST_CONTEXT"
-    
-    # CM Project
-    
-    python ofexport.py -C -o tmp/$FMT/cm-pi.$FMT --fi "$TEST_FOLDER" --pi '.*'
-    python ofexport.py -C -o tmp/$FMT/cm-pe.$FMT --fi "$TEST_FOLDER" --pe '.*'
-    
-    python ofexport.py -C -o tmp/$FMT/cm-pci.$FMT --fi "$TEST_FOLDER" --pci none
-    python ofexport.py -C -o tmp/$FMT/cm-pce.$FMT --fi "$TEST_FOLDER" --pce none
-    
-    python ofexport.py -C -o tmp/$FMT/cm-pdi.$FMT --fi "$TEST_FOLDER" --pdi none
-    python ofexport.py -C -o tmp/$FMT/cm-pde.$FMT --fi "$TEST_FOLDER" --pde none
-    
-    python ofexport.py -C -o tmp/$FMT/cm-psi.$FMT --fi "$TEST_FOLDER" --psi none
-    python ofexport.py -C -o tmp/$FMT/cm-pse.$FMT --fi "$TEST_FOLDER" --pse none
-    
-    python ofexport.py -C -o tmp/$FMT/cm-pfi.$FMT --fi "$TEST_FOLDER" --pfi none
-    python ofexport.py -C -o tmp/$FMT/cm-pfe.$FMT --fi "$TEST_FOLDER" --pfe none
-    
-    # CM Task
-    
-    python ofexport.py -C -o tmp/$FMT/cm-ti.$FMT --fi "$TEST_FOLDER" --ti '.*'
-    python ofexport.py -C -o tmp/$FMT/cm-te.$FMT --fi "$TEST_FOLDER" --te '.*'
-    
-    python ofexport.py -C -o tmp/$FMT/cm-tci.$FMT --fi "$TEST_FOLDER" --tci none
-    python ofexport.py -C -o tmp/$FMT/cm-tce.$FMT --fi "$TEST_FOLDER" --tce none
-    
-    python ofexport.py -C -o tmp/$FMT/cm-tdi.$FMT --fi "$TEST_FOLDER" --tdi none
-    python ofexport.py -C -o tmp/$FMT/cm-tde.$FMT --fi "$TEST_FOLDER" --tde none
-    
-    python ofexport.py -C -o tmp/$FMT/cm-tsi.$FMT --fi "$TEST_FOLDER" --tsi none
-    python ofexport.py -C -o tmp/$FMT/cm-tse.$FMT --fi "$TEST_FOLDER" --tse none
-    
-    python ofexport.py -C -o tmp/$FMT/cm-tfi.$FMT --fi "$TEST_FOLDER" --tfi none
-    python ofexport.py -C -o tmp/$FMT/cm-tfe.$FMT --fi "$TEST_FOLDER" --tfe none
 }
 
 FMT=$1
 
 if [ -z "$FMT" ]; then
     for FMT in tp md html opml ft; do
-        run_tool $FMT
+        for MODE in -P -C; do
+            run_tool $FMT $MODE
+        done
     done
 else
-    run_tool $FMT
+    run_tool $FMT -P
+    run_tool $FMT -C
 fi

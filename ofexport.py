@@ -13,12 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
-
+from datetime import datetime
+from datematch import process_date_specifier, date_range_to_str
 import os
 import codecs
 import getopt
 import sys
-from treemodel import traverse_list
+from treemodel import traverse, traverse_list, PROJECT, TASK, FOLDER, CONTEXT
 from omnifocus import build_model, find_database
 from datetime import date
 from of_to_tp import PrintTaskpaperVisitor
@@ -26,25 +27,120 @@ from of_to_text import PrintTextVisitor
 from of_to_md import PrintMarkdownVisitor
 from of_to_opml import PrintOpmlVisitor
 from of_to_html import PrintHtmlVisitor
-from visitors import AnyNameFilterVisitor, AnyFlaggedFilterVisitor, FolderNameFilterVisitor, ProjectNameFilterVisitor, ProjectFlaggedFilterVisitor, FolderNameSortingVisitor, ProjectDueFilterVisitor, ProjectStartFilterVisitor, ContextNameFilterVisitor, TaskDueFilterVisitor, TaskNameFilterVisitor, TaskStartFilterVisitor, TaskCompletionFilterVisitor, ProjectCompletionFilterVisitor, TaskCompletionSortingVisitor, TaskFlaggedFilterVisitor, PruningFilterVisitor, FlatteningVisitor
+from visitors import Filter, Sort, Prune, Flatten, match_name, match_start, match_completed, match_due, match_flagged, get_name, get_start, get_due, get_completion, get_flagged
 
-VERSION = "1.0.4 (2013-04-15)" 
-     
-def print_structure (visitor, root_projects_and_folders, root_contexts, project_mode):
-    if project_mode:
-        traverse_list (visitor, root_projects_and_folders)
-    else:
-        traverse_list (visitor, root_contexts, project_mode=False)
+VERSION = "1.0.5 (2013-04-18)"
+
+NAME_ALIASES = ['title', 'text', 'name', '']
+START_ALIASES = ['start', 'started', 'begin', 'began']
+COMPLETED_ALIASES = ['done', 'end', 'ended', 'complete', 'completed', 'finish', 'finished', 'completion']
+DUE_ALIASES = ['due', 'deadline']
+FLAGGED_ALIASES = ['flag', 'flagged']
+
+def get_not_flagged (item):
+    return not get_flagged (item)
 
 class CustomPrintTaskpaperVisitor (PrintTaskpaperVisitor):
-    def __init__(self, out, project_mode):
-        PrintTaskpaperVisitor.__init__(self, out, project_mode)
+    def __init__(self, out, links=False):
+        PrintTaskpaperVisitor.__init__(self, out, links=links)
     def tags (self, item):
-        if item.date_completed != None:
+        if item.date_completed != None and item.type != PROJECT:
             return item.date_completed.strftime(" @%Y-%m-%d-%a")
         else:
             return ""
-        
+    
+def build_filter (item_types, include, field, arg):
+    if 'prune' == field:
+        item_types = [x for x in item_types if x in [PROJECT, CONTEXT, FOLDER]]
+        return Prune (item_types)
+    elif 'flatten' == field:
+        return Flatten (item_types)
+    elif 'sort' == field:
+        if arg == None or arg in NAME_ALIASES:
+            return Sort (item_types, get_name, 'text')
+        elif arg in START_ALIASES:
+            item_types = [x for x in item_types if x in [TASK, PROJECT]]
+            return Sort (item_types, get_start, 'start')
+        elif arg in COMPLETED_ALIASES:
+            item_types = [x for x in item_types if x in [TASK, PROJECT]]
+            return Sort (item_types, get_completion, 'completion')
+        elif arg in DUE_ALIASES:
+            item_types = [x for x in item_types if x in [TASK, PROJECT]]
+            return Sort (item_types, get_due, 'due')
+        elif arg in FLAGGED_ALIASES:
+            item_types = [x for x in item_types if x in [TASK, PROJECT]]
+            return Sort (item_types, get_not_flagged, 'flagged')
+        else:
+            assert False, 'unsupported field: ' + field
+    else:
+        if field in NAME_ALIASES:
+            nice_str = NAME_ALIASES[0] + ' = ' + arg
+            return Filter (item_types, match_name, arg, include, nice_str)
+        elif field in START_ALIASES:
+            item_types = [x for x in item_types if x in [TASK, PROJECT]]
+            rng = process_date_specifier (datetime.now(), arg)
+            nice_str = START_ALIASES[0] + ' = ' + date_range_to_str (rng)
+            return Filter (item_types, match_start, rng, include, nice_str)
+        elif field in COMPLETED_ALIASES:
+            item_types = [x for x in item_types if x in [TASK, PROJECT]]
+            rng = process_date_specifier (datetime.now(), arg)
+            nice_str = COMPLETED_ALIASES[0] + ' = ' + date_range_to_str (rng)
+            return Filter (item_types, match_completed, rng, include, nice_str)
+        elif field in DUE_ALIASES:
+            item_types = [x for x in item_types if x in [TASK, PROJECT]]
+            rng = process_date_specifier (datetime.now(), arg)
+            nice_str = DUE_ALIASES[0] + ' = ' + date_range_to_str (rng)
+            return Filter (item_types, match_due, rng, include, nice_str)
+        elif field in FLAGGED_ALIASES:
+            item_types = [x for x in item_types if x in [TASK, PROJECT]]
+            return Filter (item_types, match_flagged, None, include, field)
+        else:
+            assert False, 'unsupported field: ' + field
+    
+    
+def parse_command (param):
+    if param.startswith ('flag'):
+        return (True, 'flagged', None)
+    elif param.startswith ('!flag'):
+        return (False, 'flagged', None)
+    elif param =='prune':
+        return (True, 'prune', None)
+    elif param == 'sort':
+        return (True, 'sort', None)
+    elif param.startswith('flat'):
+        return (True, 'flatten', None)
+    
+    params = param.split('=', 1)
+    assert len(params) == 2
+    # We've got x=y or x!=y
+    include = True
+    if params[0].endswith ('!'):
+        include = False
+        field=params[0][:-1]
+        value=params[1]
+    else:
+        field=params[0]
+        value=params[1]
+    return (include, field, value)
+    
+    
+    instruction = params[0]
+    field = None
+    arg = None
+    if 'include'.startswith(instruction) or 'exclude'.startswith (instruction):
+        assert 'command invalid: ' + param, len (params>=2)
+        field = params[1]
+        arg = None
+        if not 'flagged'.startswith(field):
+            assert 'command invalid: ' + param, len (params==3)
+            arg = params[2]
+    elif 'sort'.startswith (instruction):
+        assert 'command invalid: ' + param, len (params==2)
+        field = params[1]
+    else:
+        assert False, 'command invalid: ' + param
+    return (instruction, field, arg)
+       
 def print_help ():
     print 'Version ' + VERSION
     print 
@@ -57,58 +153,31 @@ def print_help ():
     print '  -h,-?,--help'
     print '  -C: context mode (as opposed to project mode)'
     print '  -P: project mode - the default (as opposed to context mode)'
+    print '  -l: print links to tasks (in supported file formats)'
     print '  -o file_name: the output file name, must end in a recognised suffix - see documentation'
     print '  --open: open the output file with the registered application (if one is installed)'
     print
     print 'filters:'
-    
-    print '  -i regexp: include anything matching regexp'
-    print '  -e regexp: exclude anything matching regexp'
-    
-    print '  --Fi regexp: include anything flagged'
-    print '  --Fe regexp: exclude anything flagged'
-    
-    print '  --pi regexp: include projects matching regexp'
-    print '  --pe regexp: exclude projects matching regexp'
-    
-    print '  --pci regexp: include projects with completion matching regexp'
-    print '  --pce regexp: exclude projects with completion matching regexp'
-    
-    print '  --pdi regexp: include projects with due matching regexp'
-    print '  --pde regexp: exclude projects with due matching regexp'
-    
-    print '  --psi regexp: include projects with start matching regexp'
-    print '  --pse regexp: exclude projects with start matching regexp'
-    
-    print '  --pfi: include flagged projects'
-    print '  --pfe: exclude flagged projects'
-    
-    print '  --fi regexp: include folders matching regexp'
-    print '  --fe regexp: exclude folders matching regexp'
-    
-    print '  --ti regexp: include tasks matching regexp'
-    print '  --te regexp: exclude tasks matching regexp'
-    
-    print '  --ci regexp: include contexts matching regexp'
-    print '  --ce regexp: exclude contexts matching regexp'
-     
-    print '  --tci regexp: include tasks with completion matching regexp'
-    print '  --tce regexp: exclude tasks with completion matching regexp'
-    
-    print '  --tsi regexp: include tasks with start matching regexp'
-    print '  --tse regexp: exclude tasks with start matching regexp'
-    
-    print '  --tdi regexp: include tasks with due matching regexp'
-    print '  --tde regexp: exclude tasks with due matching regexp'
-    
-    print '  --tfi: include flagged tasks'
-    print '  --tfe: exclude flagged tasks'
-    
-    print '  --tsc: sort tasks by completion'
-    print '  --fsa: sort folders/projects alphabetically'
-    
-    print '  -F: flatten project/task structure'
-    print '  --prune: prune empty projects or folders'
+    print '  -a,--any     filter tasks, projects, contexts and folders against argument'
+    print '  -t,--task    filter any task against task against argument'
+    print '  -p,--project filter any project against argument'
+    print '  -f,--folder  filter any folder against argument'
+    print '  -c,--context filter any context type against argument'
+    print 
+    print '  A filter argument may be:'
+    print '    text=regexp'
+    print '    text!=regexp'
+    print '    =regexp (abbrieviation of text=regexp)'
+    print '    !=regexp (abbrieviation of text!=regexp)'
+    print '    flagged'
+    print '    !flagged'
+    print '    due=tomorrow'
+    print '    start!=this week (this will need quoting on the command line, because of the space)'
+    print '    sort=completed'
+    print '    prune'
+    print '    flatten'
+    print
+    print '  See DOCUMENTATION.md for more information'
 
 if __name__ == "__main__":
     
@@ -118,35 +187,27 @@ if __name__ == "__main__":
     project_mode=True
     file_name = None
     paul = False
+    links = False
         
-    opts, args = getopt.optlist, args = getopt.getopt(sys.argv[1:], 'hFCP?o:i:e:',
-                                                      ['fi=','fe=',
-                                                       'ci=','ce=',
-                                                       'pi=','pe=',
-                                                       'pci=','pce=',
-                                                       'psi=','pse=',
-                                                       'pdi=','pde=',
-                                                       'pfi','pfe',
-                                                       'ti=','te=',
-                                                       'tci=','tce=',
-                                                       'tsi=','tse=',
-                                                       'tdi=','tde=',
-                                                       'tfi','tfe',
-                                                       'Fi','Fe',
-                                                       'tsc',
-                                                       'fsa',
-                                                       'help',
-                                                       'open',
-                                                       'prune',
-                                                       'paul'])
+    opts, args = getopt.optlist, args = getopt.getopt(sys.argv[1:],
+                'p:c:t:f:a:hlCP?o:',
+                ['project=',
+                 'context=',
+                 'task=',
+                 'folder=',
+                 'any=',
+                 'help',
+                 'open',
+                 'paul'])
     for opt, arg in opts:
         if '--open' == opt:
             opn = True
         elif '--paul' == opt:
             paul = True
+        elif '-l' == opt:
+            links = True
         elif '-o' == opt:
             file_name = arg;
-            print 'Generating', file_name
         elif opt in ('-?', '-h', '--help'):
             print_help ()
             sys.exit()
@@ -162,201 +223,55 @@ if __name__ == "__main__":
     
     fmt = file_name[dot+1:]
     
-    root_projects_and_folders, root_contexts = build_model (find_database ())
-    items = root_projects_and_folders
+    root_project, root_context = build_model (find_database ())
+    subject = root_project
         
     for opt, arg in opts:
-        
-        # PROJECT MODE
-        if '-P' == opt:
-            project_mode = True
-            items = root_contexts
-        # CONTEXT MODE
-        elif '-C' == opt:
-            project_mode = False
-            items = root_contexts
-        
-        # ANYTHING
-        if '-i' == opt:
-            visitor = AnyNameFilterVisitor (arg, include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '-e' == opt:
-            visitor = AnyNameFilterVisitor (arg, include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--Fi' == opt:
-            visitor = AnyFlaggedFilterVisitor (include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--Fe' == opt:
-            visitor = AnyFlaggedFilterVisitor (include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        
-        # FOLDER
-        elif '--fi' == opt:
-            visitor = FolderNameFilterVisitor (arg, include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--fe' == opt:
-            visitor = FolderNameFilterVisitor (arg, include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        
-        # PROJECT
-        elif '--pi' == opt:
-            visitor = ProjectNameFilterVisitor (arg, include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--pe' == opt:
-            visitor = ProjectNameFilterVisitor (arg, include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--psi' == opt:
-            visitor = ProjectStartFilterVisitor (arg, include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--pse' == opt:
-            visitor = ProjectStartFilterVisitor (arg, include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--pdi' == opt:
-            visitor = ProjectDueFilterVisitor (arg, include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--psc' == opt:
-            visitor = ProjectDueFilterVisitor (arg, include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--pci' == opt:
-            visitor = ProjectCompletionFilterVisitor (arg, include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--pce' == opt:
-            visitor = ProjectCompletionFilterVisitor (arg, include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--pfi' == opt:
-            visitor = ProjectFlaggedFilterVisitor (include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--pfe' == opt:
-            visitor = ProjectFlaggedFilterVisitor (include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--fsa' == opt:
-            visitor = FolderNameSortingVisitor ()
-            print opt + '\t= ' + str (visitor)
-            root_projects_and_folders.sort(key=lambda item:item.name) # Have to sort the top level list too
-            traverse_list (visitor, items, project_mode=project_mode)
-            
-        # CONTEXT
-        elif '--ci' == opt:
-            visitor = ContextNameFilterVisitor (arg, include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--ce' == opt:
-            visitor = ContextNameFilterVisitor (arg, include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        
-        # TASK
-        elif '--ti' == opt:
-            visitor = TaskNameFilterVisitor (arg, include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--te' == opt:
-            visitor = TaskNameFilterVisitor (arg, include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--tci' == opt:
-            visitor = TaskCompletionFilterVisitor (arg, include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--tce' == opt:
-            visitor = TaskCompletionFilterVisitor (arg, include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--tsi' == opt:
-            visitor = TaskStartFilterVisitor (arg, include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--tse' == opt:
-            visitor = TaskStartFilterVisitor (arg, include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--tdi' == opt:
-            visitor = TaskDueFilterVisitor (arg, include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--tde' == opt:
-            visitor = TaskDueFilterVisitor (arg, include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--tfi' == opt:
-            visitor = TaskFlaggedFilterVisitor (include=True)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--tfe' == opt:
-            visitor = TaskFlaggedFilterVisitor (include=False)
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '--tsc' == opt:
-            visitor = TaskCompletionSortingVisitor ()
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        
-        # MISC
-        elif '--prune' == opt:
-            visitor = PruningFilterVisitor ()
-            print opt + '\t= ' + str (visitor)
-            traverse_list (visitor, items, project_mode=project_mode)
-        elif '-F' == opt:
-            visitor = FlatteningVisitor ()
-            print opt + '\t= ' + str (visitor)
-            if project_mode:
-                traverse_list (visitor, root_projects_and_folders, project_mode=project_mode)
-                root_projects_and_folders = visitor.projects # Really?
-                items = visitor.projects
-            else:
-                traverse_list (visitor, root_contexts, project_mode=project_mode)
-                root_contexts = visitor.contexts # Really?
-                items = visitor.contexts
-
-    file_name_base = os.environ['HOME']+'/Desktop/'
-    date_str = today.strftime (time_fmt)
-    
-    if fmt == 'txt' or fmt == 'text':
-        out=codecs.open(file_name, 'w', 'utf-8')
-        
-        print_structure (PrintTextVisitor (out), root_projects_and_folders, root_contexts, project_mode)
-        
-    # MARKDOWN
-    elif fmt == 'md' or fmt == 'markdown':
-        out=codecs.open(file_name, 'w', 'utf-8')
-        
-        print_structure (PrintMarkdownVisitor (out), root_projects_and_folders, root_contexts, project_mode)
-        
-    # FOLDING TEXT
-    elif fmt == 'ft' or fmt == 'foldingtext':
-        out=codecs.open(file_name, 'w', 'utf-8')
-        
-        print_structure (PrintMarkdownVisitor (out), root_projects_and_folders, root_contexts, project_mode)
-                
-    # TASKPAPER            
-    elif fmt == 'tp' or fmt == 'taskpaper':
-        out=codecs.open(file_name, 'w', 'utf-8')
         visitor = None
-        if paul:
-            visitor = CustomPrintTaskpaperVisitor (out, project_mode)
-        else:
-            visitor = PrintTaskpaperVisitor (out, project_mode)
-        print_structure (visitor, root_projects_and_folders, root_contexts, project_mode)
+        if opt in ('--project', '-p'):
+            included, field, arg = parse_command (arg)
+            visitor = build_filter ([PROJECT], included, field, arg)
+        elif opt in ('--task', '-t'):
+            included, field, arg = parse_command (arg)
+            visitor = build_filter ([TASK], included, field, arg)
+        elif opt in ('--context', '-c'):
+            included, field, arg = parse_command (arg)
+            visitor = build_filter ([CONTEXT], included, field, arg)
+        elif opt in ('--folder', '-f'):
+            included, field, arg = parse_command (arg)
+            visitor = build_filter ([FOLDER], included, field, arg)
+        elif opt in ('--any', '-a'):
+            included, field, arg = parse_command (arg)
+            visitor = build_filter ([TASK,PROJECT,FOLDER,CONTEXT], included, field, arg)
+        elif '-C' == opt:
+            subject = root_context
+        elif '-P' == opt:
+            subject = root_project
+        
+        if visitor != None: 
+            print str (visitor)
+            traverse (visitor, subject, project_mode=project_mode)
+                    
+    print 'Generating', file_name
     
-    # OPML
+    out=codecs.open(file_name, 'w', 'utf-8')
+    
+    if fmt == 'txt' or fmt == 'text':        
+        visitor = PrintTextVisitor (out)
+        traverse_list (visitor, subject.children, project_mode=project_mode)       
+    elif fmt == 'md' or fmt == 'markdown':
+        visitor = PrintMarkdownVisitor (out)
+        traverse_list (visitor, subject.children, project_mode=project_mode)       
+    elif fmt == 'ft' or fmt == 'foldingtext':        
+        visitor = PrintMarkdownVisitor (out)
+        traverse_list (visitor, subject.children, project_mode=project_mode)       
+    elif fmt == 'tp' or fmt == 'taskpaper':
+        if paul:
+            visitor = CustomPrintTaskpaperVisitor (out, links=links)
+        else:
+            visitor = PrintTaskpaperVisitor (out, links = links)
+        traverse_list (visitor, subject.children, project_mode=project_mode)       
     elif fmt == 'opml':
-        out=codecs.open(file_name, 'w', 'utf-8')
         print >>out, '<?xml version="1.0" encoding="UTF-8" standalone="no"?>'
         print >>out, '<opml version="1.0">'
         print >>out, '  <head>'
@@ -364,7 +279,8 @@ if __name__ == "__main__":
         print >>out, '  </head>'
         print >>out, '  <body>'
         
-        print_structure (PrintOpmlVisitor (out, depth=1), root_projects_and_folders, root_contexts, project_mode)
+        visitor = PrintOpmlVisitor (out, depth=1)
+        traverse_list (visitor, subject.children, project_mode=project_mode)       
         
         print >>out, '  </body>'
         print >>out, '</opml>'
@@ -378,7 +294,8 @@ if __name__ == "__main__":
         print >>out, '  </head>'
         print >>out, '  <body>'
         
-        print_structure (PrintHtmlVisitor (out, depth=1), root_projects_and_folders, root_contexts, project_mode)
+        visitor = PrintHtmlVisitor (out, depth=1)
+        traverse_list (visitor, subject.children, project_mode=project_mode)       
         
         print >>out, '  </body>'
         print >>out, '<html>'

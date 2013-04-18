@@ -1,33 +1,33 @@
 import unittest
-from visitors import FolderNameFilterVisitor, TaskNameFilterVisitor, ProjectNameFilterVisitor, ContextNameFilterVisitor
-from treemodel import Folder, Task, Project, Context, traverse_list, traverse
+from treemodel import Folder, Task, Project, Context, traverse_list, traverse, PROJECT, CONTEXT, TASK, FOLDER
+from visitors import Filter, match_name
 
 class Test_visitors(unittest.TestCase):
     
-    def test_FolderNameFilterVisitor_include (self):
+    def test_include (self):
         n1 = Folder (name=u'n1')
         n2 = Folder (name=u'n2 xxx')
         nodes = [n1, n2]
-        visitor = FolderNameFilterVisitor ('xxx')
+        visitor = Filter ([PROJECT, CONTEXT, TASK, FOLDER], match_name, 'xxx', True, "pretty")
         traverse_list (visitor, nodes)
         self.assertFalse(n1.marked)
         self.assertTrue(n2.marked)
-        
-    def test_FolderNameFilterVisitor_exclude (self):
+    
+    def test_exclude (self):
         n1 = Folder (name=u'n1')
         n2 = Folder (name=u'n2 xxx')
         nodes = [n1, n2]
-        visitor = FolderNameFilterVisitor ('xxx', include=False)
+        visitor = Filter ([PROJECT, CONTEXT, TASK, FOLDER], match_name, 'xxx', False, 'pretty')
         traverse_list (visitor, nodes)
         self.assertTrue(n1.marked)
         self.assertFalse(n2.marked)
         
-    def test_FolderNameFilterVisitor_include_ignores_children (self):
+    def test__include_ignores_children (self):
         n1 = Folder (name=u'n1 xxx')
         n2 = Folder (name=u'n2')
         n1.add_child(n2)
         
-        visitor = FolderNameFilterVisitor ('xxx')
+        visitor = Filter ([PROJECT, CONTEXT, TASK, FOLDER], match_name, 'xxx', True, 'pretty')
         traverse (visitor, n1)
         self.assertTrue(n1.marked)
         self.assertTrue(n2.marked)
@@ -36,7 +36,7 @@ class Test_visitors(unittest.TestCase):
         n1 = Task (name=u'n1')
         n2 = Task (name=u'n2 xxx')
         nodes = [n1, n2]
-        visitor = TaskNameFilterVisitor ('xxx')
+        visitor = Filter ([PROJECT, CONTEXT, TASK, FOLDER], match_name, 'xxx', True, 'pretty')
         traverse_list (visitor, nodes)
         self.assertFalse(n1.marked)
         self.assertTrue(n2.marked)
@@ -45,7 +45,7 @@ class Test_visitors(unittest.TestCase):
         n1 = Task (name=u'n1')
         n2 = Task (name=u'n2 xxx')
         nodes = [n1, n2]
-        visitor = TaskNameFilterVisitor ('xxx', include=False)
+        visitor = Filter ([PROJECT, CONTEXT, TASK, FOLDER], match_name, 'xxx', False, 'pretty')
         traverse_list (visitor, nodes)
         self.assertTrue(n1.marked)
         self.assertFalse(n2.marked)
@@ -55,63 +55,7 @@ class Test_visitors(unittest.TestCase):
         n2 = Task (name=u'n2')
         n1.add_child(n2)
         
-        visitor = TaskNameFilterVisitor ('xxx')
-        traverse (visitor, n1)
-        self.assertTrue(n1.marked)
-        self.assertTrue(n2.marked)
-        
-    def test_ProjectNameFilterVisitor_include (self):
-        n1 = Project (name=u'n1')
-        n2 = Project (name=u'n2 xxx')
-        nodes = [n1, n2]
-        visitor = ProjectNameFilterVisitor ('xxx')
-        traverse_list (visitor, nodes)
-        self.assertFalse(n1.marked)
-        self.assertTrue(n2.marked)
-        
-    def test_ProjectNameFilterVisitor_exclude (self):
-        n1 = Project (name=u'n1')
-        n2 = Project (name=u'n2 xxx')
-        nodes = [n1, n2]
-        visitor = ProjectNameFilterVisitor ('xxx', include=False)
-        traverse_list (visitor, nodes)
-        self.assertTrue(n1.marked)
-        self.assertFalse(n2.marked)
-        
-    def test_ProjectNameFilterVisitor_include_ignores_children (self):
-        n1 = Project (name=u'n1 xxx')
-        n2 = Task (name=u'n2')
-        n1.add_child(n2)
-        
-        visitor = ProjectNameFilterVisitor ('xxx')
-        traverse (visitor, n1)
-        self.assertTrue(n1.marked)
-        self.assertTrue(n2.marked)
-
-    def test_ContextNameFilterVisitor_include (self):
-        n1 = Context (name=u'n1')
-        n2 = Context (name=u'n2 xxx')
-        nodes = [n1, n2]
-        visitor = ContextNameFilterVisitor ('xxx')
-        traverse_list (visitor, nodes)
-        self.assertFalse(n1.marked)
-        self.assertTrue(n2.marked)
-        
-    def test_ContextNameFilterVisitor_exclude (self):
-        n1 = Context (name=u'n1')
-        n2 = Context (name=u'n2 xxx')
-        nodes = [n1, n2]
-        visitor = ContextNameFilterVisitor ('xxx', include=False)
-        traverse_list (visitor, nodes)
-        self.assertTrue(n1.marked)
-        self.assertFalse(n2.marked)
-        
-    def test_ContextNameFilterVisitor_include_ignores_children (self):
-        n1 = Context (name=u'n1 xxx')
-        n2 = Context (name=u'n2')
-        n1.add_child(n2)
-        
-        visitor = ContextNameFilterVisitor ('xxx')
+        visitor = Filter ([PROJECT, CONTEXT, TASK, FOLDER], match_name, 'xxx', True, 'pretty')
         traverse (visitor, n1)
         self.assertTrue(n1.marked)
         self.assertTrue(n2.marked)
@@ -139,7 +83,7 @@ class Test_visitors(unittest.TestCase):
         c2 = Context (name='7')
         c2.add_child(t3)
         
-        traverse_list (TaskNameFilterVisitor ('xxx'), [f_on_path])
+        traverse_list (Filter ([PROJECT, CONTEXT, TASK, FOLDER], match_name, 'xxx', True, 'pretty'), [f_on_path])
         
         self.assertTrue(f_on_path.marked)
         self.assertTrue(p_on_path.marked)
@@ -180,7 +124,7 @@ class Test_visitors(unittest.TestCase):
         c2 = Context (name='7')
         c2.add_child(t3)
         
-        traverse_list (TaskNameFilterVisitor ('xxx', include=False), [f_on_path])
+        traverse_list (Filter ([PROJECT, CONTEXT, TASK, FOLDER], match_name, 'xxx', False, 'pretty'), [f_on_path])
         
         self.assertTrue(f_on_path.marked)
         self.assertTrue(p_on_path.marked)
@@ -222,7 +166,7 @@ class Test_visitors(unittest.TestCase):
         
         c3 = Context (name='7', parent=c2_on_path)
         
-        traverse_list (TaskNameFilterVisitor ('xxx'), [c1_on_path], project_mode=False)
+        traverse_list (Filter ([PROJECT, CONTEXT, TASK, FOLDER], match_name, 'xxx', True, 'pretty'), [c1_on_path], project_mode=False)
         
         self.assertTrue(f1.marked)
         self.assertTrue(p1.marked)
@@ -267,7 +211,7 @@ class Test_visitors(unittest.TestCase):
         
         c3 = Context (name='7', parent=c2_on_path)
         
-        traverse_list (TaskNameFilterVisitor ('xxx', include=False), [c1_on_path], project_mode=False)
+        traverse_list (Filter ([PROJECT, CONTEXT, TASK, FOLDER], match_name, 'xxx', False, 'pretty'), [c1_on_path], project_mode=False)
         
         self.assertTrue(f1.marked)
         self.assertTrue(p1.marked)

@@ -14,26 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-from treemodel import traverse_list, Visitor
-from omnifocus import build_model, find_database
-import os
-import codecs
+from treemodel import Visitor
 
 class PrintTaskpaperVisitor(Visitor):
-    def __init__ (self, out, depth=0):
+    def __init__ (self, out, links = False, depth=0):
         self.depth = depth
         self.out = out
+        self.links = links
     def begin_folder (self, folder):
         print >>self.out, self.tabs() + folder.name + ':'
         self.depth+=1
+        self.print_link ('folder', folder)
     def end_folder (self, folder):
         self.depth-=1
     def begin_project (self, project):
         if self.project_mode:
-            print >>self.out, self.tabs() + project.name + ':'
+            print >>self.out, self.tabs() + project.name + ':' + self.tags(project)
         else:
             print >>self.out, self.tabs() + '- ' + self.remove_trailing_colon(project.name) + self.tags(project)
         self.depth+=1
+        self.print_link ('task', project)
     def end_project (self, project):
         self.depth-=1
     def begin_task (self, task):
@@ -47,22 +47,25 @@ class PrintTaskpaperVisitor(Visitor):
     def begin_context (self, context):
         print >>self.out, self.tabs() + context.name + ':'
         self.depth+=1
+        self.print_link ('context', context)
     def end_context (self, context):
         self.depth-=1
     def tags (self, item):
         tags = []
-        if item.date_completed != None:
-            tags.append(item.date_completed.strftime("@done(%Y-%m-%d)"))
-        else:
-            tags.append("@todo")
         if item.flagged:
             tags.append ("@flagged")
+        if item.date_completed == None:
+            tags.append("@todo")
         if item.date_to_start != None:
             tags.append(item.date_to_start.strftime("@start(%Y-%m-%d)"))
         if item.date_due != None:
             tags.append (item.date_due.strftime("@due(%Y-%m-%d)"))
-        if item.context != None:
-            tags.append ('@' + ''.join (item.context.name.split ()))
+        if item.date_completed != None:
+            tags.append(item.date_completed.strftime("@done(%Y-%m-%d)"))
+        if self.project_mode == True and item.context != None:
+            tags.append ('@context(' + ''.join (item.context.name.split ()) + ')')
+        if self.project_mode == False and item.project != None:
+            tags.append ('@project(' + ''.join (item.project.name.split ()) + ')')
         if len (tags) > 0:
             return ' ' + ' '.join(tags)
         return ''
@@ -74,20 +77,8 @@ class PrintTaskpaperVisitor(Visitor):
         return len ([x for x in item.children if x.marked]) == 0
     def tabs (self):
         return '\t' * (self.depth)
-
-if __name__ == "__main__":
-
-    root_projects_and_folders, root_contexts = build_model (find_database ())
-    
-    file_name=os.environ['HOME'] + '/Desktop/OF.taskpaper'
-    
-    out=codecs.open(file_name, 'w', 'utf-8')
-    
-    print >>out, 'Projects:'
-    traverse_list (PrintTaskpaperVisitor (out, True, depth=1), root_projects_and_folders)
-    print >>out, 'Contexts:'
-    traverse_list (PrintTaskpaperVisitor (out, False, depth=1), root_contexts, project_mode=False)
-    
-    out.close()
-    
-    os.system("open '" + file_name + "'")
+    def print_link (self, link_type, item):
+        if self.links and 'persistentIdentifier' in item.ofattribs:
+            ident = item.ofattribs['persistentIdentifier']
+            link = 'omnifocus:///' + link_type + '/' + ident
+            print >>self.out, self.tabs() + link

@@ -1,5 +1,12 @@
 # Changes #
 
+## 1.0.5 (2013-04-18) ##
+- Fewer and more modular command line options.
+- Big internal changes to the filter mechanism.
+- Much simpler filter building from command line arguments.
+- Added link mode (-l) to add links to OmniFocus from TaskPaper documents.
+- Added tags for projects/contexts in TaskPaper report.
+  
 ## 1.0.4 (2013-04-15) ##
 
 - Added Context mode.

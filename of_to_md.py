@@ -14,10 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-from treemodel import traverse_list, Visitor
-from omnifocus import build_model, find_database
-import os
-import codecs
+from treemodel import Visitor
 
 class PrintMarkdownVisitor(Visitor):
     def __init__ (self, out, depth=0):
@@ -27,12 +24,14 @@ class PrintMarkdownVisitor(Visitor):
     def begin_folder (self, folder):
         self.task_depth = 0
         print >>self.out, ('#' * (self.header_depth+1)) + ' ' + folder.name
+        print >>self.out
         self.header_depth+=1
     def end_folder (self, folder):
         self.header_depth-=1
     def begin_project (self, project):
         self.task_depth = 0
         print >>self.out, ('#' * (self.header_depth+1)) + ' ' + project.name
+        print >>self.out
         self.header_depth+=1
     def end_project (self, project):
         print >>self.out
@@ -45,6 +44,7 @@ class PrintMarkdownVisitor(Visitor):
     def begin_context (self, context):
         self.task_depth = 0
         print >>self.out, ('#' * (self.header_depth+1)) + ' ' + context.name
+        print >>self.out
         self.header_depth+=1
     def end_context (self, context):
         print >>self.out
@@ -53,20 +53,3 @@ class PrintMarkdownVisitor(Visitor):
         if completed != None:
             return completed.strftime(" @%Y-%m-%d-%a")
         return ""
-
-if __name__ == "__main__":
-
-    root_projects_and_folders, root_contexts = build_model (find_database ())
-    
-    file_name=os.environ['HOME'] + '/Desktop/OF.md'
-    
-    out=codecs.open(file_name, 'w', 'utf-8')
-    
-    print >>out, '# Projects:'
-    traverse_list (PrintMarkdownVisitor (out, depth=1), root_projects_and_folders)
-    print >>out, '# Contexts:'
-    traverse_list (PrintMarkdownVisitor (out, depth=1), root_contexts, project_mode=False)
-    
-    out.close()
-    
-    os.system("open '" + file_name + "'")
