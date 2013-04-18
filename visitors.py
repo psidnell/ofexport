@@ -14,8 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-from treemodel import Visitor, TASK, PROJECT, CONTEXT, FOLDER
-from datematch import process_date_specifier, date_range_to_str
+from treemodel import Visitor, TASK, PROJECT, FOLDER
 import re
 from datetime import datetime
 

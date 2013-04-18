@@ -330,7 +330,7 @@ This produces a report showing all tasks that contain "Beth" and their enclosing
 
 This produces the report of what I have yet to do on this project			
 
-        fexport -o TODO.md --open -p='OmniPythonLib Todo' -t done!=any
+        ofexport -o TODO.md --open -p='ofexport Todo' -t done!=any
 
 ### Tips and Tricks ###
 

@@ -190,7 +190,7 @@ if __name__ == "__main__":
     links = False
         
     opts, args = getopt.optlist, args = getopt.getopt(sys.argv[1:],
-                'p:c:t:f:a:hlC?o:',
+                'p:c:t:f:a:hlCP?o:',
                 ['project=',
                  'context=',
                  'task=',
@@ -294,7 +294,7 @@ if __name__ == "__main__":
         print >>out, '  </head>'
         print >>out, '  <body>'
         
-        visitor - PrintHtmlVisitor (out, depth=1)
+        visitor = PrintHtmlVisitor (out, depth=1)
         traverse_list (visitor, subject.children, project_mode=project_mode)       
         
         print >>out, '  </body>'
