@@ -192,8 +192,6 @@ class Prune (Visitor):
     def __str__ (self):
         return 'prune ' + str(self.types)
 
-
-    
 class Flatten (Visitor):
     def __init__(self, types):
         Visitor.__init__(self)
@@ -216,7 +214,7 @@ class Flatten (Visitor):
         return 'Flatten'
      
 #-----------------------------------
-
+'''
 class NameFilterVisitor(BaseFilterVisitor):
     def __init__(self, filtr, include=True):
         BaseFilterVisitor.__init__(self, include)
@@ -467,3 +465,4 @@ class PruningFilterVisitor (Visitor):
                 item.marked = False
     def __str__ (self):
         return 'Prune'     
+'''

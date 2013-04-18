@@ -27,7 +27,7 @@ from of_to_text import PrintTextVisitor
 from of_to_md import PrintMarkdownVisitor
 from of_to_opml import PrintOpmlVisitor
 from of_to_html import PrintHtmlVisitor
-from visitors import Filter, Sort, Prune, Flatten, match_name, match_start, match_completed, match_due, match_flagged, get_name, get_start, get_due, get_completion, get_flagged, PruningFilterVisitor, FlatteningVisitor
+from visitors import Filter, Sort, Prune, Flatten, match_name, match_start, match_completed, match_due, match_flagged, get_name, get_start, get_due, get_completion, get_flagged
 
 VERSION = "1.0.4 (2013-04-15)"
 
@@ -74,21 +74,22 @@ def build_filter (item_types, include, field, arg):
             assert False, 'unsupported field: ' + field
     else:
         if field in NAME_ALIASES:
-            return Filter (item_types, match_name, arg, include, field + ':' + arg)
+            nice_str = NAME_ALIASES[0] + ' = ' + arg
+            return Filter (item_types, match_name, arg, include, nice_str)
         elif field in START_ALIASES:
             item_types = [x for x in item_types if x in [TASK, PROJECT]]
             rng = process_date_specifier (datetime.now(), arg)
-            nice_str = date_range_to_str (rng)
+            nice_str = START_ALIASES[0] + ' = ' + date_range_to_str (rng)
             return Filter (item_types, match_start, rng, include, nice_str)
         elif field in COMPLETED_ALIASES:
             item_types = [x for x in item_types if x in [TASK, PROJECT]]
             rng = process_date_specifier (datetime.now(), arg)
-            nice_str = date_range_to_str (rng)
+            nice_str = COMPLETED_ALIASES[0] + ' = ' + date_range_to_str (rng)
             return Filter (item_types, match_completed, rng, include, nice_str)
         elif field in DUE_ALIASES:
             item_types = [x for x in item_types if x in [TASK, PROJECT]]
             rng = process_date_specifier (datetime.now(), arg)
-            nice_str = date_range_to_str (rng)
+            nice_str = DUE_ALIASES[0] + ' = ' + date_range_to_str (rng)
             return Filter (item_types, match_due, rng, include, nice_str)
         elif field in FLAGGED_ALIASES:
             item_types = [x for x in item_types if x in [TASK, PROJECT]]
@@ -157,15 +158,13 @@ def print_help ():
     print '  --open: open the output file with the registered application (if one is installed)'
     print
     print 'filters:'
-    print '  -a arg: filter any type against arg'
-    print '  -t arg: filter any task against arg'
-    print '  -p arg: filter any project against arg'
-    print '  -f arg: filter any folder against arg'
-    print '  -c arg: filter any context type against arg'
-    print '  -F: flatten the tree hierarchy to 1 level of project/context'
-    print '  --prune: prune empty projects or folders'
+    print '  -a,--any     filter tasks, projects, contexts and folders against argument'
+    print '  -t,--task    filter any task against task against argument'
+    print '  -p,--project filter any project against argument'
+    print '  -f,--folder  filter any folder against argument'
+    print '  -c,--context filter any context type against argument'
     print 
-    print '  arg may be:'
+    print '  A filter argument may be:'
     print '    text=regexp'
     print '    text!=regexp'
     print '    =regexp (abbrieviation of text=regexp)'
@@ -173,8 +172,10 @@ def print_help ():
     print '    flagged'
     print '    !flagged'
     print '    due=tomorrow'
-    print '    start!=this week (this will need quoting on the command line)'
+    print '    start!=this week (this will need quoting on the command line, because of the space)'
     print '    sort=completed'
+    print '    prune'
+    print '    flatten'
     print
     print '  See DOCUMENTATION.md for more information'
 
@@ -189,7 +190,7 @@ if __name__ == "__main__":
     links = False
         
     opts, args = getopt.optlist, args = getopt.getopt(sys.argv[1:],
-                'p:c:t:f:a:hlFC?o:',
+                'p:c:t:f:a:hlC?o:',
                 ['project=',
                  'context=',
                  'task=',
@@ -197,7 +198,6 @@ if __name__ == "__main__":
                  'any=',
                  'help',
                  'open',
-                 'prune',
                  'paul'])
     for opt, arg in opts:
         if '--open' == opt:
@@ -243,17 +243,6 @@ if __name__ == "__main__":
         elif opt in ('--any', '-a'):
             included, field, arg = parse_command (arg)
             visitor = build_filter ([TASK,PROJECT,FOLDER,CONTEXT], included, field, arg)
-        elif '--prune' == opt:
-            visitor = PruningFilterVisitor ()
-        elif '-F' == opt:
-            visitor = FlatteningVisitor ()
-            print str (visitor)
-            traverse (visitor, subject, project_mode=project_mode)
-            if project_mode:
-                root_project.children = visitor.projects
-            else:
-                root_context=visitor.contexts
-            visitor = None
         elif '-C' == opt:
             subject = root_context
         elif '-P' == opt:

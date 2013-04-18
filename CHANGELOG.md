@@ -1,10 +1,10 @@
 # Changes #
 
 ## 1.0.5 (???) ##
-- Significant revamp/simplification of command line parsing options.
-- Much simpler filter building from command line arguments
-- Added link mode (-l) to add links to OmniFocus tasks in TaskPaper documents.
-- Added tags to projects in TaskPaper report.
+- Fewer and more modular command line.
+- Much simpler filter building from command line arguments.
+- Added link mode (-l) to add links to OmniFocus from TaskPaper documents.
+- Added tags for projects/contexts in TaskPaper report.
   
 ## 1.0.4 (2013-04-15) ##
 

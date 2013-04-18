@@ -124,15 +124,13 @@ which prints:
           --open: open the output file with the registered application (if one is installed)
         
         filters:
-          -a arg: filter any type against arg
-          -t arg: filter any task against arg
-          -p arg: filter any project against arg
-          -f arg: filter any folder against arg
-          -c arg: filter any context type against arg
-          -F: flatten the tree hierarchy to 1 level of project/context
-          --prune: prune empty projects or folders
+          -a,--any     filter tasks, projects, contexts and folders against argument
+          -t,--task    filter any task against task against argument
+          -p,--project filter any project against argument
+          -f,--folder  filter any folder against argument
+          -c,--context filter any context type against argument
         
-          arg may be:
+          A filter argument may be:
             text=regexp
             text!=regexp
             =regexp (abbrieviation of text=regexp)
@@ -140,8 +138,10 @@ which prints:
             flagged
             !flagged
             due=tomorrow
-            start!=this week (this will need quoting on the command line)
+            start!=this week (this will need quoting on the command line, because of the space)
             sort=completed
+            prune
+            flatten
         
           See DOCUMENTATION.md for more information
 
@@ -241,7 +241,7 @@ If you ran an exclude filter searching for ''Cat" you'd get:
                 Task: Send receipts
                 Task: Purge junk
 
-#### Sorting Filters ####
+#### Sorting Filters
 
 To sort items its possible to use a sort filter e.g. "-t sort=due" which will sort all tasks by their due date  (if they have one), or "-p sort=text" which sorts projects alphabetically.
 
@@ -249,11 +249,17 @@ Note that when we sort any type, it's it's direct descendants that get sorted, s
 
 If items are sorted by an attribute they may not all have (like due date) then any item without that date is assumed to have today's date.
 
-#### Pruning ####
+#### Pruning Filters ####
 
 You might run a filter that eliminates a lot of tasks and leaves a lot of empty projects or folders in your report. If you don't want to see these then use the prune option.
 
-#### Multiple Filters ####
+It's possible to run a pruning filter: e.g. "-a prune" that can remove any folders, projects or contexts that have no tasks within them.
+
+#### Flattening Filters
+
+If the report is flattened e.g. with "-a flat" then all sub-folders, sub-context, sub-tasks are pulled up to to their parents level leaving a more readable document with a flattened hierarchy. Using the flatten filter on all node types will result in a document that simply has projects/contexts with a single level of tasks beneath.
+
+#### Multiple Filters
 
 The important thing to note about filters is that you can specify as many as you like and they are executed in the order you specify. If there are multiple filters then the output of one is passed to the next and so on.
 
@@ -300,31 +306,31 @@ There are several different attributes, each of which may have alternatives for 
 
 This produces a document containing all tasks completed yesterday from any folder with "Work" in it's title:
 	
-        ofexport -o report.tp -f=Work -t done=yesterday --prune --open
+        ofexport -o report.tp -f=Work -t done=yesterday -a prune --open
 	
 This uses a little regular expression magic to create a document containing all tasks completed today from any folder with the exact name "Work":
 	
-        ofexport -o report.tp -f='^Work$' -t done='today' --prune --open
+        ofexport -o report.tp -f='^Work$' -t done='today' -a prune --open
 	
 This produces a document containing all tasks completed today from any folder that does NOT have "Work" in it's title:
 	
-        ofexport -o report.tp -f!=Work -t done=today --prune --open
+        ofexport -o report.tp -f!=Work -t done=today -a prune --open
 
 This uses a little regular expression magic to create a document containing all tasks completed today from any folder with the exact name "Work" or "Home".
 	
-        ofexport -o report.tp -f='^Work$|^Home$' -t done='today' --prune --open
+        ofexport -o report.tp -f='^Work$|^Home$' -t done='today' -a prune --open
 
 This produces a document containing all tasks completed today from any folder with "Work" in it's title and the flattens/simplifies the indenting:
 	
-        ofexport -o report.tp -f=Work -t done='this week' --prune -F --open
+        ofexport -o report.tp -f=Work -t done='this week' -a prune -a flat --open
 
 This produces a report showing all tasks that contain "Beth" and their enclosing projects:
 			
-        ofexport -o report.tp -a=Beth --prune --open -F
+        ofexport -o report.tp -a=Beth -a prune -a flat --open
 
 This produces the report of what I have yet to do on this project			
 
-        ofexport -o TODO.md --open -p='OmniPythonLib Todo' -F -t done=none
+        fexport -o TODO.md --open -p='OmniPythonLib Todo' -t done!=any
 
 ### Tips and Tricks ###
 
