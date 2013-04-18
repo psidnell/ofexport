@@ -1,4 +1,4 @@
-# ofexport V1.0.4 #
+# ofexport V1.0.5 #
 
 - [Changelog](https://github.com/psidnell/ofexport/blob/master/CHANGELOG.md)
 
@@ -106,7 +106,7 @@ To get help on usage and the full list of options, run the command with no argum
 
 which prints:
 
-        Version 1.0.4 (2013-04-15)
+        Version 1.0.5 (2013-04-18)
         
         Usage:
         
