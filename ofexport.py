@@ -236,6 +236,13 @@ if __name__ == "__main__":
             visitor = PruningFilterVisitor ()
         elif '-F' == opt:
             visitor = FlatteningVisitor ()
+            print str (visitor)
+            traverse (visitor, subject, project_mode=project_mode)
+            if project_mode:
+                root_project.children = visitor.projects
+            else:
+                root_context=visitor.contexts
+            visitor = None
         elif '-C' == opt:
             subject = root_context
         elif '-P' == opt:
