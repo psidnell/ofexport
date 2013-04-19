@@ -18,7 +18,7 @@ def process_line (line, short_opts, long_opts):
             reassembled.append (piece)
     return ''.join (reassembled)
 
-instream=codecs.open('help-template.txt', 'r', 'utf-8')
+instream=codecs.open('templates/help-template.txt', 'r', 'utf-8')
 
 short_opts = []
 long_opts = []

@@ -8,5 +8,7 @@ export PYTHONPATH=`pwd`/src/main/python
 # Run unit tests
 ################
 
-cd src/test/python
-python -m unittest discover -p '*_test.py'
+python -m unittest discover -s src/test/python -p '*_test.py'
+
+bash build-scripts/generate-todo
+

@@ -2,10 +2,11 @@
 
 ## ofexport Todo
 
-* V1.0.5
-    * Release
 * V1.0.6
-    * use lamdas instead of these ratty little get/match fns
+    * do I need project mode any more - infer from node type?
+    * base project has a folder - why?
+    * Make command line parsing more robust
+    * Fix stupid way of matching any date (longAgo,distantFuture)
     * move html/opml preamble into visitors
     * merge projects folders etc if they have same name?
     * proper logging: with on/off on the command line

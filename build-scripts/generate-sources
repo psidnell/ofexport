@@ -1,4 +1,4 @@
-python src/test/python/generate_help.py $@ > src/main/python/help.py
+python build-scripts/generate_help.py $@ > src/main/python/help.py
 echo =================================
 python src/main/python/ofexport.py --help
 echo =================================
