@@ -81,7 +81,7 @@ def build_filter (item_types, include, field, arg):
     else:
         if field in NAME_ALIASES:
             nice_str = NAME_ALIASES[0] + ' = ' + arg
-            match_name = lambda item, regexp: re.search (regexp, item.name) != None
+            match_name = lambda item, regexp: re.compile (arg).search (item.name) != None
             return Filter (item_types, match_name, arg, include, nice_str)
         elif field in START_ALIASES:
             item_types = [x for x in item_types if x in [TASK, PROJECT]]

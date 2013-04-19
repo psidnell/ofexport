@@ -1,4 +1,4 @@
-# ofexport V1.0.5 #
+# ofexport #
 
 - [Changelog](https://github.com/psidnell/ofexport/blob/master/CHANGELOG.md)
 

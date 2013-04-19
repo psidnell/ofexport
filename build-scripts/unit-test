@@ -2,7 +2,7 @@
 
 set -o xtrace
 set -e
-export PYTHONPATH=`pwd`
+export PYTHONPATH=`pwd`/src/main/python
 
 ################
 # Run unit tests
