@@ -8,6 +8,5 @@ export PYTHONPATH=`pwd`
 # Run unit tests
 ################
 
-cd tests
+cd src/test/python
 python -m unittest discover -p '*_test.py'
-cd ..

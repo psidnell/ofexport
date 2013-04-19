@@ -5,7 +5,7 @@
   
   <groupId>org.psidnell</groupId>
   <artifactId>ofexport</artifactId>
-  <version>1.0.5</version>
+  <version>1.0.6-SNAPSHOT</version>
   <name>ofexport</name>
   
   <build>
@@ -18,7 +18,20 @@
           <configuration>
             <executable>bash</executable>
             <arguments>
-              <argument>unit_tests</argument>
+              <argument>build-scripts/generate-sources</argument>
+            </arguments>
+          </configuration>
+          <id>python-generate-sources</id>
+          <phase>generate-sources</phase>
+          <goals>
+            <goal>exec</goal>
+          </goals>
+        </execution>
+        <execution>
+          <configuration>
+            <executable>bash</executable>
+            <arguments>
+              <argument>build-scripts/unit-test</argument>
             </arguments>
           </configuration>
           <id>python-unit-test</id>
@@ -31,7 +44,7 @@
           <configuration>
             <executable>bash</executable>
             <arguments>
-              <argument>integration_tests</argument>
+              <argument>build-scripts/integration-test</argument>
             </arguments>
           </configuration>
           <id>python-integration-test</id>
