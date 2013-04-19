@@ -1,5 +1,8 @@
 # Changes #
 
+## 1.0.6 (???)
+- Added json as an output format.
+
 ## 1.0.5 (2013-04-18) ##
 - Fewer and more modular command line options.
 - Big internal changes to the filter mechanism.

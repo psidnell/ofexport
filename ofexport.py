@@ -19,6 +19,7 @@ import re
 import codecs
 import getopt
 import sys
+import json
 from datetime import datetime
 from datematch import process_date_specifier, date_range_to_str, match_date_against_range
 from treemodel import traverse, traverse_list, PROJECT, TASK, FOLDER, CONTEXT
@@ -29,6 +30,7 @@ from of_to_text import PrintTextVisitor
 from of_to_md import PrintMarkdownVisitor
 from of_to_opml import PrintOpmlVisitor
 from of_to_html import PrintHtmlVisitor
+from of_to_json import ConvertStructureToJsonVisitor
 from visitors import Filter, Sort, Prune, Flatten
 
 VERSION = "1.0.5 (2013-04-18)"
@@ -317,6 +319,17 @@ if __name__ == "__main__":
         
         print >>out, '  </body>'
         print >>out, '<html>'
+    # HTML
+    elif fmt == 'json':
+        out=codecs.open(file_name, 'w', 'utf-8')
+        
+        visitor = ConvertStructureToJsonVisitor ()
+        traverse (visitor, root_project, project_mode=True)
+        
+        visitor = ConvertStructureToJsonVisitor ()
+        traverse (visitor, root_context, project_mode=False)
+        
+        print >> out, json.dumps([root_project.attribs['json_data'], root_context.attribs['json_data']], indent=4)
     else:
         raise Exception ('unknown format ' + fmt)
     

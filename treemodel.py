@@ -122,16 +122,22 @@ class Folder(Node):
                        attribs=attribs)
 class Project(Node):
     flagged = TypeOf ('flagged', bool)
+    context = TypeOf ('context', Context)
     date_completed = TypeOf ('date_completed', datetime)
+    date_to_start = TypeOf ('date_to_start', datetime)
+    date_due = TypeOf ('date_due', datetime)
     folder = TypeOf ('folder', Folder)
     def __init__ (self,
-                   name=None,
+                  name=None,
                   parent=None,
                   marked=True,
                   children=[],
                   attribs = {},
                   flagged = False,
                   date_completed=None,
+                  date_to_start=None,
+                  date_due=None,
+                  context=None,
                   folder=None):
         Node.__init__ (self, PROJECT,
                        name=name,
@@ -140,7 +146,10 @@ class Project(Node):
                        children=children,
                        attribs=attribs)
         self.flagged = flagged
+        self.context = context
         self.date_completed = date_completed
+        self.date_to_start = date_to_start
+        self.date_due = date_due
         self.folder = folder
     
 class Visitor(object):
