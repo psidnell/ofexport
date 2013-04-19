@@ -32,6 +32,7 @@ from of_to_opml import PrintOpmlVisitor
 from of_to_html import PrintHtmlVisitor
 from of_to_json import ConvertStructureToJsonVisitor, read_json
 from visitors import Filter, Sort, Prune, Flatten
+from help import print_help, SHORT_OPTS, LONG_OPTS
 
 VERSION = "1.0.5 (2013-04-18)"
 
@@ -160,45 +161,6 @@ class CustomPrintTaskpaperVisitor (PrintTaskpaperVisitor):
             return item.date_completed.strftime(" @%Y-%m-%d-%a")
         else:
             return ""
-     
-def print_help ():
-    print 'Version ' + VERSION
-    print 
-    print 'Usage:'
-    print
-    print 'ofexport [options...] -o file_name'
-    print
-    print
-    print 'options:'
-    print '  -h,-?,--help'
-    print '  -C: context mode (as opposed to project mode)'
-    print '  -P: project mode - the default (as opposed to context mode)'
-    print '  -l: print links to tasks (in supported file formats)'
-    print '  -o file_name: the output file name, must end in a recognised suffix - see documentation'
-    print '  -i file_name: read file_name instead of the OmniFocus database, must be in json format'
-    print '  --open: open the output file with the registered application (if one is installed)'
-    print
-    print 'filters:'
-    print '  -a,--any     filter tasks, projects, contexts and folders against argument'
-    print '  -t,--task    filter any task against task against argument'
-    print '  -p,--project filter any project against argument'
-    print '  -f,--folder  filter any folder against argument'
-    print '  -c,--context filter any context type against argument'
-    print 
-    print '  A filter argument may be:'
-    print '    text=regexp'
-    print '    text!=regexp'
-    print '    =regexp (abbrieviation of text=regexp)'
-    print '    !=regexp (abbrieviation of text!=regexp)'
-    print '    flagged'
-    print '    !flagged'
-    print '    due=tomorrow'
-    print '    start!=this week (this will need quoting on the command line, because of the space)'
-    print '    sort=completed'
-    print '    prune'
-    print '    flatten'
-    print
-    print '  See DOCUMENTATION.md for more information'
 
 if __name__ == "__main__":
     
@@ -210,17 +172,10 @@ if __name__ == "__main__":
     paul = False
     links = False
     infile = None
-        
-    opts, args = getopt.optlist, args = getopt.getopt(sys.argv[1:],
-                'i:p:c:t:f:a:hlCP?o:',
-                ['project=',
-                 'context=',
-                 'task=',
-                 'folder=',
-                 'any=',
-                 'help',
-                 'open',
-                 'paul'])
+    
+    LONG_OPTS.append('paul')
+    opts, args = getopt.optlist, args = getopt.getopt(sys.argv[1:],SHORT_OPTS, LONG_OPTS)
+              
     for opt, arg in opts:
         if '--open' == opt:
             opn = True
