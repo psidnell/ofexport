@@ -8,22 +8,8 @@
 # that format alone
 ####################
 
-# set -o xtrace
+set -o xtrace
 set -e
-export PYTHONPATH=`pwd`
-
-################
-# Run unit tests
-################
-
-cd tests
-rm *.pyc
-for FILE in $( ls ); do
-        MODULE=`echo $FILE | sed -e 's/\.py$//'`
-        echo module: $MODULE
-        python -m unittest -f -v $MODULE
-done
-cd ..
 
 #########################################################
 # Run some tests against a test folder in my OmniFocus DB

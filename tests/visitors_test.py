@@ -1,6 +1,10 @@
 import unittest
+import re
 from treemodel import Folder, Task, Project, Context, traverse_list, traverse, PROJECT, CONTEXT, TASK, FOLDER
-from visitors import Filter, match_name
+from visitors import Filter
+
+def match_name (item, regexp):
+    return re.search (regexp, item.name) != None
 
 class Test_visitors(unittest.TestCase):
     

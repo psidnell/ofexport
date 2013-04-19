@@ -174,7 +174,22 @@ def process_date_specifier (now, date_spec):
         return (start, end)
     else:
         raise Exception ('I don\'t think "' + date_spec + '" is any kind of date specification I recognise')
-    
+
+def match_date_against_range (thedate, date_range):
+    start, end = date_range
+    # If start and end == None then we match against no date
+    # Currently any date uses (longAgo, distantFuture)
+    if start == None and end == None:
+        return thedate == None
+    elif thedate == None:
+        return start == None and end == None
+    elif start != None and end != None:
+        return thedate.date() >= start.date() and thedate.date() <= end.date ()
+    elif start != None:
+        return thedate.date() >= start.date()
+    else:
+        return thedate.date() <= end.date ()
+
 def date_range_to_str (spec):
     fmt = "[%a %b %d %Y]"
     start, end = spec

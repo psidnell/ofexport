@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -o xtrace
+set -e
+export PYTHONPATH=`pwd`
+
+################
+# Run unit tests
+################
+
+cd tests
+python -m unittest discover -p '*_test.py'
+cd ..

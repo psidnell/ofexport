@@ -13,12 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
-from datetime import datetime
-from datematch import process_date_specifier, date_range_to_str
+
 import os
+import re
 import codecs
 import getopt
 import sys
+from datetime import datetime
+from datematch import process_date_specifier, date_range_to_str, match_date_against_range
 from treemodel import traverse, traverse_list, PROJECT, TASK, FOLDER, CONTEXT
 from omnifocus import build_model, find_database
 from datetime import date
@@ -27,7 +29,7 @@ from of_to_text import PrintTextVisitor
 from of_to_md import PrintMarkdownVisitor
 from of_to_opml import PrintOpmlVisitor
 from of_to_html import PrintHtmlVisitor
-from visitors import Filter, Sort, Prune, Flatten, match_name, match_start, match_completed, match_due, match_flagged, get_name, get_start, get_due, get_completion, get_flagged
+from visitors import Filter, Sort, Prune, Flatten
 
 VERSION = "1.0.5 (2013-04-18)"
 
@@ -37,18 +39,14 @@ COMPLETED_ALIASES = ['done', 'end', 'ended', 'complete', 'completed', 'finish', 
 DUE_ALIASES = ['due', 'deadline']
 FLAGGED_ALIASES = ['flag', 'flagged']
 
-def get_not_flagged (item):
-    return not get_flagged (item)
+def get_date_attrib_or_now (item, attrib):
+    if not attrib in item.__dict__:
+        return datetime.now()
+    result = item.__dict__[attrib]
+    if result == None:
+        return datetime.now()
+    return result
 
-class CustomPrintTaskpaperVisitor (PrintTaskpaperVisitor):
-    def __init__(self, out, links=False):
-        PrintTaskpaperVisitor.__init__(self, out, links=links)
-    def tags (self, item):
-        if item.date_completed != None and item.type != PROJECT:
-            return item.date_completed.strftime(" @%Y-%m-%d-%a")
-        else:
-            return ""
-    
 def build_filter (item_types, include, field, arg):
     if 'prune' == field:
         item_types = [x for x in item_types if x in [PROJECT, CONTEXT, FOLDER]]
@@ -57,42 +55,52 @@ def build_filter (item_types, include, field, arg):
         return Flatten (item_types)
     elif 'sort' == field:
         if arg == None or arg in NAME_ALIASES:
+            get_name = lambda x: x.name
             return Sort (item_types, get_name, 'text')
         elif arg in START_ALIASES:
             item_types = [x for x in item_types if x in [TASK, PROJECT]]
+            get_start = lambda x: get_date_attrib_or_now (x, 'start')
             return Sort (item_types, get_start, 'start')
         elif arg in COMPLETED_ALIASES:
             item_types = [x for x in item_types if x in [TASK, PROJECT]]
+            get_completion = lambda x: get_date_attrib_or_now (x, 'date_completed')
             return Sort (item_types, get_completion, 'completion')
         elif arg in DUE_ALIASES:
             item_types = [x for x in item_types if x in [TASK, PROJECT]]
+            get_due = lambda x: get_date_attrib_or_now (x, 'due')
             return Sort (item_types, get_due, 'due')
         elif arg in FLAGGED_ALIASES:
             item_types = [x for x in item_types if x in [TASK, PROJECT]]
+            get_not_flagged = lambda x: not x.flagged
             return Sort (item_types, get_not_flagged, 'flagged')
         else:
             assert False, 'unsupported field: ' + field
     else:
         if field in NAME_ALIASES:
             nice_str = NAME_ALIASES[0] + ' = ' + arg
+            match_name = lambda item, regexp: re.search (regexp, item.name) != None
             return Filter (item_types, match_name, arg, include, nice_str)
         elif field in START_ALIASES:
             item_types = [x for x in item_types if x in [TASK, PROJECT]]
             rng = process_date_specifier (datetime.now(), arg)
             nice_str = START_ALIASES[0] + ' = ' + date_range_to_str (rng)
+            match_start = lambda x, r: match_date_against_range (x.date_to_start, r)
             return Filter (item_types, match_start, rng, include, nice_str)
         elif field in COMPLETED_ALIASES:
             item_types = [x for x in item_types if x in [TASK, PROJECT]]
             rng = process_date_specifier (datetime.now(), arg)
             nice_str = COMPLETED_ALIASES[0] + ' = ' + date_range_to_str (rng)
+            match_completed = lambda x, r: match_date_against_range (x.date_completed, r)
             return Filter (item_types, match_completed, rng, include, nice_str)
         elif field in DUE_ALIASES:
             item_types = [x for x in item_types if x in [TASK, PROJECT]]
             rng = process_date_specifier (datetime.now(), arg)
             nice_str = DUE_ALIASES[0] + ' = ' + date_range_to_str (rng)
+            match_due = lambda x, r: match_date_against_range (x.date_due, r)
             return Filter (item_types, match_due, rng, include, nice_str)
         elif field in FLAGGED_ALIASES:
             item_types = [x for x in item_types if x in [TASK, PROJECT]]
+            match_flagged = lambda x, ignore: x.flagged
             return Filter (item_types, match_flagged, None, include, field)
         else:
             assert False, 'unsupported field: ' + field
@@ -140,7 +148,17 @@ def parse_command (param):
     else:
         assert False, 'command invalid: ' + param
     return (instruction, field, arg)
-       
+
+
+class CustomPrintTaskpaperVisitor (PrintTaskpaperVisitor):
+    def __init__(self, out, links=False):
+        PrintTaskpaperVisitor.__init__(self, out, links=links)
+    def tags (self, item):
+        if item.date_completed != None and item.type != PROJECT:
+            return item.date_completed.strftime(" @%Y-%m-%d-%a")
+        else:
+            return ""
+     
 def print_help ():
     print 'Version ' + VERSION
     print 
