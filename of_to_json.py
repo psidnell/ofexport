@@ -14,10 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 import uuid
-from treemodel import Visitor, CONTEXT
+import json
+import codecs
+from datetime import datetime
+from treemodel import Visitor, Context, Project, Task, Folder, CONTEXT, PROJECT, TASK, FOLDER
 
 TIME_FMT = "%Y-%m-%d %H:%M:%S"
-def copy_attrib (item, attrib, attribs, convert):
+
+def save_attrib (item, attrib, attribs, convert):
     if not attrib in item.__dict__:
         return
     value = item.__dict__[attrib]
@@ -25,44 +29,86 @@ def copy_attrib (item, attrib, attribs, convert):
         return
     attribs[attrib] = convert (value)
 
+def load_attrib (item, attrib, attribs, convert):
+    if not attrib in attribs:
+        return
+    value = attribs[attrib]
+    item.__dict__[attrib] = convert (value)
 
 class ConvertStructureToJsonVisitor(Visitor):
     def begin_any (self, item):
-        myid = str(uuid.uuid1())
-        item.attribs['id'] = myid
-        node_json_data = {'id' : myid }
-        copy_attrib (item, 'name', node_json_data, lambda x : x)
-        copy_attrib (item, 'type', node_json_data, lambda x : x)
-        copy_attrib (item, 'date_completed', node_json_data, lambda x: x.strftime (TIME_FMT))
-        copy_attrib (item, 'date_to_start', node_json_data, lambda x: x.strftime (TIME_FMT))
-        copy_attrib (item, 'date_due', node_json_data, lambda x: x.strftime (TIME_FMT))
-        copy_attrib (item, 'flagged', node_json_data, lambda x : x)
-        
-        item.attribs['json_data'] = node_json_data
+        if not 'id' in item.attribs:
+            myid = str(uuid.uuid1())
+            item.attribs['id'] = myid
+            node_json_data = {'id' : myid }
+            save_attrib (item, 'name', node_json_data, lambda x : x)
+            save_attrib (item, 'type', node_json_data, lambda x : x)
+            save_attrib (item, 'date_completed', node_json_data, lambda x: x.strftime (TIME_FMT))
+            save_attrib (item, 'date_to_start', node_json_data, lambda x: x.strftime (TIME_FMT))
+            save_attrib (item, 'date_due', node_json_data, lambda x: x.strftime (TIME_FMT))
+            save_attrib (item, 'flagged', node_json_data, lambda x : x)
+            item.attribs['json_data'] = node_json_data
     def end_task (self, item):
-        for child in item.children:
-            child_json_data = child.attribs['json_data']
-            child_json_data['parent'] = item.attribs['id']
+        self.add_children(item)
     def end_project (self, item):
-        for child in item.children:
-            child_json_data = child.attribs['json_data']
-            child_json_data['parent'] = item.attribs['id']
+        self.add_children(item)
     def end_folder (self, item):
-        for child in item.children:
-            child_json_data = child.attribs['json_data']
-            child_json_data['parent'] = item.attribs['id']
+        self.add_children(item)
     def end_context (self, item):
+        children_json_data = []
         for child in item.children:
             child_json_data = child.attribs['json_data']
             if child.type == CONTEXT:
-                child_json_data['parent'] = item.attribs['id']
+                children_json_data.append(child_json_data)
             else:
-                child_json_data['context'] = item.attribs['id']
-    def end_any (self, item):
+                children_json_data.append({'ref' : child.attribs['id']})
+        item.attribs['json_data']['children'] = children_json_data
+    def add_children (self, item):
         children_json_data = []
         for child in item.children:
             child_json_data = child.attribs['json_data']
             children_json_data.append(child_json_data)
         item.attribs['json_data']['children'] = children_json_data
-        
+
+def load_from_json (json_data, item_db):
+    if 'ref' in json_data:
+        item = item_db[json_data['ref']]
+        return item
+    
+    item_type = json_data['type']
+    item_id = json_data['id']
+    if item_type == FOLDER:
+        item = Folder ()
+    elif item_type == CONTEXT:
+        item = Context ()
+    elif item_type == TASK:
+        item = Task ()
+    elif item_type == PROJECT:
+        item = Project ()
+    load_attrib (item, 'name', json_data, lambda x: x)
+    load_attrib (item, 'date_completed', json_data, lambda x: datetime.strptime (x, TIME_FMT))
+    load_attrib (item, 'date_to_start', json_data, lambda x: datetime.strptime (x, TIME_FMT))
+    load_attrib (item, 'date_due', json_data, lambda x: datetime.strptime (x, TIME_FMT))
+    load_attrib (item, 'flagged', json_data, lambda x: x)
+    
+    for child_data in json_data['children']:
+        child = load_from_json (child_data, item_db)
+        item.add_child(child)
+
+    item_db[item_id] = item
+    return item
+
+def read_json (file_name):
+    instream=codecs.open(file_name, 'r', 'utf-8')
+    json_data = json.loads(instream.read())
+    instream.close ()
+    
+    item_db = {}
+    root_project = load_from_json (json_data[0], item_db)
+    root_context = load_from_json (json_data[1], item_db)
+    
+    
+    
+    return root_project, root_context
+    
     

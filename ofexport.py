@@ -30,7 +30,7 @@ from of_to_text import PrintTextVisitor
 from of_to_md import PrintMarkdownVisitor
 from of_to_opml import PrintOpmlVisitor
 from of_to_html import PrintHtmlVisitor
-from of_to_json import ConvertStructureToJsonVisitor
+from of_to_json import ConvertStructureToJsonVisitor, read_json
 from visitors import Filter, Sort, Prune, Flatten
 
 VERSION = "1.0.5 (2013-04-18)"
@@ -175,6 +175,7 @@ def print_help ():
     print '  -P: project mode - the default (as opposed to context mode)'
     print '  -l: print links to tasks (in supported file formats)'
     print '  -o file_name: the output file name, must end in a recognised suffix - see documentation'
+    print '  -i file_name: read file_name instead of the OmniFocus database, must be in json format'
     print '  --open: open the output file with the registered application (if one is installed)'
     print
     print 'filters:'
@@ -208,9 +209,10 @@ if __name__ == "__main__":
     file_name = None
     paul = False
     links = False
+    infile = None
         
     opts, args = getopt.optlist, args = getopt.getopt(sys.argv[1:],
-                'p:c:t:f:a:hlCP?o:',
+                'i:p:c:t:f:a:hlCP?o:',
                 ['project=',
                  'context=',
                  'task=',
@@ -227,7 +229,9 @@ if __name__ == "__main__":
         elif '-l' == opt:
             links = True
         elif '-o' == opt:
-            file_name = arg;
+            file_name = arg
+        elif '-i' == opt:
+            infile = arg;
         elif opt in ('-?', '-h', '--help'):
             print_help ()
             sys.exit()
@@ -243,7 +247,11 @@ if __name__ == "__main__":
     
     fmt = file_name[dot+1:]
     
-    root_project, root_context = build_model (find_database ())
+    if infile != None:
+        root_project, root_context = read_json (infile)
+    else:    
+        root_project, root_context = build_model (find_database ())
+    
     subject = root_project
         
     for opt, arg in opts:

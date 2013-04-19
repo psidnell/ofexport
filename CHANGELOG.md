@@ -2,6 +2,7 @@
 
 ## 1.0.6 (???)
 - Added json as an output format.
+- Added json as an alternative input format.
 
 ## 1.0.5 (2013-04-18) ##
 - Fewer and more modular command line options.
