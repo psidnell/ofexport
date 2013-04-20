@@ -232,26 +232,23 @@ if __name__ == "__main__":
     
     out=codecs.open(file_name, 'w', 'utf-8')
     
-    if fmt == 'txt' or fmt == 'text':
+    if fmt in ('txt', 'text'):
         template = load_template (template_dir, 'text')
         visitor = PrintTextVisitor (out, template)
         format_document (subject, visitor, project_mode)
-    elif fmt == 'md' or fmt == 'markdown':
+    elif fmt in ('md', 'markdown', 'ft', 'foldingtext'):
         template = load_template (template_dir, 'markdown')
         visitor = PrintMarkdownVisitor (out, template)
         format_document (subject, visitor, project_mode)
-    elif fmt == 'ft' or fmt == 'foldingtext':        
-        visitor = PrintMarkdownVisitor (out)
-        traverse_list (visitor, subject.children, project_mode=project_mode)       
-    elif fmt == 'tp' or fmt == 'taskpaper':
+    elif fmt in ('tp', 'taskpaper'):
         template = load_template (template_dir, 'taskpaper')
         visitor = PrintTaskpaperVisitor (out, template)
-        traverse_list (visitor, subject.children, project_mode=project_mode)       
+        format_document (subject, visitor, project_mode)
     elif fmt == 'opml':
         template = load_template (template_dir, 'opml')
         visitor = PrintOpmlVisitor (out, template)
         format_document (subject, visitor, project_mode)
-    elif fmt == 'html' or fmt == 'htm':
+    elif fmt in ('html', 'htm'):
         template = load_template (template_dir, 'html')
         visitor = PrintHtmlVisitor (out, template)
         format_document (subject, visitor, project_mode)
