@@ -126,7 +126,6 @@ class Project(Node):
     date_completed = TypeOf ('date_completed', datetime)
     date_to_start = TypeOf ('date_to_start', datetime)
     date_due = TypeOf ('date_due', datetime)
-    folder = TypeOf ('folder', Folder)
     def __init__ (self,
                   name=None,
                   parent=None,
@@ -137,8 +136,7 @@ class Project(Node):
                   date_completed=None,
                   date_to_start=None,
                   date_due=None,
-                  context=None,
-                  folder=None):
+                  context=None):
         Node.__init__ (self, PROJECT,
                        name=name,
                        parent=parent,
@@ -150,7 +148,6 @@ class Project(Node):
         self.date_completed = date_completed
         self.date_to_start = date_to_start
         self.date_due = date_due
-        self.folder = folder
     
 class Visitor(object):
     project_mode = TypeOf ('flagged', bool)

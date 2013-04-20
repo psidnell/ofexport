@@ -1,3 +1,3 @@
 #!/bin/bash
 
-python src/main/python/ofexport.py -o TODO.md -p='ofexport Todo' -t done!=any
+ofexport -o TODO.md -f flatten -p='ofexport Todo' -t done!=any

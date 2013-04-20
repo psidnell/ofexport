@@ -328,7 +328,7 @@ This produces a report showing all tasks that contain "Beth" and their enclosing
 
 This produces the report of what I have yet to do on this project			
 
-        ofexport -o TODO.md --open -p='ofexport Todo' -t done!=any
+        ofexport -o TODO.md -f flatten -p='ofexport Todo' -t done!=any --open
 
 ### Tips and Tricks ###
 

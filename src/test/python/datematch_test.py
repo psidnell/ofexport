@@ -1,19 +1,26 @@
+'''
+Copyright 2013 Paul Sidnell
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+'''
+
 import unittest
-from datematch import tidy_space_separated_fields, process_date_specifier, hunt_for_day, find_first_of_month, find_next_month, find_prev_month, find_end_of_month, find_january_this_year, hunt_for_month, find_monday_this_week, find_monday_next_week
+from datematch import date_range_to_str, tidy_space_separated_fields, process_date_specifier, hunt_for_day, find_first_of_month, find_next_month, find_prev_month, find_end_of_month, find_january_this_year, hunt_for_month, find_monday_this_week, find_monday_next_week
 from datetime import datetime
 
 def process_date_specifier_to_datestr (now, spec):
-        start, end = process_date_specifier (now, spec)
-        if start == None and end == None:
-            return None
-        elif start == None and end != None:
-            return end.strftime ("..%Y-%m-%d")
-        elif start != None and end == None:
-            return start.strftime ("%Y-%m-%d..")
-        elif start == end:
-            return start.strftime ("%Y-%m-%d")
-        else:
-            return start.strftime ("%Y-%m-%d") + '..' + end.strftime ("%Y-%m-%d")
+        rng = process_date_specifier (now, spec)
+        return date_range_to_str (rng)
     
 class Test_datematch(unittest.TestCase):
     
@@ -242,9 +249,9 @@ class Test_datematch(unittest.TestCase):
         self.assertEquals("2012-11-01..2012-11-30", process_date_specifier_to_datestr (tue,"last nov"))
         self.assertEquals("2012-12-01..2012-12-31", process_date_specifier_to_datestr (tue,"last dec"))
         
-        self.assertEquals("1900-01-01..9000-01-01", process_date_specifier_to_datestr (tue,"any"))
-        self.assertEquals(None, process_date_specifier_to_datestr (tue,"none"))
-        self.assertEquals(None, process_date_specifier_to_datestr (tue, ''))
+        self.assertEquals("any", process_date_specifier_to_datestr (tue,"any"))
+        self.assertEquals("none", process_date_specifier_to_datestr (tue,"none"))
+        self.assertEquals("none", process_date_specifier_to_datestr (tue, ''))
         
         self.assertEquals("2013-04-09", process_date_specifier_to_datestr (tue,"today"))
         self.assertEquals("2013-04-08", process_date_specifier_to_datestr (tue,"yesterday"))

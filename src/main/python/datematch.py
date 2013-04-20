@@ -31,10 +31,12 @@ def hunt_for_day (now, dow, forward, match_today = False):
             return next_date
     return None
 
+DATE_FMT = '%Y-%m-%d'
+
 def find_first_of_month (now):
     year = now.year
     month = now.month
-    return datetime.strptime(str(year) + '-' + str(month) + '-01', '%Y-%m-%d')
+    return datetime.strptime(str(year) + '-' + str(month) + '-01', DATE_FMT)
 
 def find_next_month (now):
     in_next_month = find_first_of_month (now) + timedelta(days=33)
@@ -130,7 +132,7 @@ def process_date_specifier (now, date_spec):
         return (None, None)
     if date_spec == '' or date_spec == 'any':
         # This is a bit of a hack
-        return (datetime.strptime ('1900-01-01', '%Y-%m-%d'), datetime.strptime ('9000-01-01', '%Y-%m-%d'))
+        return None
     
     match_date = date_from_string (now, date_spec)
     if match_date != None:
@@ -176,9 +178,9 @@ def process_date_specifier (now, date_spec):
         raise Exception ('I don\'t think "' + date_spec + '" is any kind of date specification I recognise')
 
 def match_date_against_range (thedate, date_range):
+    if date_range == None:
+        return thedate != None
     start, end = date_range
-    # If start and end == None then we match against no date
-    # Currently any date uses (longAgo, distantFuture)
     if start == None and end == None:
         return thedate == None
     elif thedate == None:
@@ -191,15 +193,16 @@ def match_date_against_range (thedate, date_range):
         return thedate.date() <= end.date ()
 
 def date_range_to_str (spec):
-    fmt = "[%a %b %d %Y]"
+    if spec == None:
+        return 'any'
     start, end = spec
     if start == None and end == None:
         return 'none'
     elif start == None and end != None:
-        return 'everything until ' + end.strftime (fmt)
+        return '..' + end.strftime (DATE_FMT)
     elif start != None and end == None:
-        return 'everything after ' + start.strftime (fmt)
+        return start.strftime (DATE_FMT) + '..'
     elif start == end:
-        return 'on ' + start.strftime (fmt)
+        return start.strftime (DATE_FMT)
     else:
-        return 'from ' + start.strftime (fmt) + ' to ' + end.strftime (fmt)
+        return start.strftime (DATE_FMT) + '..' + end.strftime (DATE_FMT)

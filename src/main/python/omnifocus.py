@@ -129,6 +129,7 @@ class ProjectInfo(Node):
         self.ofattribs = ofattribs
 
 class OFProject(OFNodeMixin, Project):
+    folder = TypeOf ('folder', Folder)
     project_info = TypeOf ('project_info', ProjectInfo)
     def __init__(self):
         # UNUSUAL - don't call super constructor

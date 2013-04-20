@@ -62,7 +62,7 @@ function run_tool {
 FMT=$1
 
 if [ -z "$FMT" ]; then
-    for FMT in tp md html opml ft; do
+    for FMT in tp md html opml ft json; do
         for MODE in -P -C; do
             run_tool $FMT $MODE
         done
