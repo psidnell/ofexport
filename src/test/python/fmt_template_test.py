@@ -57,11 +57,11 @@ DEFAULT_TEMPLATE = {
                         'indentStart'           : 0,
                         'indent' : '\t',
                         'Nodes': {
-                              'Project'         : 'P $name:$flagged$date_to_start$date_due$date_completed$context$project',
-                              'Folder'          : 'F $name:',
-                              'Context'         : 'C $name:',
-                              'Task'            : 'T $name$flagged$date_to_start$date_due$date_completed$context$project',
-                              'TaskGroup'       : 'T $name:$flagged$date_to_start$date_due$date_completed$context$project',
+                              'ProjectStart'    : 'P $name:$flagged$date_to_start$date_due$date_completed$context$project',
+                              'FolderStart'     : 'F $name:',
+                              'ContextStart'    : 'C $name:',
+                              'TaskStart'       : 'T $name$flagged$date_to_start$date_due$date_completed$context$project',
+                              'TaskGroupStart'  : 'T $name:$flagged$date_to_start$date_due$date_completed$context$project',
                               },
                         'NodeAttributes'        : {
                               'name'            : '$value',

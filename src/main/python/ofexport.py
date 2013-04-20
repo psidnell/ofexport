@@ -248,44 +248,20 @@ if __name__ == "__main__":
         visitor = PrintTaskpaperVisitor (out, template)
         traverse_list (visitor, subject.children, project_mode=project_mode)       
     elif fmt == 'opml':
-        print >>out, '<?xml version="1.0" encoding="UTF-8" standalone="no"?>'
-        print >>out, '<opml version="1.0">'
-        print >>out, '  <head>'
-        print >>out, '    <title>OmniFocus</title>'
-        print >>out, '  </head>'
-        print >>out, '  <body>'
-        
-        visitor = PrintOpmlVisitor (out, depth=1)
-        traverse_list (visitor, subject.children, project_mode=project_mode)       
-        
-        print >>out, '  </body>'
-        print >>out, '</opml>'
-        
-    # HTML
+        template = load_template (template_dir, 'opml')
+        visitor = PrintOpmlVisitor (out, template)
+        format_document (subject, visitor, project_mode)
     elif fmt == 'html' or fmt == 'htm':
-        out=codecs.open(file_name, 'w', 'utf-8')
-        print >>out, '<html>'
-        print >>out, '  <head>'
-        print >>out, '    <title>OmniFocus</title>'
-        print >>out, '  </head>'
-        print >>out, '  <body>'
-        
-        visitor = PrintHtmlVisitor (out, depth=1)
-        traverse_list (visitor, subject.children, project_mode=project_mode)       
-        
-        print >>out, '  </body>'
-        print >>out, '<html>'
-    # HTML
+        template = load_template (template_dir, 'html')
+        visitor = PrintHtmlVisitor (out, template)
+        format_document (subject, visitor, project_mode)
     elif fmt == 'json':
-        out=codecs.open(file_name, 'w', 'utf-8')
-        
+        # json has intrinsic formatting - no template required
         visitor = ConvertStructureToJsonVisitor ()
         traverse (visitor, root_project, project_mode=True)
-        
         visitor = ConvertStructureToJsonVisitor ()
         traverse (visitor, root_context, project_mode=False)
-        
-        print >> out, json.dumps([root_project.attribs['json_data'], root_context.attribs['json_data']], indent=4)
+        print >> out, json.dumps([root_project.attribs['json_data'], root_context.attribs['json_data']], indent=2)
     else:
         raise Exception ('unknown format ' + fmt)
     

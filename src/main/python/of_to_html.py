@@ -14,39 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-from treemodel import Visitor
+from fmt_template import Formatter
 
-class PrintHtmlVisitor(Visitor):
-    def __init__ (self, out, depth=2, indent=4):
-        self.depth = depth
-        self.out = out
-        self.indent = indent
-    def begin_folder (self, folder):
-        self.print_link ('folder', folder)
-        self.depth+=1
-    def end_folder (self, folder):
-        self.depth-=1
-    def begin_project (self, project):
-        self.print_link ('task', project)
-        self.depth+=1
-    def end_project (self, project):
-        self.depth-=1
-    def begin_task (self, task):
-        self.print_link ('task', task)
-        self.depth+=1
-    def end_task (self, task):
-        self.depth-=1
-    def begin_context (self, context):
-        self.print_link ('context', context)
-        self.depth+=1
-    def end_context (self, context):
-        self.depth-=1
-    def print_link (self, link_type, item):
-        # This happens on "No Context" - we fabricate it and it has no persistentIdentifier
-        if 'persistentIdentifier' in item.ofattribs:
-            ident = item.ofattribs['persistentIdentifier']
-            print >>self.out, self.spaces() + item.type + ': <a href="omnifocus:///' + link_type + '/' + ident + '">' + self.escape(item.name) + '</a><br>'
-    def spaces (self):
-        return '&nbsp' * self.depth * self.indent
-    def escape (self, val):
-        return val.replace('"','&quot;').replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
+def escape (val):
+    return val.replace('"','&quot;').replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
+    
+ATTRIB_CONVERSIONS = {
+                      'name'           : lambda x: escape(x),
+                      'flagged'        : lambda x: str(x) if x else None,
+                      'context'        : lambda x: escape(''.join (x.name.split ())),
+                      'project'        : lambda x: escape(''.join (x.name.split ())),
+                      'date_to_start'  : lambda x: x.strftime('%Y-%m-%d'),
+                      'date_due'       : lambda x: x.strftime('%Y-%m-%d'),
+                      'date_completed' : lambda x: x.strftime('%Y-%m-%d')
+                      }
+
+class PrintHtmlVisitor(Formatter):
+    def __init__ (self, out, template):
+        Formatter.__init__(self, out, template, attrib_conversions = ATTRIB_CONVERSIONS)

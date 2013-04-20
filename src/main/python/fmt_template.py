@@ -29,8 +29,9 @@ ATTRIB_CONVERSIONS = {
 
 class FmtTemplate:
     def __init__(self, data):
-        self.indent_start = data['indentStart']
-        self.indent = data['indent']
+        self.indent_start = data['indent']
+        self.depth_start = data['depth']
+        self.indent = data['indentString']
         self.nodes = {k:Template(v) for (k,v) in data['Nodes'].items()}
         self.node_attributes = {k:Template(v) for (k,v) in data['NodeAttributes'].items()}
         self.node_attribute_defaults = data['NodeAttributeDefaults']
@@ -41,40 +42,82 @@ class Formatter(Visitor):
     def __init__ (self, out, template, attrib_conversions=ATTRIB_CONVERSIONS):
         self.template = template
         self.depth = self.template.indent_start
+        self.traversal_depth = self.template.depth_start
         self.out = out
         self.attrib_conversions = attrib_conversions
+        self.extra_attribs = {}
     def begin_folder (self, folder):
-        line = format_item (folder, self.template, 'Folder', self.attrib_conversions)
-        print >>self.out, self.indent() + line
+        self.update_extra_attribs()
+        line = format_item (folder, self.template, 'FolderStart', self.attrib_conversions, self.extra_attribs)
+        if line != None:
+            print >>self.out, self.indent() + line
         self.depth+=1
+        self.traversal_depth+=1
     def end_folder (self, folder):
         self.depth-=1
+        self.traversal_depth-=1
+        self.update_extra_attribs()
+        line = format_item (folder, self.template, 'FolderEnd', self.attrib_conversions, self.extra_attribs)
+        if line != None:
+            print >>self.out, self.indent() + line
     def begin_project (self, project):
-        line = format_item (project, self.template, 'Project', self.attrib_conversions)
-        print >>self.out, self.indent() + line
+        self.update_extra_attribs()
+        line = format_item (project, self.template, 'ProjectStart', self.attrib_conversions, self.extra_attribs)
+        if line != None:
+            print >>self.out, self.indent() + line
         self.depth+=1
+        self.traversal_depth+=1
     def end_project (self, project):
         self.depth-=1
+        self.traversal_depth-=1
+        self.update_extra_attribs()
+        line = format_item (project, self.template, 'ProjectEnd', self.attrib_conversions, self.extra_attribs)
+        if line != None:
+            print >>self.out, self.indent() + line
     def begin_task (self, task):
+        self.update_extra_attribs()
         if self.is_empty (task) or self.project_mode == False:
-            line = format_item (task, self.template, 'Task', self.attrib_conversions)
-            print >>self.out, self.indent() + line
+            line = format_item (task, self.template, 'TaskStart', self.attrib_conversions, self.extra_attribs)
+            if line != None:
+                print >>self.out, self.indent() + line
         else:
-            line = format_item (task, self.template, 'TaskGroup', self.attrib_conversions)
-            print >>self.out, self.indent() + line
+            line = format_item (task, self.template, 'TaskGroupStart', self.attrib_conversions, self.extra_attribs)
+            if line != None:
+                print >>self.out, self.indent() + line
         self.depth+=1
+        self.traversal_depth+=1
     def end_task (self, task):
         self.depth-=1
+        self.traversal_depth-=1
+        self.update_extra_attribs()
+        if self.is_empty (task) or self.project_mode == False:
+            line = format_item (task, self.template, 'TaskEnd', self.attrib_conversions, self.extra_attribs)
+            if line != None:
+                print >>self.out, self.indent() + line
+        else:
+            line = format_item (task, self.template, 'TaskGroupEnd', self.attrib_conversions, self.extra_attribs)
+            if line != None:
+                print >>self.out, self.indent() + line
     def begin_context (self, context):
-        line = format_item (context, self.template, 'Context', self.attrib_conversions)
-        print >>self.out, self.tabs() + line
+        self.update_extra_attribs()
+        line = format_item (context, self.template, 'ContextStart', self.attrib_conversions, self.extra_attribs)
+        if line != None:
+            print >>self.out, self.indent() + line
         self.depth+=1
+        self.traversal_depth+=1
     def end_context (self, context):
         self.depth-=1
+        self.traversal_depth-=1
+        self.update_extra_attribs()
+        line = format_item (context, self.template, 'ContextEnd', self.attrib_conversions, self.extra_attribs)
+        if line != None:
+            print >>self.out, self.indent() + line
     def is_empty (self, item):
         return len ([x for x in item.children if x.marked]) == 0
     def indent (self):
         return self.template.indent * (self.depth)
+    def update_extra_attribs (self):
+        self.extra_attribs['depth'] = str (self.traversal_depth)
     def link (self, link_type, item):
         if self.links and 'persistentIdentifier' in item.ofattribs:
             ident = item.ofattribs['persistentIdentifier']
@@ -110,7 +153,9 @@ def build_entry (item, line_template, attrib_conversions, attrib_defaults, attri
     return line_template.safe_substitute(item_attribs)
 
 def format_item (item, template, node_type, attrib_conversions, extra_attribs = {}):
-    return build_entry (item, template.nodes[node_type], attrib_conversions, template.node_attribute_defaults, template.node_attributes, extra_attribs)
+    if node_type in template.nodes:
+        return build_entry (item, template.nodes[node_type], attrib_conversions, template.node_attribute_defaults, template.node_attributes, extra_attribs)
+    return None
 
 def format_document (root, formatter, project_mode):
     print >>formatter.out, formatter.template.preamble
