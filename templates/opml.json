@@ -2,16 +2,16 @@
     "indent": 2, 
     "depth": 0,
     "Nodes": {
-        "ProjectStart": "<outline text=\"$name\" completed=\"$date_completed\">", 
-        "FolderStart": "<outline text=\"$name\">", 
-        "TaskStart": "<outline text=\"$name\" completed=\"$date_completed\">", 
-        "TaskGroupStart": "<outline text=\"$name\" completed=\"$date_completed\">", 
-        "ContextStart": "<outline text=\"$name\">",
-        "ProjectEnd": "</outline>", 
-        "FolderEnd": "</outline>", 
-        "TaskEnd": "</outline>", 
-        "TaskGroupEnd": "</outline>", 
-        "ContextEnd": "</outline>"
+        "ProjectStart": "$indent<outline text=\"$name\" completed=\"$date_completed\">", 
+        "FolderStart": "$indent<outline text=\"$name\">", 
+        "TaskStart": "$indent<outline text=\"$name\" completed=\"$date_completed\">", 
+        "TaskGroupStart": "$indent<outline text=\"$name\" completed=\"$date_completed\">", 
+        "ContextStart": "$indent<outline text=\"$name\">",
+        "ProjectEnd": "$indent</outline>", 
+        "FolderEnd": "$indent</outline>", 
+        "TaskEnd": "$indent</outline>", 
+        "TaskGroupEnd": "$indent</outline>", 
+        "ContextEnd": "$indent</outline>"
     }, 
     "NodeAttributeDefaults": {
         "date_to_start": "", 

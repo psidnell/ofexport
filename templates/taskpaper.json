@@ -2,11 +2,11 @@
     "indent": 0,
     "depth": 0, 
     "Nodes": {
-        "ProjectStart": "$name:$flagged$date_to_start$date_due$date_completed$context$project", 
-        "FolderStart": "$name:", 
-        "TaskStart": "- $name $flagged$date_to_start$date_due$date_completed$context$project", 
-        "TaskGroupStart": "$name:$flagged$date_to_start$date_due$date_completed$context$project", 
-        "ContextStart": "$name:"
+        "ProjectStart": "$indent$name:$flagged$date_to_start$date_due$date_completed$context$project", 
+        "FolderStart": "$indent$name:", 
+        "TaskStart": "$indent- $name $flagged$date_to_start$date_due$date_completed$context$project", 
+        "TaskGroupStart": "$indent$name:$flagged$date_to_start$date_due$date_completed$context$project", 
+        "ContextStart": "$indent$name:"
     }, 
     "NodeAttributeDefaults": {
         "date_to_start": "", 

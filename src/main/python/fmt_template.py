@@ -50,7 +50,7 @@ class Formatter(Visitor):
         self.update_extra_attribs()
         line = format_item (folder, self.template, 'FolderStart', self.attrib_conversions, self.extra_attribs)
         if line != None:
-            print >>self.out, self.indent() + line
+            print >>self.out, line
         self.depth+=1
         self.traversal_depth+=1
     def end_folder (self, folder):
@@ -59,12 +59,12 @@ class Formatter(Visitor):
         self.update_extra_attribs()
         line = format_item (folder, self.template, 'FolderEnd', self.attrib_conversions, self.extra_attribs)
         if line != None:
-            print >>self.out, self.indent() + line
+            print >>self.out, line
     def begin_project (self, project):
         self.update_extra_attribs()
         line = format_item (project, self.template, 'ProjectStart', self.attrib_conversions, self.extra_attribs)
         if line != None:
-            print >>self.out, self.indent() + line
+            print >>self.out, line
         self.depth+=1
         self.traversal_depth+=1
     def end_project (self, project):
@@ -73,17 +73,17 @@ class Formatter(Visitor):
         self.update_extra_attribs()
         line = format_item (project, self.template, 'ProjectEnd', self.attrib_conversions, self.extra_attribs)
         if line != None:
-            print >>self.out, self.indent() + line
+            print >>self.out, line
     def begin_task (self, task):
         self.update_extra_attribs()
         if self.is_empty (task) or self.project_mode == False:
             line = format_item (task, self.template, 'TaskStart', self.attrib_conversions, self.extra_attribs)
             if line != None:
-                print >>self.out, self.indent() + line
+                print >>self.out, line
         else:
             line = format_item (task, self.template, 'TaskGroupStart', self.attrib_conversions, self.extra_attribs)
             if line != None:
-                print >>self.out, self.indent() + line
+                print >>self.out, line
         self.depth+=1
         self.traversal_depth+=1
     def end_task (self, task):
@@ -93,16 +93,16 @@ class Formatter(Visitor):
         if self.is_empty (task) or self.project_mode == False:
             line = format_item (task, self.template, 'TaskEnd', self.attrib_conversions, self.extra_attribs)
             if line != None:
-                print >>self.out, self.indent() + line
+                print >>self.out, line
         else:
             line = format_item (task, self.template, 'TaskGroupEnd', self.attrib_conversions, self.extra_attribs)
             if line != None:
-                print >>self.out, self.indent() + line
+                print >>self.out, line
     def begin_context (self, context):
         self.update_extra_attribs()
         line = format_item (context, self.template, 'ContextStart', self.attrib_conversions, self.extra_attribs)
         if line != None:
-            print >>self.out, self.indent() + line
+            print >>self.out, line
         self.depth+=1
         self.traversal_depth+=1
     def end_context (self, context):
@@ -111,13 +111,12 @@ class Formatter(Visitor):
         self.update_extra_attribs()
         line = format_item (context, self.template, 'ContextEnd', self.attrib_conversions, self.extra_attribs)
         if line != None:
-            print >>self.out, self.indent() + line
+            print >>self.out, line
     def is_empty (self, item):
         return len ([x for x in item.children if x.marked]) == 0
-    def indent (self):
-        return self.template.indent * (self.depth)
     def update_extra_attribs (self):
         self.extra_attribs['depth'] = str (self.traversal_depth)
+        self.extra_attribs['indent'] = self.template.indent * (self.depth)
     def link (self, link_type, item):
         if self.links and 'persistentIdentifier' in item.ofattribs:
             ident = item.ofattribs['persistentIdentifier']

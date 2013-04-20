@@ -1,12 +1,12 @@
 {
-    "indent": 1, 
+    "indent": 0, 
     "depth" : 0, 
     "Nodes": {
-        "ProjectStart": "Project: $name $flagged$date_to_start$date_due$date_completed$context$project", 
-        "FolderStart": "Folder $name", 
-        "TaskStart": "Task $name $flagged$date_to_start$date_due$date_completed$context$project", 
-        "TaskGroupStart": "TaskGroup $name $flagged$date_to_start$date_due$date_completed$context$project", 
-        "ContextStart": "Context $name"
+        "ProjectStart": "${indent}Project: $name $flagged$date_to_start$date_due$date_completed$context$project", 
+        "FolderStart": "${indent}Folder $name", 
+        "TaskStart": "${indent}Task $name $flagged$date_to_start$date_due$date_completed$context$project", 
+        "TaskGroupStart": "${indent}TaskGroup $name $flagged$date_to_start$date_due$date_completed$context$project", 
+        "ContextStart": "${indent}Context $name"
     }, 
     "NodeAttributeDefaults": {
         "date_to_start": "", 
@@ -27,6 +27,6 @@
         "context": " context:$value", 
         "flagged": " flagged"
     },
-    "preamble":"Omnifocus Database\n",
-    "postamble":"\nThe End"
+    "preamble":"",
+    "postamble":""
 }
