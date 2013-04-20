@@ -14,42 +14,48 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-from treemodel import Visitor
+from fmt_template import Formatter
 
-class PrintMarkdownVisitor(Visitor):
-    def __init__ (self, out, depth=0):
-        self.header_depth = depth
-        self.task_depth = 0
+class PrintMarkdownVisitor(Formatter):
+    def __init__ (self, out, template):
+        Formatter.__init__(self, out, template)
+        self.header_depth = 0
+        self.depth = 0
         self.out = out
+        self.just_printed_newline = False
     def begin_folder (self, folder):
-        self.task_depth = 0
-        print >>self.out, ('#' * (self.header_depth+1)) + ' ' + folder.name
-        print >>self.out
+        print >>self.out, ('#' * (self.header_depth+1)),
+        Formatter.begin_folder(self, folder)
+        self.depth = 0
         self.header_depth+=1
-    def end_folder (self, folder):
-        self.header_depth-=1
+        self.just_printed_newline = False
     def begin_project (self, project):
-        self.task_depth = 0
-        print >>self.out, ('#' * (self.header_depth+1)) + ' ' + project.name
-        print >>self.out
+        print >>self.out, ('#' * (self.header_depth+1)),
+        Formatter.begin_project(self, project)
+        self.depth = 0
         self.header_depth+=1
-    def end_project (self, project):
-        print >>self.out
-        self.header_depth-=1
-    def begin_task (self, task):
-        print >>self.out, (' ' * (4 * self.task_depth)) + '* ' + task.name + self.done(task.date_completed)
-        self.task_depth+=1
-    def end_task (self, task):
-        self.task_depth-=1
+        self.just_printed_newline = False
     def begin_context (self, context):
-        self.task_depth = 0
-        print >>self.out, ('#' * (self.header_depth+1)) + ' ' + context.name
-        print >>self.out
+        print >>self.out, ('#' * (self.header_depth+1)),
+        Formatter.begin_context(self, context)
+        self.depth = 0
         self.header_depth+=1
+        self.just_printed_newline = False
+    def begin_task (self,task):
+        Formatter.begin_task(self, task)
+        self.just_printed_newline = False
     def end_context (self, context):
-        print >>self.out
+        if not self.just_printed_newline:
+            print >>self.out
+        self.just_printed_newline = True
         self.header_depth-=1
-    def done (self, completed):
-        if completed != None:
-            return completed.strftime(" @%Y-%m-%d-%a")
-        return ""
+    def end_project (self, project):
+        if not self.just_printed_newline:
+            print >>self.out
+        self.just_printed_newline = True
+        self.header_depth-=1
+    def end_folder (self, folder):
+        if not self.just_printed_newline:
+            print >>self.out
+        self.just_printed_newline = True
+        self.header_depth-=1

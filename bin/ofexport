@@ -3,7 +3,7 @@
 ####################################################################
 # CHANGE THIS TO MATCH WHERE YOU'VE INSTALLED THE OFEXPORT DIRECTORY
 ####################################################################
-OFEXPORT_HOME=/Users/psidnell/Workspace/OmniFocus
+export OFEXPORT_HOME=/Users/psidnell/Workspace/OmniFocus
 
 python $OFEXPORT_HOME/src/main/python/ofexport.py "$@"
 

@@ -8,7 +8,6 @@ options:
   {{-h}},{{-?}},{{--help}}
   {{-C}}: context mode (as opposed to project mode)
   {{-P}}: project mode - the default (as opposed to context mode)
-  {{-l}}: print links to tasks (in supported file formats)
   {{-o:}} file_name: the output file name, must end in a recognised suffix - see documentation
   {{-i:}} file_name: read file_name instead of the OmniFocus database, must be in json format
   {{--open}}: open the output file with the registered application (if one is installed)

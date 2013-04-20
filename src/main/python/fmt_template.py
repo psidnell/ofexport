@@ -15,44 +15,71 @@ limitations under the License.
 '''
 
 from string import Template
+from treemodel import Visitor, traverse_list
 
-DEFAULT_TEMPLATE = {
-                        'indentStart'           : 0,
-                        'indent'                : '\t',
-                        'Nodes': {
-                              'Project'         : 'P $name:$tags',
-                              'Folder'          : 'F $name:',
-                              'Context'         : 'C $name:',
-                              'Task'            : 'T $name $tags',
-                              'TaskGroup'       : 'T $name:$tags',
-                              },
-                        'NodeAttributes'        : {
-                              'name'            : '$value',
-                              'flagged'         : ' @flagged',
-                              'date_to_start'   : ' @start($value)',
-                              'date_due'        : ' @due($value)',
-                              'date_completed'  : ' @done($value)',
-                              'context'         : ' @context($value)',
-                              'project'         : ' @project($value)'
-                            },
-                        'NodeAttributeDefaults' : {
-                              'name'            : '',
-                              'flagged'         : '',
-                              'context'         : '',
-                              'project'         : '',
-                              'date_to_start'   : '',
-                              'date_due'        : '',
-                              'date_completed'  : ''
-                              }
-                    }
+ATTRIB_CONVERSIONS = {
+                      'name'           : lambda x: str (x),
+                      'flagged'        : lambda x: str(x) if x else None,
+                      'context'        : lambda x: x.name,
+                      'project'        : lambda x: x.name,
+                      'date_to_start'  : lambda x: x.strftime('%Y-%m-%d'),
+                      'date_due'       : lambda x: x.strftime('%Y-%m-%d'),
+                      'date_completed' : lambda x: x.strftime('%Y-%m-%d')
+                      }
 
 class FmtTemplate:
-    def __init__(self, data = DEFAULT_TEMPLATE):
+    def __init__(self, data):
         self.indent_start = data['indentStart']
         self.indent = data['indent']
         self.nodes = {k:Template(v) for (k,v) in data['Nodes'].items()}
         self.node_attributes = {k:Template(v) for (k,v) in data['NodeAttributes'].items()}
         self.node_attribute_defaults = data['NodeAttributeDefaults']
+        self.preamble = data['preamble']
+        self.postamble = data['postamble']
+        
+class Formatter(Visitor):
+    def __init__ (self, out, template, attrib_conversions=ATTRIB_CONVERSIONS):
+        self.template = template
+        self.depth = self.template.indent_start
+        self.out = out
+        self.attrib_conversions = attrib_conversions
+    def begin_folder (self, folder):
+        line = format_item (folder, self.template, 'Folder', self.attrib_conversions)
+        print >>self.out, self.indent() + line
+        self.depth+=1
+    def end_folder (self, folder):
+        self.depth-=1
+    def begin_project (self, project):
+        line = format_item (project, self.template, 'Project', self.attrib_conversions)
+        print >>self.out, self.indent() + line
+        self.depth+=1
+    def end_project (self, project):
+        self.depth-=1
+    def begin_task (self, task):
+        if self.is_empty (task) or self.project_mode == False:
+            line = format_item (task, self.template, 'Task', self.attrib_conversions)
+            print >>self.out, self.indent() + line
+        else:
+            line = format_item (task, self.template, 'TaskGroup', self.attrib_conversions)
+            print >>self.out, self.indent() + line
+        self.depth+=1
+    def end_task (self, task):
+        self.depth-=1
+    def begin_context (self, context):
+        line = format_item (context, self.template, 'Context', self.attrib_conversions)
+        print >>self.out, self.tabs() + line
+        self.depth+=1
+    def end_context (self, context):
+        self.depth-=1
+    def is_empty (self, item):
+        return len ([x for x in item.children if x.marked]) == 0
+    def indent (self):
+        return self.template.indent * (self.depth)
+    def link (self, link_type, item):
+        if self.links and 'persistentIdentifier' in item.ofattribs:
+            ident = item.ofattribs['persistentIdentifier']
+            return 'omnifocus:///' + link_type + '/' + ident
+        return None
         
 def build_attrib_values (item, attrib_conversions):
     attrib_values = {}
@@ -84,3 +111,8 @@ def build_entry (item, line_template, attrib_conversions, attrib_defaults, attri
 
 def format_item (item, template, node_type, attrib_conversions, extra_attribs = {}):
     return build_entry (item, template.nodes[node_type], attrib_conversions, template.node_attribute_defaults, template.node_attributes, extra_attribs)
+
+def format_document (root, formatter, project_mode):
+    print >>formatter.out, formatter.template.preamble
+    traverse_list (formatter, root.children, project_mode=project_mode)
+    print >>formatter.out, formatter.template.postamble

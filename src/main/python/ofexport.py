@@ -33,6 +33,7 @@ from of_to_html import PrintHtmlVisitor
 from of_to_json import ConvertStructureToJsonVisitor, read_json
 from visitors import Filter, Sort, Prune, Flatten
 from help import print_help, SHORT_OPTS, LONG_OPTS
+from fmt_template import FmtTemplate, format_document
 
 VERSION = "1.0.5 (2013-04-18)"
 
@@ -153,14 +154,11 @@ def parse_command (param):
     return (instruction, field, arg)
 
 
-class CustomPrintTaskpaperVisitor (PrintTaskpaperVisitor):
-    def __init__(self, out, links=False):
-        PrintTaskpaperVisitor.__init__(self, out, links=links)
-    def tags (self, item):
-        if item.date_completed != None and item.type != PROJECT:
-            return item.date_completed.strftime(" @%Y-%m-%d-%a")
-        else:
-            return ""
+def load_template (template_dir, name):
+    instream=codecs.open(template_dir + name + '.json', 'r', 'utf-8')
+    template = FmtTemplate (json.loads(instream.read()))
+    instream.close ()
+    return template
 
 if __name__ == "__main__":
     
@@ -169,20 +167,15 @@ if __name__ == "__main__":
     opn=False
     project_mode=True
     file_name = None
-    paul = False
-    links = False
     infile = None
+    template = None
+    template_dir = os.environ['OFEXPORT_HOME'] + '/templates/'
     
-    LONG_OPTS.append('paul')
     opts, args = getopt.optlist, args = getopt.getopt(sys.argv[1:],SHORT_OPTS, LONG_OPTS)
               
     for opt, arg in opts:
         if '--open' == opt:
             opn = True
-        elif '--paul' == opt:
-            paul = True
-        elif '-l' == opt:
-            links = True
         elif '-o' == opt:
             file_name = arg
         elif '-i' == opt:
@@ -239,20 +232,20 @@ if __name__ == "__main__":
     
     out=codecs.open(file_name, 'w', 'utf-8')
     
-    if fmt == 'txt' or fmt == 'text':        
-        visitor = PrintTextVisitor (out)
-        traverse_list (visitor, subject.children, project_mode=project_mode)       
+    if fmt == 'txt' or fmt == 'text':
+        template = load_template (template_dir, 'text')
+        visitor = PrintTextVisitor (out, template)
+        format_document (subject, visitor, project_mode)
     elif fmt == 'md' or fmt == 'markdown':
-        visitor = PrintMarkdownVisitor (out)
-        traverse_list (visitor, subject.children, project_mode=project_mode)       
+        template = load_template (template_dir, 'markdown')
+        visitor = PrintMarkdownVisitor (out, template)
+        format_document (subject, visitor, project_mode)
     elif fmt == 'ft' or fmt == 'foldingtext':        
         visitor = PrintMarkdownVisitor (out)
         traverse_list (visitor, subject.children, project_mode=project_mode)       
     elif fmt == 'tp' or fmt == 'taskpaper':
-        if paul:
-            visitor = CustomPrintTaskpaperVisitor (out, links=links)
-        else:
-            visitor = PrintTaskpaperVisitor (out, links = links)
+        template = load_template (template_dir, 'taskpaper')
+        visitor = PrintTaskpaperVisitor (out, template)
         traverse_list (visitor, subject.children, project_mode=project_mode)       
     elif fmt == 'opml':
         print >>out, '<?xml version="1.0" encoding="UTF-8" standalone="no"?>'

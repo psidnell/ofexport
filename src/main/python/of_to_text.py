@@ -14,41 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-from treemodel import Visitor
+from fmt_template import Formatter
 
-class PrintTextVisitor(Visitor):
-    def __init__ (self, out, indent=4):
-        self.depth = 0
-        self.indent = indent
-        self.out = out
-    def begin_folder (self, folder):
-        print >>self.out, self.spaces() + '* Folder: ' + folder.name
-        self.depth+=1
-    def end_folder (self, folder):
-        self.depth-=1
-    def begin_project (self, project):
-        print >>self.out, self.spaces () + '* Project: ' + str(project) + self.attribs (project)
-        self.depth+=1
-    def end_project (self, project):
-        self.depth-=1
-    def begin_task (self, task):
-        print >>self.out, self.spaces() + '* Task: ' + task.name + self.attribs (task)
-        self.depth+=1
-    def end_task (self, task):
-        self.depth-=1
-    def begin_context (self, context):
-        print >>self.out, self.spaces() + '* Context: ' + context.name
-        self.depth+=1
-    def end_context (self, context):
-        self.depth-=1
-    def attribs (self, task):
-        attribs = []
-        if task.date_completed != None:
-            attribs.append ('Done:' + task.date_completed.strftime ('%Y-%m-%d'))
-        if task.flagged:
-            attribs.append ('Flagged')
-        if len (attribs) > 0:
-            return ' ' +  ' '.join(attribs)
-        return ''
-    def spaces (self):
-        return ' ' * self.depth * self.indent
+class PrintTextVisitor(Formatter):
+    def __init__ (self, out, template):
+        Formatter.__init__(self, out, template)

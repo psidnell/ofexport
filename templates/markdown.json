@@ -1,0 +1,31 @@
+{
+    "indentStart": 0, 
+    "Nodes": {
+        "Project": "$name\n", 
+        "Folder": "$name\n", 
+        "Task": "- $name$date_completed", 
+        "TaskGroup": "- $name$date_completed", 
+        "Context": "$name\n"
+    }, 
+    "NodeAttributeDefaults": {
+        "date_to_start": "", 
+        "date_due": "", 
+        "date_completed": "", 
+        "name": "", 
+        "project": "", 
+        "context": "", 
+        "flagged": ""
+    }, 
+    "indent": "    ", 
+    "NodeAttributes": {
+        "date_to_start": " start:**$value**", 
+        "date_due": " due:**$value**", 
+        "date_completed": " done:**$value**", 
+        "name": "$value", 
+        "project": " project:**$value**", 
+        "context": " context:**$value**", 
+        "flagged": " flagged"
+    },
+    "preamble":"",
+    "postamble":""
+}
