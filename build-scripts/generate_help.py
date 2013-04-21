@@ -13,8 +13,10 @@ def process_line (line, short_opts, long_opts):
         for piece in pieces:
             if piece.startswith ('--'):
                 long_opts.append (string.replace (piece, '-', ''))
+                piece = string.replace (piece, '=', '')
             elif piece.startswith ('-'):
                 short_opts.append(string.replace (piece, '-', ''))
+                piece = string.replace (piece, ':', '')
             reassembled.append (piece)
     return ''.join (reassembled)
 

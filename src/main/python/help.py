@@ -9,19 +9,20 @@ def print_help ():
     print
     print
     print 'options:'
-    print '  -h,-?,--help'
-    print '  -C: context mode (as opposed to project mode)'
-    print '  -P: project mode - the default (as opposed to context mode)'
-    print '  -o: file_name: the output file name, must end in a recognised suffix - see documentation'
-    print '  -i: file_name: read file_name instead of the OmniFocus database, must be in json format'
-    print '  --open: open the output file with the registered application (if one is installed)'
+    print '  -h,-?,--help       : print help'
+    print '  -C                 :  context mode (as opposed to project mode)'
+    print '  -P                 :  project mode - the default (as opposed to context mode)'
+    print '  -o file_name       : the output file name, must end in a recognised suffix - see documentation'
+    print '  -i file_name       : read file_name instead of the OmniFocus database, must be in json format'
+    print '  -T - template_name : use the specified template instead of one derived from the output file extension'
+    print '  --open             : open the output file with the registered application (if one is installed)'
     print
     print 'filters:'
-    print '  -a:,--any=     filter tasks, projects, contexts and folders against argument'
-    print '  -t:,--task=    filter any task against task against argument'
-    print '  -p:,--project= filter any project against argument'
-    print '  -f:,--folder=  filter any folder against argument'
-    print '  -c:,--context= filter any context type against argument'
+    print '  -a,--any arg     : filter tasks, projects, contexts and folders against the argument'
+    print '  -t,--task arg    : filter any task against task against the argument'
+    print '  -p,--project arg : filter any project against the argument'
+    print '  -f,--folder  arg : filter any folder against the argument'
+    print '  -c,--context arg : filter any context type against the argument'
     print
     print '  A filter argument may be:'
     print '    text=regexp'
@@ -38,5 +39,5 @@ def print_help ():
     print
     print '  See DOCUMENTATION.md for more information'
 
-SHORT_OPTS = 'h?CPo:i:a:t:p:f:c:'
+SHORT_OPTS = 'h?CPo:i:T:a:t:p:f:c:'
 LONG_OPTS = ['help','open','any=','task=','project=','folder=','context=']

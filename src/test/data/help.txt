@@ -6,19 +6,20 @@ ofexport [options...] -o file_name
 
 
 options:
-  -h,-?,--help
-  -C: context mode (as opposed to project mode)
-  -P: project mode - the default (as opposed to context mode)
-  -o: file_name: the output file name, must end in a recognised suffix - see documentation
-  -i: file_name: read file_name instead of the OmniFocus database, must be in json format
-  --open: open the output file with the registered application (if one is installed)
+  -h,-?,--help       : print help
+  -C                 :  context mode (as opposed to project mode)
+  -P                 :  project mode - the default (as opposed to context mode)
+  -o file_name       : the output file name, must end in a recognised suffix - see documentation
+  -i file_name       : read file_name instead of the OmniFocus database, must be in json format
+  -T - template_name : use the specified template instead of one derived from the output file extension
+  --open             : open the output file with the registered application (if one is installed)
 
 filters:
-  -a:,--any=     filter tasks, projects, contexts and folders against argument
-  -t:,--task=    filter any task against task against argument
-  -p:,--project= filter any project against argument
-  -f:,--folder=  filter any folder against argument
-  -c:,--context= filter any context type against argument
+  -a,--any arg     : filter tasks, projects, contexts and folders against the argument
+  -t,--task arg    : filter any task against task against the argument
+  -p,--project arg : filter any project against the argument
+  -f,--folder  arg : filter any folder against the argument
+  -c,--context arg : filter any context type against the argument
 
   A filter argument may be:
     text=regexp

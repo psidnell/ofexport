@@ -155,6 +155,7 @@ def parse_command (param):
 
 
 def load_template (template_dir, name):
+    print 'loading template: ' + name
     instream=codecs.open(template_dir + name + '.json', 'r', 'utf-8')
     template = FmtTemplate (json.loads(instream.read()))
     instream.close ()
@@ -180,6 +181,8 @@ if __name__ == "__main__":
             file_name = arg
         elif '-i' == opt:
             infile = arg;
+        elif '-T' == opt:
+            template = load_template (template_dir, arg)
         elif opt in ('-?', '-h', '--help'):
             print_help ()
             sys.exit()
@@ -233,23 +236,23 @@ if __name__ == "__main__":
     out=codecs.open(file_name, 'w', 'utf-8')
     
     if fmt in ('txt', 'text'):
-        template = load_template (template_dir, 'text')
+        template = template if template != None else load_template (template_dir, 'text')
         visitor = PrintTextVisitor (out, template)
         format_document (subject, visitor, project_mode)
     elif fmt in ('md', 'markdown', 'ft', 'foldingtext'):
-        template = load_template (template_dir, 'markdown')
+        template = template if template != None else load_template (template_dir, 'markdown')
         visitor = PrintMarkdownVisitor (out, template)
         format_document (subject, visitor, project_mode)
     elif fmt in ('tp', 'taskpaper'):
-        template = load_template (template_dir, 'taskpaper')
+        template = template if template != None else load_template (template_dir, 'taskpaper')
         visitor = PrintTaskpaperVisitor (out, template)
         format_document (subject, visitor, project_mode)
     elif fmt == 'opml':
-        template = load_template (template_dir, 'opml')
+        template = template if template != None else load_template (template_dir, 'opml')
         visitor = PrintOpmlVisitor (out, template)
         format_document (subject, visitor, project_mode)
     elif fmt in ('html', 'htm'):
-        template = load_template (template_dir, 'html')
+        template = template if template != None else load_template (template_dir, 'html')
         visitor = PrintHtmlVisitor (out, template)
         format_document (subject, visitor, project_mode)
     elif fmt == 'json':
