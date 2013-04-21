@@ -17,6 +17,7 @@ limitations under the License.
 from datetime import datetime
 from typeof import TypeOf
 from util import strip_tabs_newlines
+import uuid
 
 TASK = 'Task'
 PROJECT = 'Project'
@@ -28,6 +29,7 @@ class NodeFwdDecl (object):
     pass
 
 class Node (NodeFwdDecl):
+    id = TypeOf ('id', str)
     name = TypeOf ('name', unicode)
     parent = TypeOf ('parent', NodeFwdDecl)
     marked = TypeOf ('marked', bool)
@@ -50,6 +52,7 @@ class Node (NodeFwdDecl):
         self.attribs = dict(attribs)
         self.type = nType
         self.link = link
+        self.id = str(uuid.uuid1())
         if parent != None:
             parent.add_child (self)
     def add_child (self, child):

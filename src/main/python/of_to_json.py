@@ -38,10 +38,9 @@ def load_attrib (item, attrib, attribs, convert):
 
 class ConvertStructureToJsonVisitor(Visitor):
     def begin_any (self, item):
-        if self.is_in_applicable_mode (item) and not 'id' in item.attribs:
-            myid = str(uuid.uuid1())
-            item.attribs['id'] = myid
-            node_json_data = {'id' : myid }
+        if self.is_in_applicable_mode (item) and not 'json_data' in item.attribs:
+            node_json_data =  {}
+            save_attrib (item, 'id', node_json_data, lambda x : x)
             save_attrib (item, 'name', node_json_data, lambda x : x)
             save_attrib (item, 'type', node_json_data, lambda x : x)
             save_attrib (item, 'date_completed', node_json_data, lambda x: x.strftime (TIME_FMT))
@@ -58,13 +57,13 @@ class ConvertStructureToJsonVisitor(Visitor):
     def end_context (self, item):
         children_json_data = []
         for child in item.children:
-            if child.marked and 'id' in child.attribs:
+            if child.marked and 'json_data' in child.attribs:
                 child_json_data = child.attribs['json_data']
                 if child.type == CONTEXT:
                     children_json_data.append(child_json_data)
                 else:
                     # The name is just a debugging aid
-                    children_json_data.append({'ref' : child.attribs['id'], 'name' : child.name })
+                    children_json_data.append({'ref' : child.id, 'name' : child.name })
         item.attribs['json_data']['children'] = children_json_data
     def is_in_applicable_mode (self, item):
         # Project ,ode items are written first,
@@ -97,6 +96,7 @@ def load_from_json (json_data, item_db):
         item = Task ()
     elif item_type == PROJECT:
         item = Project ()
+    load_attrib (item, 'id', json_data, lambda x: x)
     load_attrib (item, 'name', json_data, lambda x: x)
     load_attrib (item, 'date_completed', json_data, lambda x: datetime.strptime (x, TIME_FMT))
     load_attrib (item, 'date_to_start', json_data, lambda x: datetime.strptime (x, TIME_FMT))
@@ -118,9 +118,7 @@ def read_json (file_name):
     item_db = {}
     root_project = load_from_json (json_data[0], item_db)
     root_context = load_from_json (json_data[1], item_db)
-    
-    
-    
+
     return root_project, root_context
     
     
