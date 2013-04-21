@@ -97,7 +97,9 @@ class OFContext(OFNodeMixin, Context):
         Context.__init__(self,
                          name=ofattribs['name'])
         self.ofattribs = ofattribs
-
+        if 'persistentIdentifier' in ofattribs:
+            self.link = 'omnifocus:///context/' + ofattribs['persistentIdentifier']
+            
 class OFTask(OFNodeMixin, Task):
     TABLE='task'
     COLUMNS=['persistentIdentifier', 'name', 'dateDue', 'dateCompleted','dateToStart', 'dateDue', 
@@ -112,6 +114,8 @@ class OFTask(OFNodeMixin, Task):
                       flagged = bool (ofattribs['flagged']),
                       context=None)
         self.ofattribs = ofattribs
+        if 'persistentIdentifier' in ofattribs:
+            self.link = 'omnifocus:///task/' + ofattribs['persistentIdentifier']
     
 class OFFolder(OFNodeMixin, Folder):
     TABLE='folder'
@@ -120,6 +124,8 @@ class OFFolder(OFNodeMixin, Folder):
         Folder.__init__(self,
                         name=ofattribs['name'])
         self.ofattribs = ofattribs
+        if 'persistentIdentifier' in ofattribs:
+            self.link = 'omnifocus:///folder/' + ofattribs['persistentIdentifier']
         
 class ProjectInfo(Node):
     TABLE='projectinfo'

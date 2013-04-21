@@ -34,11 +34,13 @@ class Node (NodeFwdDecl):
     children = TypeOf ('children', list)
     attribs = TypeOf ('attribs', dict)
     type = TypeOf ('type', str)
+    link = TypeOf ('link', unicode)
     
     def __init__ (self, nType,
                   name=None,
                   parent=None,
                   marked=True,
+                  link=None,
                   children=[],
                   attribs = {}):
         self.name = strip_tabs_newlines (name)
@@ -47,6 +49,7 @@ class Node (NodeFwdDecl):
         self.marked = marked
         self.attribs = dict(attribs)
         self.type = nType
+        self.link = link
         if parent != None:
             parent.add_child (self)
     def add_child (self, child):
@@ -62,12 +65,14 @@ class Context(Node):
                   name=None,
                   parent=None,
                   marked=True,
+                  link=None,
                   children=[],
                   attribs = {}):
         Node.__init__ (self, CONTEXT,
                        name=name,
                        parent=parent,
                        marked=marked,
+                       link=link,
                        children=children,
                        attribs=attribs)
     def add_child (self, child):
@@ -89,6 +94,7 @@ class Task(Node):
                   parent=None,
                   marked=True,
                   flagged=False,
+                  link=None,
                   children=[],
                   context=None,
                   attribs={},
@@ -100,6 +106,7 @@ class Task(Node):
                        parent=parent,
                        marked=marked,
                        children=children,
+                       link=link,
                        attribs=attribs)
         self.flagged = flagged
         self.context = context
@@ -112,6 +119,7 @@ class Folder(Node):
                   name=None,
                   parent=None,
                   marked=True,
+                  link=None,
                   children=[],
                   attribs = {}):
         Node.__init__ (self, FOLDER,
@@ -119,6 +127,7 @@ class Folder(Node):
                        parent=parent,
                        marked=marked,
                        children=children,
+                       link=link,
                        attribs=attribs)
 class Project(Node):
     flagged = TypeOf ('flagged', bool)
@@ -130,6 +139,7 @@ class Project(Node):
                   name=None,
                   parent=None,
                   marked=True,
+                  link=None,
                   children=[],
                   attribs = {},
                   flagged = False,
@@ -141,6 +151,7 @@ class Project(Node):
                        name=name,
                        parent=parent,
                        marked=marked,
+                       link=link,
                        children=children,
                        attribs=attribs)
         self.flagged = flagged
