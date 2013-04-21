@@ -22,7 +22,7 @@ import sys
 import json
 from datetime import datetime
 from datematch import process_date_specifier, date_range_to_str, match_date_against_range
-from treemodel import traverse, traverse_list, PROJECT, TASK, FOLDER, CONTEXT
+from treemodel import traverse, PROJECT, TASK, FOLDER, CONTEXT
 from omnifocus import build_model, find_database
 from datetime import date
 from of_to_tp import PrintTaskpaperVisitor
@@ -254,11 +254,13 @@ if __name__ == "__main__":
         format_document (subject, visitor, project_mode)
     elif fmt == 'json':
         # json has intrinsic formatting - no template required
+        root_project.attribs['json_data'] = {}
+        root_context.attribs['json_data'] = {}
         visitor = ConvertStructureToJsonVisitor ()
         traverse (visitor, root_project, project_mode=True)
         visitor = ConvertStructureToJsonVisitor ()
         traverse (visitor, root_context, project_mode=False)
-        print >> out, json.dumps([root_project.attribs['json_data'], root_context.attribs['json_data']], indent=2)
+        print >> out, json.dumps([root_project.attribs['json_data'], root_context.attribs['json_data']], sort_keys=True, indent=2)
     else:
         raise Exception ('unknown format ' + fmt)
     

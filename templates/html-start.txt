@@ -1,0 +1,88 @@
+<html>
+  <head>
+    <title>OmniFocus</title>
+    <style type="text/css">
+		
+		body
+		{
+			background-color: #fdf6e3;
+			font-family: Verdana, Arial, Helvetica, sans-serif;
+			margin-left:2cm;
+		}
+		
+        a:link
+        {
+           color:inherit;
+           text-decoration: none;
+        }
+		
+		a:hover
+		{
+		  text-decoration: underline;
+		}
+		
+		.Project
+		{
+			color: #b58900;
+		}
+		
+		.Folder
+		{
+			color: #b58900;
+		}
+
+		.Context
+		{
+			color: #6c71c4;
+		}
+		
+		.Task
+		{
+			color: #586e75;
+			font-size: 1.0em;
+		}
+		
+		.TaskGroup
+		{
+			color: #586e75;
+			font-weight: bold;
+			font-size: 1.0em;
+		}
+		
+		.Attrib
+		{
+			font-size: 0.8em;
+		}
+		
+		.AStart
+		{
+			color: #2aa198;
+		}
+		
+		.ADue
+		{
+			color: #dc322f;
+		}
+		
+		.AComplete
+		{
+			color: #839496;
+		}
+		
+		.AFlagged
+		{
+			color: #d33682;
+		}
+		
+		.AProject
+		{
+			color: #b58900;
+		}
+		
+		.AContext
+		{
+			color: #6c71c4;
+		}
+    </style>
+  </head>
+  <body>

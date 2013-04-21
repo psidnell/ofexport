@@ -26,7 +26,5 @@
         "project": " project:$value", 
         "context": " context:$value", 
         "flagged": " flagged"
-    },
-    "preamble":"",
-    "postamble":""
+    }
 }

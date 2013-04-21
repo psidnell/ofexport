@@ -22,40 +22,46 @@ class PrintMarkdownVisitor(Formatter):
         self.header_depth = 0
         self.depth = 0
         self.out = out
-        self.just_printed_newline = False
+        self.blank_needed_on_end = False
     def begin_folder (self, folder):
         print >>self.out, ('#' * (self.header_depth+1)),
         Formatter.begin_folder(self, folder)
+        print >>self.out
         self.depth = 0
         self.header_depth+=1
-        self.just_printed_newline = False
+        self.blank_needed_on_end = False
     def begin_project (self, project):
         print >>self.out, ('#' * (self.header_depth+1)),
         Formatter.begin_project(self, project)
+        print >>self.out
         self.depth = 0
         self.header_depth+=1
-        self.just_printed_newline = False
+        self.blank_needed_on_end = False
     def begin_context (self, context):
         print >>self.out, ('#' * (self.header_depth+1)),
         Formatter.begin_context(self, context)
+        print >>self.out
         self.depth = 0
         self.header_depth+=1
-        self.just_printed_newline = False
-    def begin_task (self,task):
-        Formatter.begin_task(self, task)
-        self.just_printed_newline = False
+        self.blank_needed_on_end = False
+    def end_task (self,task):
+        Formatter.end_task(self, task)
+        self.blank_needed_on_end = True
     def end_context (self, context):
-        if not self.just_printed_newline:
-            print >>self.out
-        self.just_printed_newline = True
         self.header_depth-=1
+        Formatter.end_context(self, context)
+        if self.blank_needed_on_end:
+            self.blank_needed_on_end = False
+            print >>self.out
     def end_project (self, project):
-        if not self.just_printed_newline:
-            print >>self.out
-        self.just_printed_newline = True
         self.header_depth-=1
+        Formatter.end_project(self, project)
+        if self.blank_needed_on_end:
+            self.blank_needed_on_end = False
+            print >>self.out
     def end_folder (self, folder):
-        if not self.just_printed_newline:
-            print >>self.out
-        self.just_printed_newline = True
         self.header_depth-=1
+        Formatter.end_folder(self, folder)
+        if self.blank_needed_on_end:
+            self.blank_needed_on_end = False
+            print >>self.out

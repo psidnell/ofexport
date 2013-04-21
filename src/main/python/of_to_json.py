@@ -38,7 +38,7 @@ def load_attrib (item, attrib, attribs, convert):
 
 class ConvertStructureToJsonVisitor(Visitor):
     def begin_any (self, item):
-        if not 'id' in item.attribs:
+        if self.is_in_applicable_mode (item) and not 'id' in item.attribs:
             myid = str(uuid.uuid1())
             item.attribs['id'] = myid
             node_json_data = {'id' : myid }
@@ -58,18 +58,29 @@ class ConvertStructureToJsonVisitor(Visitor):
     def end_context (self, item):
         children_json_data = []
         for child in item.children:
-            child_json_data = child.attribs['json_data']
-            if child.type == CONTEXT:
-                children_json_data.append(child_json_data)
-            else:
-                children_json_data.append({'ref' : child.attribs['id']})
+            if child.marked and 'id' in child.attribs:
+                child_json_data = child.attribs['json_data']
+                if child.type == CONTEXT:
+                    children_json_data.append(child_json_data)
+                else:
+                    # The name is just a debugging aid
+                    children_json_data.append({'ref' : child.attribs['id'], 'name' : child.name })
         item.attribs['json_data']['children'] = children_json_data
+    def is_in_applicable_mode (self, item):
+        # Project ,ode items are written first,
+        # Contexts second with refs to tasks/projects
+        if self.project_mode:
+            return item.type in (FOLDER, PROJECT, TASK)
+        else:
+            return item.type == CONTEXT
     def add_children (self, item):
-        children_json_data = []
-        for child in item.children:
-            child_json_data = child.attribs['json_data']
-            children_json_data.append(child_json_data)
-        item.attribs['json_data']['children'] = children_json_data
+        if self.is_in_applicable_mode (item):
+            children_json_data = []
+            for child in item.children:
+                if child.marked:
+                    child_json_data = child.attribs['json_data']
+                    children_json_data.append(child_json_data)
+            item.attribs['json_data']['children'] = children_json_data
 
 def load_from_json (json_data, item_db):
     if 'ref' in json_data:
