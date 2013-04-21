@@ -22,7 +22,7 @@ import sys
 import json
 from datetime import datetime
 from datematch import process_date_specifier, date_range_to_str, match_date_against_range
-from treemodel import traverse, PROJECT, TASK, FOLDER, CONTEXT
+from treemodel import traverse, Visitor, PROJECT, TASK, FOLDER, CONTEXT
 from omnifocus import build_model, find_database
 from datetime import date
 from of_to_tp import PrintTaskpaperVisitor
@@ -108,7 +108,27 @@ def build_filter (item_types, include, field, arg):
             return Filter (item_types, match_flagged, None, include, field)
         else:
             assert False, 'unsupported field: ' + field
-    
+
+class SummaryVisitor (Visitor):
+    def __init__ (self):
+        self.counts = {}
+        # Subtract for the extra invisible roots that we've added.
+        self.counts[CONTEXT] = -1
+        self.counts[FOLDER] = -1
+    def end_any (self, item):
+        if not 'counted' in item.attribs:
+            item.attribs['counted'] = True
+            if item.type in self.counts:
+                self.counts[item.type] = self.counts[item.type] + 1
+            else:
+                self.counts[item.type] = 1
+    def print_counts (self):
+        print 'Report Contents:'
+        print '----------------'
+        for k,v in [(k,self.counts[k]) for k in sorted(self.counts.keys())]:
+            k = ' ' * (8 - len(k)) + k + 's:'
+            print k, v
+        print '----------------'
     
 def parse_command (param):
     if param.startswith ('flag'):
@@ -272,3 +292,8 @@ if __name__ == "__main__":
     
     if opn:
         os.system("open '" + file_name + "'")
+        
+    visitor = SummaryVisitor ()
+    traverse (visitor, root_project, project_mode=True)
+    traverse (visitor, root_context, project_mode=False)
+    visitor.print_counts()
