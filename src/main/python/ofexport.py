@@ -254,6 +254,8 @@ if __name__ == "__main__":
         format_document (subject, visitor, project_mode)
     elif fmt == 'json':
         # json has intrinsic formatting - no template required
+        root_project.marked = True
+        root_context.marked = True
         visitor = ConvertStructureToJsonVisitor ()
         traverse (visitor, root_project, project_mode=True)
         visitor = ConvertStructureToJsonVisitor ()

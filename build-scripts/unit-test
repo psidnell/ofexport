@@ -68,7 +68,7 @@ diff src/test/data/db-1.html target/db-1.html
 
 VERSION=`ofexport | grep Version`
 echo '###############################################################################'
-echo "PASSED $VERSION"
+echo "PASSED UNIT TESTS $VERSION"
 echo '###############################################################################'
 
 
