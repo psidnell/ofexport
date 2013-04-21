@@ -1,6 +1,9 @@
 # Changes #
 
-## 1.0.6 (???)
+## 1.1.0 (2013-04-21)
+- Customisable templates for formatting the output.
+- Big internal changes to support templates.
+- Much improved tests.
 - Added json as an output format.
 - Added json as an alternative input format.
 

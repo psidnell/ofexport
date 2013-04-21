@@ -107,7 +107,7 @@ To get help on usage and the full list of options, run the command with no argum
 
 which prints:
 
-        Version: 1.0.6-SNAPSHOT 2013-04-21
+        Version: 1.1.0 2013-04-21
         
         Usage:
         
@@ -343,8 +343,8 @@ For example, this is the current text template:
 
 * **indent** : The indent level the document formatting starts at. Usually 0 but for formats that have a preamble (like xml or html) you might want to increase this to improve the layout.
 * **depth** : This sets the initial value of a variable you can refer to in the template that tracks the indent depth. For example in html you might set this to start at 1 and then use **\<H$depth>$name\</H$depth>** for formatting folders.
-* **nodes**: This contains sections for formatting lines for each node type. You can optionally have an XStart and/or XEnd where X is Folder, Project, Task or Context. The contents of each entry contain references to symbolic values that will be populated from the document. Usually they're empty by you might want "not due" or "unflagged" etc.
-* **NodeAttributeDefaults**: This lists all the attribute types and what values that have if they do not occur in the line being formatted.
+* **nodes**: This contains sections for formatting lines for each node type. You can optionally have an XStart and/or XEnd where X is Folder, Project, Task or Context. The contents of each entry contain references to symbolic values that will be populated from the document. 
+* **NodeAttributeDefaults**: This lists all the attribute types and what values that have if they do not occur in the line being formatted. Usually they're empty by you might want "not due" or "unflagged" etc.
 * **indentString**: This is the set of characters used to indent the document, usually a few spaces or a tab **"\t"**. The $indent variable will contain N occurrences of this where N is the depth of the item in the document.
 * **NodeAttributes**: This section lists all the attributes available for use in the line and allows a different formatting for each. For example if the document is HTML you might wish to represent a due date in bold: **"\<b>$value\</b>"**
 * **preamble/postamble**: Some text to print at the start/end of the document.
