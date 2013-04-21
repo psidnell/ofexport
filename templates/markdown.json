@@ -11,7 +11,8 @@
     "NodeAttributeDefaults": {
         "date_to_start": "", 
         "date_due": "", 
-        "date_completed": "", 
+        "date_completed": "",
+        "link" : "", 
         "name": "", 
         "project": "", 
         "context": "", 
@@ -22,6 +23,7 @@
         "date_to_start": " start:**$value**", 
         "date_due": " due:**$value**", 
         "date_completed": " done:**$value**", 
+        "link": "$value", 
         "name": "$value", 
         "project": " project:**$value**", 
         "context": " context:**$value**", 

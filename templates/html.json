@@ -13,7 +13,8 @@
     "NodeAttributeDefaults": {
         "date_to_start": "", 
         "date_due": "", 
-        "date_completed": "", 
+        "date_completed": "",
+        "link" : "",
         "name": "", 
         "project": "", 
         "context": "", 
@@ -24,6 +25,7 @@
         "date_to_start": " <span class=\"AStart\">$value</span>", 
         "date_due": " <span class=\"ADue\">$value</span>", 
         "date_completed": " <span class=\"AComplete\">$value</span>", 
+        "link": "$value", 
         "name": "$value", 
         "project": " <span class=\"AProject\">$value</span>", 
         "context": " <span class=\"AContext\">$value<span>", 

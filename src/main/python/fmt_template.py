@@ -135,11 +135,6 @@ class Formatter(Visitor):
     def update_extra_attribs (self, item, link_type):
         self.extra_attribs['depth'] = str (self.traversal_depth)
         self.extra_attribs['indent'] = self.template.indent * (self.depth)
-        if 'ofattribs' in item.__dict__ and 'persistentIdentifier' in item.ofattribs:
-            ident = item.ofattribs['persistentIdentifier']
-            link = 'omnifocus:///' + link_type + '/' + ident
-            self.extra_attribs['link'] = link
-        
         
 def build_attrib_values (item, attrib_conversions):
     attrib_values = {}
