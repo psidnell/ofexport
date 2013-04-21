@@ -55,8 +55,10 @@ ATTRIB_DEFAULTS = {
 
 DEFAULT_TEMPLATE = {
                         'indentStart'           : 0,
-                        'indent' : '\t',
-                        'Nodes': {
+                        'indent'                : 0,
+                        'indentString'          : '\t',
+                        'depth'                 : 0,
+                        'Nodes'                 : {
                               'ProjectStart'    : 'P $name:$flagged$date_to_start$date_due$date_completed$context$project',
                               'FolderStart'     : 'F $name:',
                               'ContextStart'    : 'C $name:',
@@ -130,5 +132,5 @@ class Test_fmt_datematch(unittest.TestCase):
     def test_format_item (self):
         task = Task (name='My Name', flagged=True, date_completed=datetime.strptime('2015-02-03', '%Y-%m-%d'))
         template = FmtTemplate(DEFAULT_TEMPLATE)
-        line = format_item (task, template, 'Task', ATTRIB_CONVERSIONS)
+        line = format_item (task, template, 'TaskStart', ATTRIB_CONVERSIONS)
         self.assertEquals ('T My Name @flagged @done(2015-02-03)', line)
