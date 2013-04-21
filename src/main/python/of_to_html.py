@@ -20,7 +20,9 @@ def escape (val):
     return val.replace('"','&quot;').replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
     
 ATTRIB_CONVERSIONS = {
+                      'id'             : lambda x: escape(x),
                       'name'           : lambda x: escape(x),
+                      'link'           : lambda x: x,
                       'flagged'        : lambda x: str(x) if x else None,
                       'context'        : lambda x: escape(''.join (x.name.split ())),
                       'project'        : lambda x: escape(''.join (x.name.split ())),

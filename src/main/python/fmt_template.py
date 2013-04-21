@@ -19,7 +19,9 @@ from treemodel import Visitor, traverse_list
 import codecs
 
 ATTRIB_CONVERSIONS = {
+                      'id'             : lambda x: x,
                       'name'           : lambda x: x,
+                      'link'           : lambda x: x,
                       'flagged'        : lambda x: str(x) if x else None,
                       'context'        : lambda x: x.name,
                       'project'        : lambda x: x.name,
