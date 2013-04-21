@@ -1,0 +1,3 @@
+#!/bin/bash
+
+ofexport -o TODO.md -f flatten -p='ofexport Todo' -t done!=any

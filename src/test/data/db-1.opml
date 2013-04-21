@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<opml version="1.0">
+  <head>
+    <title>OmniFocus</title>
+  </head>
+  <body>
+    <outline text="Test Folder">
+      <outline text="Sub Folder 1">
+        <outline text="F1 Project 1" completed="">
+          <outline text="parent task F1 P1 1" completed="">
+            <outline text="sub task with a colon:" completed="">
+            </outline>
+          </outline>
+          <outline text="task F1 P1 2" completed="">
+          </outline>
+        </outline>
+        <outline text="F1 Project 2" completed="">
+          <outline text="task F1 P2 1" completed="">
+          </outline>
+          <outline text="task F1 P2 2" completed="">
+          </outline>
+        </outline>
+      </outline>
+      <outline text="Sub Folder 2">
+        <outline text="F2 Project 1" completed="">
+          <outline text="task F2 P1 1" completed="">
+          </outline>
+          <outline text="task F2 P1 2" completed="">
+          </outline>
+          <outline text="I'm done!" completed="2013-04-21">
+          </outline>
+        </outline>
+        <outline text="F2 Project 2" completed="2013-04-21">
+          <outline text="task F2 P2 1" completed="">
+          </outline>
+          <outline text="task F2 P2 2" completed="">
+          </outline>
+          <outline text="task with no context" completed="">
+          </outline>
+        </outline>
+      </outline>
+    </outline>
+  </body>
+</opml>

@@ -1,0 +1,74 @@
+#!/bin/bash
+
+#set -o xtrace
+set -e
+export PYTHONPATH=`pwd`/src/main/python
+
+################
+echo UNIT TESTS
+################
+
+python -m unittest discover -s src/test/python -p '*_test.py'
+
+################
+echo DIFF TESTS
+################
+
+mkdir target
+
+################
+echo -- HELP
+################
+#ofexport | sed -e 's/^Version: [0-9].*/Version: XXX XXX/' > src/test/data/help.txt
+ofexport | sed -e 's/^Version: [0-9].*/Version: XXX XXX/' > target/help.txt
+diff src/test/data/help.txt target/help.txt
+
+################
+echo -- JSON
+################
+#build-scripts/dump-test-data --open -o src/test/data/db-1.json
+ofexport -i src/test/data/db-1.json -o target/db-1.json
+diff src/test/data/db-1.json target/db-1.json
+
+################
+echo -- TASKPAPER
+################
+#ofexport -i src/test/data/db-1.json -o src/test/data/db-1.taskpaper
+ofexport -i src/test/data/db-1.json -o target/db-1.taskpaper
+diff src/test/data/db-1.taskpaper target/db-1.taskpaper
+
+################
+echo -- TEXT
+################
+#ofexport -i src/test/data/db-1.json -o src/test/data/db-1.text
+ofexport -i src/test/data/db-1.json -o target/db-1.text
+diff src/test/data/db-1.text target/db-1.text
+
+################
+echo -- MARKDOWN
+################
+#ofexport -i src/test/data/db-1.json -o src/test/data/db-1.md
+ofexport -i src/test/data/db-1.json -o target/db-1.md
+diff src/test/data/db-1.md target/db-1.md
+
+################
+echo -- OPML
+################
+#ofexport -i src/test/data/db-1.json -o src/test/data/db-1.opml
+ofexport -i src/test/data/db-1.json -o target/db-1.opml
+diff src/test/data/db-1.opml target/db-1.opml
+
+################
+echo -- HTML
+################
+#ofexport -i src/test/data/db-1.json -o src/test/data/db-1.html
+ofexport -i src/test/data/db-1.json -o target/db-1.html
+diff src/test/data/db-1.html target/db-1.html
+
+
+VERSION=`ofexport | grep Version`
+echo '###############################################################################'
+echo "PASSED UNIT TESTS $VERSION"
+echo '###############################################################################'
+
+

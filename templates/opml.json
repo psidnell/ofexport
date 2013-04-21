@@ -1,0 +1,39 @@
+{
+    "indent": 2, 
+    "depth": 0,
+    "Nodes": {
+        "ProjectStart": "$indent<outline text=\"$name\" completed=\"$date_completed\">", 
+        "FolderStart": "$indent<outline text=\"$name\">", 
+        "TaskStart": "$indent<outline text=\"$name\" completed=\"$date_completed\">", 
+        "TaskGroupStart": "$indent<outline text=\"$name\" completed=\"$date_completed\">", 
+        "ContextStart": "$indent<outline text=\"$name\">",
+        "ProjectEnd": "$indent</outline>", 
+        "FolderEnd": "$indent</outline>", 
+        "TaskEnd": "$indent</outline>", 
+        "TaskGroupEnd": "$indent</outline>", 
+        "ContextEnd": "$indent</outline>"
+    }, 
+    "NodeAttributeDefaults": {
+        "date_to_start": "", 
+        "date_due": "", 
+        "date_completed": "",
+        "link" : "", 
+        "name": "", 
+        "project": "", 
+        "context": "", 
+        "flagged": ""
+    }, 
+    "indentString": "  ", 
+    "NodeAttributes": {
+        "date_to_start": "$value", 
+        "date_due": "$value", 
+        "date_completed": "$value", 
+        "name": "$value", 
+        "link": "$value", 
+        "project": "$value", 
+        "context": "$value", 
+        "flagged": "$value"
+    },
+    "preamble": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<opml version=\"1.0\">\n  <head>\n    <title>OmniFocus</title>\n  </head>\n  <body>",
+    "postamble": "  </body>\n</opml>"
+}

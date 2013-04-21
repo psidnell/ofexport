@@ -1,4 +1,4 @@
-# ofexport V1.0.5 #
+# ofexport #
 
 - [Changelog](https://github.com/psidnell/ofexport/blob/master/CHANGELOG.md)
 
@@ -45,6 +45,7 @@ will produce a TaskPaper document on your desktop containing all items completed
 - Markdown/FoldingText
 - OPML (Can be read by OmniOutliner, various MindMap tools)
 - HTML
+- Modify the existing format templates or create new ones.
 
 **Filter what gets exported:**
 
@@ -106,7 +107,7 @@ To get help on usage and the full list of options, run the command with no argum
 
 which prints:
 
-        Version 1.0.5 (2013-04-18)
+        Version: 1.0.6-SNAPSHOT 2013-04-21
         
         Usage:
         
@@ -114,19 +115,20 @@ which prints:
         
         
         options:
-          -h,-?,--help
-          -C: context mode (as opposed to project mode)
-          -P: project mode - the default (as opposed to context mode)
-          -l: print links to tasks (in supported file formats)
-          -o file_name: the output file name, must end in a recognised suffix - see documentation
-          --open: open the output file with the registered application (if one is installed)
+          -h,-?,--help       : print help
+          -C                 :  context mode (as opposed to project mode)
+          -P                 :  project mode - the default (as opposed to context mode)
+          -o file_name       : the output file name, must end in a recognised suffix - see documentation
+          -i file_name       : read file_name instead of the OmniFocus database, must be in json format
+          -T - template_name : use the specified template instead of one derived from the output file extension
+          --open             : open the output file with the registered application (if one is installed)
         
         filters:
-          -a,--any     filter tasks, projects, contexts and folders against argument
-          -t,--task    filter any task against task against argument
-          -p,--project filter any project against argument
-          -f,--folder  filter any folder against argument
-          -c,--context filter any context type against argument
+          -a,--any arg     : filter tasks, projects, contexts and folders against the argument
+          -t,--task arg    : filter any task against task against the argument
+          -p,--project arg : filter any project against the argument
+          -f,--folder  arg : filter any folder against the argument
+          -c,--context arg : filter any context type against the argument
         
           A filter argument may be:
             text=regexp
@@ -300,7 +302,57 @@ There are several different attributes, each of which may have alternatives for 
 - due, deadline  
 - flag, flagged
 
-### Examples:
+#### Templates - a Brief Overview####
+
+The format for each file type is by default determined by the output file name extension. By looking in the templates directory you will see a number of files with names like **text.json** etc. These are the [json](http://en.wikipedia.org/wiki/JSON) formatting templates the tool uses for the built in supported file formats. By using the **-T template_name** option (e.g. **-T text**) the tool will use the nominated template instead of the default one. You can modify the existing templates or create new ones to suit your needs.
+
+For example, this is the current text template:
+
+	{
+		"indent": 0, 
+		"depth" : 0, 
+		"Nodes": {
+			"ProjectStart": "${indent}Project: $name $flagged$date_to_start$date_due$date_completed$context$project", 
+			"FolderStart": "${indent}Folder $name", 
+			"TaskStart": "${indent}Task $name $flagged$date_to_start$date_due$date_completed$context$project", 
+			"TaskGroupStart": "${indent}TaskGroup $name $flagged$date_to_start$date_due$date_completed$context$project", 
+			"ContextStart": "${indent}Context $name"
+		}, 
+		"NodeAttributeDefaults": {
+			"date_to_start": "", 
+			"date_due": "", 
+			"date_completed": "", 
+			"link" : "",
+			"name": "", 
+			"project": "", 
+			"context": "", 
+			"flagged": ""
+		}, 
+		"indentString": "    ", 
+		"NodeAttributes": {
+			"date_to_start": " start:$value", 
+			"date_due": " due:$value", 
+			"date_completed": " done:$value", 
+			"link": "$value", 
+			"name": "$value", 
+			"project": " project:$value", 
+			"context": " context:$value", 
+			"flagged": " flagged"
+		}
+	}
+
+* **indent** : The indent level the document formatting starts at. Usually 0 but for formats that have a preamble (like xml or html) you might want to increase this to improve the layout.
+* **depth** : This sets the initial value of a variable you can refer to in the template that tracks the indent depth. For example in html you might set this to start at 1 and then use **\<H$depth>$name\</H$depth>** for formatting folders.
+* **nodes**: This contains sections for formatting lines for each node type. You can optionally have an XStart and/or XEnd where X is Folder, Project, Task or Context. The contents of each entry contain references to symbolic values that will be populated from the document. Usually they're empty by you might want "not due" or "unflagged" etc.
+* **NodeAttributeDefaults**: This lists all the attribute types and what values that have if they do not occur in the line being formatted.
+* **indentString**: This is the set of characters used to indent the document, usually a few spaces or a tab **"\t"**. The $indent variable will contain N occurrences of this where N is the depth of the item in the document.
+* **NodeAttributes**: This section lists all the attributes available for use in the line and allows a different formatting for each. For example if the document is HTML you might wish to represent a due date in bold: **"\<b>$value\</b>"**
+* **preamble/postamble**: Some text to print at the start/end of the document.
+* **preambleFile/postambleFile**: A file to include at the start/end of the document. This is useful for including things like an HTML header that incorporates a sizeable style sheet.
+
+Browsing the existing templates, making copies and experimenting is probably the best way to start - but beware: json is an unforgiving format and errors that result from a missing  coma or quote are "not towards the helpful end of the spectrum".
+
+### Usage Examples:
 
 This produces a document containing all tasks completed yesterday from any folder with "Work" in it's title:
 	
@@ -328,7 +380,7 @@ This produces a report showing all tasks that contain "Beth" and their enclosing
 
 This produces the report of what I have yet to do on this project			
 
-        ofexport -o TODO.md --open -p='ofexport Todo' -t done!=any
+        ofexport -o TODO.md -f flatten -p='ofexport Todo' -t done!=any --open
 
 ### Tips and Tricks ###
 

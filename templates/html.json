@@ -1,0 +1,36 @@
+{
+    "indent": 2,
+    "depth" : 1, 
+    "Nodes": {
+        "ProjectStart": "$indent<H$depth class=\"Project\"><a href=\"$link\">$name</a><span class=\"Attrib\">$flagged$date_to_start$date_due$date_completed$context$project</span></H$depth><ul>", 
+        "FolderStart": "$indent<H$depth class=\"Folder\"><a href=\"$link\">$name</a></H$depth>", 
+        "TaskStart": "$indent<li class=\"Task\"><a href=\"$link\">$name</a><span class=\"Attrib\">$flagged$date_to_start$date_due$date_completed$context$project</span></li>", 
+        "TaskGroupStart": "$indent<li class=\"TaskGroup\"><a href=\"$link\">$name</a><span class=\"Attrib\">$flagged$date_to_start$date_due$date_completed$context$project</span></li><ul>", 
+        "ContextStart": "$indent<H$depth class=\"Context\"><a href=\"$link\">$name</a><H$depth>",
+        "ProjectEnd": "$indent</ul>",
+        "TaskGroupEnd": "$indent</ul>"
+    }, 
+    "NodeAttributeDefaults": {
+        "date_to_start": "", 
+        "date_due": "", 
+        "date_completed": "",
+        "link" : "",
+        "name": "", 
+        "project": "", 
+        "context": "", 
+        "flagged": ""
+    }, 
+    "indentString": "  ", 
+    "NodeAttributes": {
+        "date_to_start": " <span class=\"AStart\">$value</span>", 
+        "date_due": " <span class=\"ADue\">$value</span>", 
+        "date_completed": " <span class=\"AComplete\">$value</span>", 
+        "link": "$value", 
+        "name": "$value", 
+        "project": " <span class=\"AProject\">$value</span>", 
+        "context": " <span class=\"AContext\">$value<span>", 
+        "flagged": " <span class=\"AFlagged\">FLAGGED</span>"
+    },
+    "preambleFile":"html-start.txt",
+    "postamble":"  </body>\n<html>"
+}

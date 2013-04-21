@@ -1,25 +1,22 @@
-# Home
+# ofexport Todo
 
-## ofexport Todo
-
-* V1.0.5
-    * Release
 * V1.0.6
-    * use lamdas instead of these ratty little get/match fns
+    * Use json i/o for integration testing
     * move html/opml preamble into visitors
-    * merge projects folders etc if they have same name?
-    * proper logging: with on/off on the command line
-    * Assertions to prevent mis-wiring of type hierarchies
-    * don't need the main entry points in the conversion modules any more
-    * A visitor to prepend type to items - for debugging
-    * Where are inbox items stored in in the OF DB?
-    * raw arg on command line equivalent to "-i arg"? Might be nice...
-    * Context sort mode and others
-    * Try ofexport with omnifocus 2
+    * Summary filter
+    * Add config dir
+    * ofexport can use OFEXPORT_HOME to find it's config dir
+    * Bring templates forward?
+* Backlog
     * Document How I use it
     * from == since in dates? maybe tokenise properly
-    * Summary filter
-* Backlog
+    * Try ofexport with omnifocus 2
+    * Where are inbox items stored in in the OF DB?
+    * A visitor to prepend type to items - for debugging
+    * Assertions to prevent mis-wiring of type hierarchies
+    * proper logging: with on/off on the command line
+    * merge projects folders etc if they have same name?
+    * Make command line parsing more robust - how?
     * Allow "weekend", "weekday" in date ranges
     * I don't like the command line parsing, would like +/- switches for include exclude, beyond what getopt can do - I have a sneaky idea
     * Json output
