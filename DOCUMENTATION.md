@@ -17,6 +17,7 @@ Related Applications:
 - [TaskPaper **ofexport** Forum Thread](https://groups.google.com/forum/?fromgroups=#!topic/taskpaper/7xQ4lE_1O9I)
 - [Hazel](http://www.noodlesoft.com/hazel.php)
 - [Dropbox](http://www.dropbox.com)
+- [GeekTool](http://projects.tynsoe.org/en/geektool/)
 
 ## Overview:
 
@@ -35,6 +36,14 @@ will produce a TaskPaper document on your desktop containing all items completed
 - Exporting key tasks to devices/OSs that don't support OmniFocus via Dropbox.
 - Backing up the OmniFocus database to a form searchable by other tools.
 - Automatically creating reports on demand with Hazel whenever OmniFocus writes its database.
+- Display todays tasks on the desktop with GeekTool.
+
+![Rendered on the Desktop (using GeekTool)](documentation/GeekToolScreenGrab-thumb.jpg)
+
+![Web Page](documentation/Browser-thumb.jpg)
+
+![TaskPaper Document](documentation/TaskPaper-thumb.jpg)
+
 
 ### Features
 
