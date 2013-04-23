@@ -221,11 +221,11 @@ if __name__ == "__main__":
             print_help ()
             sys.exit()
     
-    dot = file_name.index ('.')
-    if dot == -1:
-        print 'output file name must have suffix'
-        sys.exit()
     
+    if file_name.find ('.') == -1:
+        print 'output file name must have suffix: ' + file_name
+        sys.exit()
+    dot = file_name.index ('.')
     fmt = file_name[dot+1:]
     
     if infile != None:

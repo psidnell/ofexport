@@ -2,6 +2,8 @@
 
 ## 1.1.1 (?????)
 
+- Starting work on a more sophisticated expression parser.
+- Thumbnails in the documentation.
 - Added dateFormat to templates.
 
 ## 1.1.0 (2013-04-21)
