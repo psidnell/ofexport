@@ -42,6 +42,7 @@ START_ALIASES = ['start', 'started', 'begin', 'began']
 COMPLETED_ALIASES = ['done', 'end', 'ended', 'complete', 'completed', 'finish', 'finished', 'completion']
 DUE_ALIASES = ['due', 'deadline']
 FLAGGED_ALIASES = ['flag', 'flagged']
+FLATTEN_ALIASES = ['flat', 'flatten']
 
 def get_date_attrib_or_now (item, attrib):
     if not attrib in item.__dict__:
@@ -106,15 +107,18 @@ def build_filter (item_types, include, field, arg):
             item_types = [x for x in item_types if x in [TASK, PROJECT]]
             match_flagged = lambda x, ignore: x.flagged
             return Filter (item_types, match_flagged, None, include, field)
+        elif field =='flagged_or_due':
+            item_types = [x for x in item_types if x in [TASK, PROJECT]]
+            rng = process_date_specifier (datetime.now(), arg)
+            nice_str = DUE_ALIASES[0] + ' = ' + date_range_to_str (rng)
+            match_due = lambda x, r: match_date_against_range (x.date_due, r) or x.flagged
+            return Filter (item_types, match_due, rng, include, nice_str)
         else:
             assert False, 'unsupported field: ' + field
 
 class SummaryVisitor (Visitor):
     def __init__ (self):
         self.counts = {}
-        # Subtract for the extra invisible roots that we've added.
-        self.counts[CONTEXT] = -1
-        self.counts[FOLDER] = -1
     def end_any (self, item):
         if not 'counted' in item.attribs:
             item.attribs['counted'] = True
@@ -123,6 +127,12 @@ class SummaryVisitor (Visitor):
             else:
                 self.counts[item.type] = 1
     def print_counts (self):
+        # Subtract for the extra invisible roots that we've added.
+        if CONTEXT in self.counts:
+            self.counts[CONTEXT] = self.counts[CONTEXT]-1
+        if FOLDER in self.counts:
+            self.counts[FOLDER] = self.counts[FOLDER]-1
+        
         print 'Report Contents:'
         print '----------------'
         for k,v in [(k,self.counts[k]) for k in sorted(self.counts.keys())]:
@@ -131,15 +141,15 @@ class SummaryVisitor (Visitor):
         print '----------------'
     
 def parse_command (param):
-    if param.startswith ('flag'):
+    if param in FLAGGED_ALIASES:
         return (True, 'flagged', None)
-    elif param.startswith ('!flag'):
+    elif param.startswith ('!') and param[1:] in FLAGGED_ALIASES:
         return (False, 'flagged', None)
     elif param =='prune':
         return (True, 'prune', None)
     elif param == 'sort':
         return (True, 'sort', None)
-    elif param.startswith('flat'):
+    elif param in FLATTEN_ALIASES:
         return (True, 'flatten', None)
     
     params = param.split('=', 1)
