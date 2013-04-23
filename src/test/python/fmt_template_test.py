@@ -57,6 +57,7 @@ DEFAULT_TEMPLATE = {
                         'indentStart'           : 0,
                         'indent'                : 0,
                         'indentString'          : '\t',
+                        'dateFormat'            : 'Y-%m-%d',
                         'depth'                 : 0,
                         'Nodes'                 : {
                               'ProjectStart'    : 'P $name:$flagged$date_to_start$date_due$date_completed$context$project',

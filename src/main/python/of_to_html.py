@@ -18,7 +18,9 @@ from fmt_template import Formatter
 
 def escape (val):
     return val.replace('"','&quot;').replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
-    
+
+class PrintHtmlVisitor (Formatter):
+
     def __init__ (self, out, template):
         attrib_conversions = {
                       'id'             : lambda x: escape(x),
