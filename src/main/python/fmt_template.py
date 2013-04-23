@@ -18,18 +18,6 @@ from string import Template
 from treemodel import Visitor, traverse_list
 import codecs
 
-ATTRIB_CONVERSIONS = {
-                      'id'             : lambda x: x,
-                      'name'           : lambda x: x,
-                      'link'           : lambda x: x,
-                      'flagged'        : lambda x: str(x) if x else None,
-                      'context'        : lambda x: x.name,
-                      'project'        : lambda x: x.name,
-                      'date_to_start'  : lambda x: x.strftime('%Y-%m-%d'),
-                      'date_due'       : lambda x: x.strftime('%Y-%m-%d'),
-                      'date_completed' : lambda x: x.strftime('%Y-%m-%d')
-                      }
-
 def load_resource (template_dir, name):
     instream=codecs.open(template_dir + name, 'r', 'utf-8')
     resource = instream.read()
@@ -46,6 +34,7 @@ class FmtTemplate:
         self.nodes = {k:Template(v) for (k,v) in data['Nodes'].items()}
         self.node_attributes = {k:Template(v) for (k,v) in data['NodeAttributes'].items()}
         self.node_attribute_defaults = data['NodeAttributeDefaults']
+        self.date_format = data['dateFormat']
         template_dir = os.environ['OFEXPORT_HOME'] + '/templates/'
         if 'preambleFile' in data:
             self.preamble = load_resource (template_dir, data['preambleFile'])
@@ -57,7 +46,20 @@ class FmtTemplate:
             self.postamble = data['postamble']
         
 class Formatter(Visitor):
-    def __init__ (self, out, template, attrib_conversions=ATTRIB_CONVERSIONS):
+    def __init__ (self, out, template, attrib_conversions=None):
+        if attrib_conversions == None:
+            attrib_conversions = {
+                      'id'             : lambda x: x,
+                      'name'           : lambda x: x,
+                      'link'           : lambda x: x,
+                      'flagged'        : lambda x: str(x) if x else None,
+                      'context'        : lambda x: x.name,
+                      'project'        : lambda x: x.name,
+                      'date_to_start'  : lambda x: x.strftime(template.date_format),
+                      'date_due'       : lambda x: x.strftime(template.date_format),
+                      'date_completed' : lambda x: x.strftime(template.date_format)
+                      }
+        
         self.template = template
         self.depth = self.template.indent_start
         self.traversal_depth = self.template.depth_start

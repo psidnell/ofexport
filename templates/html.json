@@ -1,5 +1,6 @@
 {
     "indent": 2,
+    "dateFormat": "%Y-%m-%d",
     "depth" : 1, 
     "Nodes": {
         "ProjectStart": "$indent<H$depth class=\"Project\"><a href=\"$link\">$name</a><span class=\"Attrib\">$flagged$date_to_start$date_due$date_completed$context$project</span></H$depth><ul>", 

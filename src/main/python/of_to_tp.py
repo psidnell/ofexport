@@ -25,17 +25,16 @@ def remove_trailing_colon (x):
 def strip_brackets (x):
     return replace(replace(x, ')', ''), '(','')
     
-ATTRIB_CONVERSIONS = {
+class PrintTaskpaperVisitor(Formatter):
+    def __init__ (self, out, template):
+        attrib_conversions = {
                       'name'           : lambda x: remove_trailing_colon(x),
                       'link'           : lambda x: x,
                       'flagged'        : lambda x: str(x) if x else None,
                       'context'        : lambda x: strip_brackets(''.join (x.name.split ())),
                       'project'        : lambda x: strip_brackets(''.join (x.name.split ())),
-                      'date_to_start'  : lambda x: x.strftime('%Y-%m-%d'),
-                      'date_due'       : lambda x: x.strftime('%Y-%m-%d'),
-                      'date_completed' : lambda x: x.strftime('%Y-%m-%d')
+                      'date_to_start'  : lambda x: x.strftime(template.date_format),
+                      'date_due'       : lambda x: x.strftime(template.date_format),
+                      'date_completed' : lambda x: x.strftime(template.date_format)
                       }
-    
-class PrintTaskpaperVisitor(Formatter):
-    def __init__ (self, out, template):
-        Formatter.__init__(self, out, template, attrib_conversions=ATTRIB_CONVERSIONS)
+        Formatter.__init__(self, out, template, attrib_conversions=attrib_conversions)

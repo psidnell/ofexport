@@ -1,5 +1,6 @@
 {
     "indent": 0,
+    "dateFormat": "%Y-%m-%d",
     "depth": 0, 
     "Nodes": {
         "ProjectStart": "$indent$name:$flagged$date_to_start$date_due$date_completed$context$project\n$indent\t$link", 

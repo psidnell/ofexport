@@ -1,5 +1,6 @@
 {
     "indent": 0,
+    "dateFormat": "%Y-%m-%d-%a",
     "depth": 0, 
     "Nodes": {
         "ProjectStart": "$indent$name:", 

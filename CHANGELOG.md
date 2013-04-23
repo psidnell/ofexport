@@ -1,6 +1,11 @@
 # Changes #
 
+## 1.1.1 (?????)
+
+- Added dateFormat to templates.
+
 ## 1.1.0 (2013-04-21)
+
 - Customisable templates for formatting the output.
 - Big internal changes to support templates.
 - Much improved tests.

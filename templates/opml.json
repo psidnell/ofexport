@@ -1,5 +1,6 @@
 {
-    "indent": 2, 
+    "indent": 2,
+    "dateFormat": "%Y-%m-%d",
     "depth": 0,
     "Nodes": {
         "ProjectStart": "$indent<outline text=\"$name\" completed=\"$date_completed\">", 
