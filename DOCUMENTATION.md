@@ -40,11 +40,15 @@ will produce a TaskPaper document on your desktop containing all items completed
 
 ![Rendered on the Desktop (using GeekTool)](documentation/GeekToolScreenGrab-thumb.jpg)
 
+Rendered on the Desktop (using GeekTool)
+
 ![Web Page](documentation/Browser-thumb.jpg)
+
+Web Page
 
 ![TaskPaper Document](documentation/TaskPaper-thumb.jpg)
 
-
+TaskPaper Document
 ### Features
 
 **Export to a number of text based file formats:**
