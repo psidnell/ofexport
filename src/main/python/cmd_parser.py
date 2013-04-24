@@ -15,14 +15,16 @@ limitations under the License.
 '''
 
 import re
+from treemodel import TASK, PROJECT, CONTEXT, FOLDER
 from datetime import datetime
 from datematch import process_date_specifier, match_date_against_range, date_range_to_str
 import logging
 import sys
+from visitors import Filter
 
 logging.basicConfig(format='%(asctime)-15s %(levelname)s %(message)s', stream=sys.stdout)
 LOGGER = logging.getLogger('cmd_parser')
-LOGGER.setLevel(level=logging.DEBUG)
+LOGGER.setLevel(level=logging.INFO)
 
 # Primary/Real name is first
 NAME_ALIASES = ['name', 'title', 'text', 'name']
@@ -30,6 +32,8 @@ START_ALIASES = ['date_to_start', 'start', 'started', 'begin', 'began']
 COMPLETED_ALIASES = ['date_completed', 'done', 'end', 'ended', 'complete', 'completed', 'finish', 'finished', 'completion']
 DUE_ALIASES = ['date_due', 'due', 'deadline']
 FLAGGED_ALIASES = ['flagged', 'flag']
+TYPE_ALIASES = ['type']
+
 FLATTEN_ALIASES = ['flat', 'flatten']
 
 def build_alias_lookups (): 
@@ -40,6 +44,7 @@ def build_alias_lookups ():
     result.update (mk_map (COMPLETED_ALIASES))
     result.update (mk_map (DUE_ALIASES))
     result.update (mk_map (FLAGGED_ALIASES))
+    result.update (mk_map (TYPE_ALIASES))
     return result
     
 ALIAS_LOOKUPS = build_alias_lookups ()
@@ -118,51 +123,65 @@ def parse_string (tokens, stop_tokens):
         t,v = tokens[0]
         tokens = tokens[1:]
         if t in stop_tokens:
-            return (''.join(buf), [(t,v)] + tokens)
+            return unicode(''.join(buf)), [(t,v)] + tokens
         else:
             buf.append(v)
-    return (''.join(buf), [])
+    return unicode(''.join(buf)), []
 
 def and_fn (lhs, rhs):
-    LOGGER.debug ('eval (%s) AND (%s)', lhs, rhs)
-    assert type(lhs) == type(rhs), 'type error'
+    LOGGER.debug ('eval and: (%s) AND (%s)', lhs, rhs)
+    assert type(lhs) == type(rhs), 'type error: ' + str (type(lhs)) + '!=' + str(type(rhs))
     assert type(lhs) == bool
     result = lhs and rhs
-    LOGGER.debug ('result (%s)', result)
+    LOGGER.debug ('result and: (%s)', result)
     return result
 
 def or_fn (lhs, rhs):
-    LOGGER.debug ('eval (%s) OR (%s)', lhs, rhs)
+    LOGGER.debug ('eval or: (%s) OR (%s)', lhs, rhs)
     assert type(lhs) == type(rhs), 'type error'
     assert type(lhs) == bool
     result = lhs or rhs
-    LOGGER.debug ('result (%s)', result)
+    LOGGER.debug ('result or: (%s)', result)
     return result
 
-def eq_fn (lhs, rhs):
+def eq_fn (lhs, rhs, lhs_is_field):
     if type (lhs) == datetime and type (rhs) == tuple:
-        LOGGER.debug ('eval (%s) = (%s)', lhs, date_range_to_str(rhs))
+        LOGGER.debug ('eval =: (%s) = (%s)', lhs, date_range_to_str(rhs))
         result = match_date_against_range (lhs, rhs)
     elif type (lhs) == tuple and type (rhs) == datetime:
-        LOGGER.debug ('eval (%s) = (%s)', date_range_to_str(lhs), rhs)
+        LOGGER.debug ('eval =:  (%s) = (%s)', date_range_to_str(lhs), rhs)
         result = match_date_against_range (rhs, lhs)
-    else:
-        LOGGER.debug ('eval (%s) = (%s)', lhs, rhs)
-        assert type(lhs) == type(rhs), 'type error'
+    elif type (lhs) == unicode and type (rhs) == unicode:
+        if lhs_is_field:
+            LOGGER.debug ('eval =: (%s) matches (%s)', lhs, rhs)
+            result = re.search(rhs, lhs) != None
+        else:
+            LOGGER.debug ('eval =: (%s) = (%s)', lhs, rhs)
+            result = lhs == rhs
+    elif type(lhs) == bool and type (rhs) == bool:
+        LOGGER.debug ('eval =: (%s) = (%s)', lhs, rhs)
         result = lhs == rhs
-    LOGGER.debug ('result (%s)', result)
+    else:
+        assert False, 'unknown or incompatible types: ' + str(type(lhs)) + ' and ' + str(type(rhs))
+    LOGGER.debug ('result =: (%s)', result)
     return result
 
-def ne_fn (lhs, rhs):
-    LOGGER.debug ('eval (%s) != (%s)', lhs, rhs)
-    result = not eq_fn (lhs, rhs)
-    LOGGER.debug ('result (%s)', result)
+def ne_fn (lhs, rhs, lhs_is_field):
+    LOGGER.debug ('eval !=: (%s) != (%s)', lhs, rhs)
+    result = not eq_fn (lhs, rhs, lhs_is_field)
+    LOGGER.debug ('result !=: (%s)', result)
     return result
+
+def adapt (x):
+    if type (x) == str:
+        return unicode (x)
+    return x
 
 def access_field (x, field):
     result = x.__dict__[field]
-    LOGGER.debug ('accessing field %s: %s', field, result)
-    return result
+    result = adapt (result)
+    LOGGER.debug ('accessing field %s %s: %s', str(type(result)), field, result)
+    return adapt (result)
 
 def parse_expr (tokens, now = datetime.now(), level = 0):
     tokens = consume_whitespace (tokens)
@@ -176,6 +195,7 @@ def parse_expr (tokens, now = datetime.now(), level = 0):
         return (lambda x: not expr (x)), tokens
     
     # LHS
+    lhs_is_field = False
     LOGGER.debug ('parse %s looking for lhs', level)
     if t == 'TXT' and v =='true':
         LOGGER.debug ('parse %s literal %s', level, t)
@@ -187,6 +207,7 @@ def parse_expr (tokens, now = datetime.now(), level = 0):
         LOGGER.debug ('parse %s field %s', level, v)
         field = ALIAS_LOOKUPS[v]
         lhs = lambda x: access_field(x, field)
+        lhs_is_field = True
     elif t == 'OB':
         LOGGER.debug ('parse %s start sub expr', level)
         lhs, tokens = parse_expr (tokens, now=now, level=level+1)
@@ -195,8 +216,8 @@ def parse_expr (tokens, now = datetime.now(), level = 0):
         tokens = next_token (tokens, ['CB'])[1]
         LOGGER.debug ('parse %s end sub expr', level)
     elif t == 'DQ':
-        LOGGER.debug ('parse %s quoted string', level)
         string, tokens = parse_string (tokens, 'DQ')
+        LOGGER.debug ('parse %s quoted string: %s', level, string)
         lhs = lambda x: string
         tokens = next_token (tokens, ['DQ'])[1]
     elif t == 'OSB':
@@ -215,6 +236,7 @@ def parse_expr (tokens, now = datetime.now(), level = 0):
         LOGGER.debug ('parse %s done - no more tokens', level)
         return lhs, tokens
     
+    
     (op,v), tokens = next_token (tokens,['AND', 'OR', 'EQ', 'NE', 'CB'])
     if op == 'CB':
         LOGGER.debug ('parse %s done - hit end brace', level)
@@ -232,10 +254,39 @@ def parse_expr (tokens, now = datetime.now(), level = 0):
     elif op == 'OR':
         return (lambda x: or_fn(lhs (x), rhs (x))), tokens
     elif op == 'EQ':
-        return (lambda x: eq_fn (lhs (x), rhs (x))), tokens
+        return (lambda x: eq_fn (lhs (x), rhs (x), lhs_is_field)), tokens
     elif op == 'NE':
-        return (lambda x: ne_fn (lhs (x), rhs (x))), tokens
+        return (lambda x: ne_fn (lhs (x), rhs (x), lhs_is_field)), tokens
 
+def log (x):
+    #LOGGER.info ('------- analysing %s %s %s', x.id, x.type, x.name)
+    return x
+
+def log2 (x):
+    #LOGGER.info ('------- result %s', x)
+    return x
     
+def make_filter (expr_str):
+    LOGGER.info ('filter %s', expr_str)
     
+    match_fn, tokens_left = parse_expr (tokenise (expr_str))
+    match_fn_2 = lambda x,y: log2(match_fn (log(x)))
+    return Filter ([TASK, PROJECT, CONTEXT, FOLDER], match_fn_2, "zzz", True, "kaplooey")
+    '''
+    bits = re.split (' ', expr_str, maxsplit=1)
+    direction = bits[0].strip ()
+    expr_str = ' '.join(bits[1:])
+    
+    match_fn, tokens_left = parse_expr (tokenise (bits[1]))
+    if len (tokens_left) > 0:
+        assert False, 'don\'t know what to do with: ' + str (tokens_left)
+    match_fn_2 = lambda x,y: log2(match_fn (log(x)))
+
+    if direction == '+':
+        LOGGER.info ('filter i "%s" "%s"', direction, expr_str)
+        return Filter ([TASK, PROJECT, CONTEXT, FOLDER], match_fn_2, "zzz", True, "kaplooey")
+    else:
+        LOGGER.info ('filter e "%s" "%s"', direction, expr_str)
+        return Filter ([TASK, PROJECT, CONTEXT, FOLDER], match_fn_2, "zzz", False, "kaplooey")
+    '''
             

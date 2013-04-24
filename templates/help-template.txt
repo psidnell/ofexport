@@ -19,6 +19,7 @@ filters:
   {{-p:}},{{--project=}} arg : filter any project against the argument
   {{-f:}},{{--folder=}}  arg : filter any folder against the argument
   {{-c:}},{{--context=}} arg : filter any context type against the argument
+  {{-e:}},{{--expression=}} arg : experimental expression syntax 
 
   A filter argument may be:
     text=regexp

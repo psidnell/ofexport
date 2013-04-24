@@ -22,7 +22,7 @@ import sys
 import json
 from datetime import datetime
 from datematch import process_date_specifier, date_range_to_str, match_date_against_range
-from treemodel import traverse, Visitor, PROJECT, TASK, FOLDER, CONTEXT
+from treemodel import traverse, traverse_list, Visitor, PROJECT, TASK, FOLDER, CONTEXT
 from omnifocus import build_model, find_database
 from datetime import date
 from of_to_tp import PrintTaskpaperVisitor
@@ -34,12 +34,7 @@ from of_to_json import ConvertStructureToJsonVisitor, read_json
 from visitors import Filter, Sort, Prune, Flatten
 from help import print_help, SHORT_OPTS, LONG_OPTS
 from fmt_template import FmtTemplate, format_document
-from cmd_parser import NAME_ALIASES, START_ALIASES, COMPLETED_ALIASES, DUE_ALIASES, FLAGGED_ALIASES, FLATTEN_ALIASES
-
-VERSION = "1.0.5 (2013-04-18)"
-
-
-
+from cmd_parser import make_filter, NAME_ALIASES, START_ALIASES, COMPLETED_ALIASES, DUE_ALIASES, FLAGGED_ALIASES, FLATTEN_ALIASES
 
 def get_date_attrib_or_now (item, attrib):
     if not attrib in item.__dict__:
@@ -249,6 +244,8 @@ if __name__ == "__main__":
         elif opt in ('--any', '-a'):
             included, field, arg = parse_command (arg)
             visitor = build_filter ([TASK,PROJECT,FOLDER,CONTEXT], included, field, arg)
+        elif opt in ('--expression', '-e'):
+            visitor = make_filter (arg)
         elif '-C' == opt:
             subject = root_context
         elif '-P' == opt:
@@ -256,7 +253,7 @@ if __name__ == "__main__":
         
         if visitor != None: 
             print str (visitor)
-            traverse (visitor, subject, project_mode=project_mode)
+            traverse_list (visitor, subject.children, project_mode=project_mode)
                     
     print 'Generating', file_name
     

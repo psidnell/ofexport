@@ -23,6 +23,7 @@ def print_help ():
     print '  -p,--project arg : filter any project against the argument'
     print '  -f,--folder  arg : filter any folder against the argument'
     print '  -c,--context arg : filter any context type against the argument'
+    print '  -e,--expression arg : experimental expression syntax'
     print
     print '  A filter argument may be:'
     print '    text=regexp'
@@ -39,5 +40,5 @@ def print_help ():
     print
     print '  See DOCUMENTATION.md for more information'
 
-SHORT_OPTS = 'h?CPo:i:T:a:t:p:f:c:'
-LONG_OPTS = ['help','open','any=','task=','project=','folder=','context=']
+SHORT_OPTS = 'h?CPo:i:T:a:t:p:f:c:e:'
+LONG_OPTS = ['help','open','any=','task=','project=','folder=','context=','expression=']

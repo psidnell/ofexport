@@ -16,7 +16,7 @@ limitations under the License.
 
 import unittest
 from datetime import datetime
-from treemodel import Task
+from treemodel import Task, Project, Folder
 from cmd_parser import tokenise, consume_whitespace, parse_string, parse_expr, ALIAS_LOOKUPS
 from datematch import date_range_to_str
 
@@ -178,4 +178,29 @@ class Test_cmd_parser(unittest.TestCase):
         expr = parse_expr(tokenise ('due = [today]'), now=tue)[0]
         self.assertTrue (expr(Task(name="", date_due=tue)))
         
+    def test_parse_expr_type(self):
+        expr = parse_expr(tokenise ('type="Task"'))[0]
+        self.assertTrue(expr (Task(flagged=True)))
+        self.assertFalse(expr (Project(flagged=True)))
+        
+    def test_parse_expr_string_literal(self):
+        expr = parse_expr(tokenise ('name="aabbccdd"'))[0]
+        self.assertTrue(expr (Task(name="aabbccdd")))
+        self.assertFalse(expr (Task(name="zzz")))
+        
+    def test_parse_expr_string_regexp(self):
+        expr = parse_expr(tokenise ('name="bb"'))[0]
+        self.assertTrue(expr (Task(name="aabbccdd")))
+        self.assertFalse(expr (Task(name="zzz")))
+
+    def test_bug_2013_04_24_1 (self):
+        expr = parse_expr(tokenise ('(type="Folder") and (name!="^Misc")'))[0]
+        self.assertFalse(expr (Folder(name="Miscellaneous")))
+        expr = parse_expr(tokenise ('(type="Project") and (name="Misc")'))[0]
+        self.assertTrue(expr (Project(name="Miscellaneous")))
+        self.assertFalse(expr (Project(name="xxx")))
+        expr = parse_expr(tokenise ('((type="Project") and (name="Misc"))'))[0]
+        self.assertTrue(expr (Project(name="Miscellaneous")))
+        self.assertFalse(expr (Project(name="xxx")))
+        self.assertFalse(expr (Folder(name="Misc")))
         

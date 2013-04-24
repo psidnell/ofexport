@@ -122,7 +122,7 @@ def date_from_string (now, date_str):
     
 def tidy_space_separated_fields (string):
     # eliminate multiple spaces
-    elements = str.split (string)
+    elements = string.split ()
     return ' '.join(elements)
 
 def process_date_specifier (now, date_spec):
