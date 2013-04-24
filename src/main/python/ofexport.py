@@ -34,15 +34,12 @@ from of_to_json import ConvertStructureToJsonVisitor, read_json
 from visitors import Filter, Sort, Prune, Flatten
 from help import print_help, SHORT_OPTS, LONG_OPTS
 from fmt_template import FmtTemplate, format_document
+from cmd_parser import NAME_ALIASES, START_ALIASES, COMPLETED_ALIASES, DUE_ALIASES, FLAGGED_ALIASES, FLATTEN_ALIASES
 
 VERSION = "1.0.5 (2013-04-18)"
 
-NAME_ALIASES = ['title', 'text', 'name', '']
-START_ALIASES = ['start', 'started', 'begin', 'began']
-COMPLETED_ALIASES = ['done', 'end', 'ended', 'complete', 'completed', 'finish', 'finished', 'completion']
-DUE_ALIASES = ['due', 'deadline']
-FLAGGED_ALIASES = ['flag', 'flagged']
-FLATTEN_ALIASES = ['flat', 'flatten']
+
+
 
 def get_date_attrib_or_now (item, attrib):
     if not attrib in item.__dict__:
