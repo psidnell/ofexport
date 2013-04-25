@@ -91,6 +91,19 @@ class Test_cmd_parser(unittest.TestCase):
         
         expr = parse_expr(tokenise ('false and false'))[0]
         self.assertFalse(expr (None))
+        
+        expr = parse_expr(tokenise ('true and true and true'))[0]
+        self.assertTrue(expr (None))
+        
+        expr = parse_expr(tokenise ('true and true and false'))[0]
+        self.assertFalse(expr (None))
+        
+        expr = parse_expr(tokenise ('true and false and true'))[0]
+        self.assertFalse(expr (None))
+        
+        expr = parse_expr(tokenise ('false and true and true'))[0]
+        self.assertFalse(expr (None))
+
 
     def test_parse_expr_or (self):
         expr = parse_expr(tokenise ('true or true'))[0]
@@ -104,6 +117,18 @@ class Test_cmd_parser(unittest.TestCase):
         
         expr = parse_expr(tokenise ('false or false'))[0]
         self.assertFalse(expr (None))
+        
+        expr = parse_expr(tokenise ('false or false or false'))[0]
+        self.assertFalse(expr (None))
+        
+        expr = parse_expr(tokenise ('false or false or true'))[0]
+        self.assertTrue(expr (None))
+        
+        expr = parse_expr(tokenise ('false or true or false'))[0]
+        self.assertTrue(expr (None))
+        
+        expr = parse_expr(tokenise ('true or false or false'))[0]
+        self.assertTrue(expr (None))
         
     def test_parse_expr_equals (self):
         expr = parse_expr(tokenise ('true = true'))[0]
@@ -203,4 +228,16 @@ class Test_cmd_parser(unittest.TestCase):
         self.assertTrue(expr (Project(name="Miscellaneous")))
         self.assertFalse(expr (Project(name="xxx")))
         self.assertFalse(expr (Folder(name="Misc")))
+        
+    def test_parse_expr_none(self):
+        tue = datetime.strptime('Apr 9 2013 11:33PM', '%b %d %Y %I:%M%p')
+        expr = parse_expr(tokenise ('due = [none]'))[0]
+        self.assertTrue (expr(Task(name="")))
+        self.assertFalse (expr(Task(name="", date_due=tue)))
+        
+    #def test_parse_expr_any(self):
+    #    tue = datetime.strptime('Apr 9 2013 11:33PM', '%b %d %Y %I:%M%p')
+    #    expr = parse_expr(tokenise ('due = [any]'))[0]
+    #    self.assertFalse (expr(Task(name="")))
+    #    self.assertTrue (expr(Task(name="", date_due=tue)))
         

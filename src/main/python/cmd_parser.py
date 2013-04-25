@@ -24,7 +24,7 @@ from visitors import Filter
 
 logging.basicConfig(format='%(asctime)-15s %(levelname)s %(message)s', stream=sys.stdout)
 LOGGER = logging.getLogger('cmd_parser')
-LOGGER.setLevel(level=logging.INFO)
+LOGGER.setLevel(level=logging.DEBUG)
 
 # Primary/Real name is first
 NAME_ALIASES = ['name', 'title', 'text', 'name']
@@ -128,27 +128,47 @@ def parse_string (tokens, stop_tokens):
             buf.append(v)
     return unicode(''.join(buf)), []
 
-def and_fn (lhs, rhs):
-    LOGGER.debug ('eval and: (%s) AND (%s)', lhs, rhs)
-    assert type(lhs) == type(rhs), 'type error: ' + str (type(lhs)) + '!=' + str(type(rhs))
+def and_fn (lhs_fn, rhs_fn, x):
+    
+    lhs = lhs_fn (x)
+    LOGGER.debug ('eval and: lhs=(%s)', lhs)
     assert type(lhs) == bool
-    result = lhs and rhs
-    LOGGER.debug ('result and: (%s)', result)
-    return result
-
-def or_fn (lhs, rhs):
-    LOGGER.debug ('eval or: (%s) OR (%s)', lhs, rhs)
-    assert type(lhs) == type(rhs), 'type error'
+    if not lhs:
+        return False;
+    
+    rhs = rhs_fn (x)
+    LOGGER.debug ('eval and: rhs=(%s)', rhs)
     assert type(lhs) == bool
-    result = lhs or rhs
-    LOGGER.debug ('result or: (%s)', result)
-    return result
+    return rhs
 
+def or_fn (lhs_fn, rhs_fn, x):
+    
+    lhs = lhs_fn (x)
+    LOGGER.debug ('eval or: lhs=(%s)', lhs)
+    assert type(lhs) == bool
+    if lhs:
+        return True;
+    
+    rhs = rhs_fn (x)
+    LOGGER.debug ('eval or: rhs=(%s)', rhs)
+    assert type(lhs) == bool
+    return rhs
+
+def reorder (lhs, rhs):
+    if type (rhs) == datetime:
+        return rhs,lhs
+    if type (lhs) == tuple:
+        return rhs, lhs
+    return lhs, rhs
+    
 def eq_fn (lhs, rhs, lhs_is_field):
-    if type (lhs) == datetime and type (rhs) == tuple:
+    lhs, rhs = reorder (lhs, rhs)
+    if lhs == None and rhs == None:
+        result = True
+    elif type (lhs) == datetime or type (rhs) == tuple:
         LOGGER.debug ('eval =: (%s) = (%s)', lhs, date_range_to_str(rhs))
         result = match_date_against_range (lhs, rhs)
-    elif type (lhs) == tuple and type (rhs) == datetime:
+    elif type (lhs) == tuple and rhs == None:
         LOGGER.debug ('eval =:  (%s) = (%s)', date_range_to_str(lhs), rhs)
         result = match_date_against_range (rhs, lhs)
     elif type (lhs) == unicode and type (rhs) == unicode:
@@ -178,6 +198,8 @@ def adapt (x):
     return x
 
 def access_field (x, field):
+    if not field in x.__dict__:
+        assert False, x.type + " does not have a '" + field + "'"
     result = x.__dict__[field]
     result = adapt (result)
     LOGGER.debug ('accessing field %s %s: %s', str(type(result)), field, result)
@@ -208,6 +230,10 @@ def parse_expr (tokens, now = datetime.now(), level = 0):
         field = ALIAS_LOOKUPS[v]
         lhs = lambda x: access_field(x, field)
         lhs_is_field = True
+    #elif t == 'TXT' and v == 'none':
+    #    LOGGER.debug ('parse %s literal none', level, v)
+    #    lhs = lambda x: None
+    #    lhs_is_field = True
     elif t == 'OB':
         LOGGER.debug ('parse %s start sub expr', level)
         lhs, tokens = parse_expr (tokens, now=now, level=level+1)
@@ -236,7 +262,6 @@ def parse_expr (tokens, now = datetime.now(), level = 0):
         LOGGER.debug ('parse %s done - no more tokens', level)
         return lhs, tokens
     
-    
     (op,v), tokens = next_token (tokens,['AND', 'OR', 'EQ', 'NE', 'CB'])
     if op == 'CB':
         LOGGER.debug ('parse %s done - hit end brace', level)
@@ -250,9 +275,9 @@ def parse_expr (tokens, now = datetime.now(), level = 0):
     
     LOGGER.debug ('parse %s building lambda %s', level, op)
     if op == 'AND':
-        return (lambda x: and_fn(lhs (x), rhs (x))), tokens
+        return (lambda x: and_fn(lhs, rhs, x)), tokens
     elif op == 'OR':
-        return (lambda x: or_fn(lhs (x), rhs (x))), tokens
+        return (lambda x: or_fn(lhs, rhs, x)), tokens
     elif op == 'EQ':
         return (lambda x: eq_fn (lhs (x), rhs (x), lhs_is_field)), tokens
     elif op == 'NE':

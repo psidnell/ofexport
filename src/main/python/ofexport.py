@@ -73,7 +73,7 @@ def build_filter (item_types, include, field, arg):
         else:
             assert False, 'unsupported field: ' + field
     else:
-        if field in NAME_ALIASES:
+        if field in NAME_ALIASES or field == "":
             nice_str = NAME_ALIASES[0] + ' = ' + arg
             match_name = lambda item, regexp: re.compile (arg).search (item.name) != None
             return Filter (item_types, match_name, arg, include, nice_str)
@@ -106,7 +106,7 @@ def build_filter (item_types, include, field, arg):
             match_due = lambda x, r: match_date_against_range (x.date_due, r) or x.flagged
             return Filter (item_types, match_due, rng, include, nice_str)
         else:
-            assert False, 'unsupported field: ' + field
+            assert False, 'unsupported field: "' + field + '"'
 
 class SummaryVisitor (Visitor):
     def __init__ (self):
@@ -240,6 +240,7 @@ if __name__ == "__main__":
             visitor = build_filter ([CONTEXT], included, field, arg)
         elif opt in ('--folder', '-f'):
             included, field, arg = parse_command (arg)
+            print '------------------------->', field, arg
             visitor = build_filter ([FOLDER], included, field, arg)
         elif opt in ('--any', '-a'):
             included, field, arg = parse_command (arg)
@@ -253,7 +254,7 @@ if __name__ == "__main__":
         
         if visitor != None: 
             print str (visitor)
-            traverse_list (visitor, subject.children, project_mode=project_mode)
+            traverse (visitor, subject, project_mode=project_mode)
                     
     print 'Generating', file_name
     

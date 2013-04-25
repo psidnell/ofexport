@@ -128,11 +128,10 @@ def tidy_space_separated_fields (string):
 def process_date_specifier (now, date_spec):
     date_spec = tidy_space_separated_fields (date_spec).lower()
     
-    if date_spec == '' or date_spec == 'none':
-        return (None, None)
-    if date_spec == '' or date_spec == 'any':
-        # This is a bit of a hack
-        return None
+    if date_spec == 'none':
+        return (None, None, date_spec)
+    if date_spec == 'any':
+        return (None, None, date_spec)
     
     match_date = date_from_string (now, date_spec)
     if match_date != None:
@@ -140,32 +139,32 @@ def process_date_specifier (now, date_spec):
         # But if it's a month we want to convert it into a range
         
         if re.match ('(next |last )?(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)', date_spec) != None:
-            return (match_date, find_end_of_month (match_date))
+            return (match_date, find_end_of_month (match_date), date_spec)
         else:    
-            return (match_date, match_date)
+            return (match_date, match_date, date_spec)
     
     if date_spec == 'this week':
         mon = find_monday_this_week (now)
         sun = hunt_for_day (now, 'sun', True, match_today=True)
-        return (mon, sun)
+        return (mon, sun, date_spec)
     elif date_spec == 'next week':
         mon = find_monday_this_week (now) + timedelta(days=7)
         sun = hunt_for_day (now, 'sun', True, match_today=True) + timedelta(days=7)
-        return (mon, sun)
+        return (mon, sun, date_spec)
     elif date_spec == 'last week':
         mon = find_monday_this_week (now) - timedelta(days=7)
         sun = hunt_for_day (now, 'sun', True, match_today=True) - timedelta(days=7)
-        return (mon, sun)
+        return (mon, sun, date_spec)
     elif date_spec.startswith ('from '):
         date_str = date_spec[4:].strip()
         start =  date_from_string (now, date_str)
-        return (start, None)
+        return (start, None, date_spec)
     elif date_spec.startswith ('to '):
         date_str = date_spec[2:].strip()
         end =  date_from_string (now, date_str)
         if re.match ('.*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)', date_str) != None:
             end = find_end_of_month (end)
-        return (None, end)
+        return (None, end, date_spec)
     elif re.search (' to ', date_spec) != None:
         elements = str.split (date_spec, ' to ')
         elements = [x.strip() for x in elements if len (x) > 0]
@@ -173,18 +172,20 @@ def process_date_specifier (now, date_spec):
         end = date_from_string(now, elements[1])
         if re.match ('.*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)', elements[1]) != None:
             end = find_end_of_month (end)
-        return (start, end)
+        return (start, end, date_spec)
     else:
         raise Exception ('I don\'t think "' + date_spec + '" is any kind of date specification I recognise')
 
 def match_date_against_range (thedate, date_range):
     if date_range == None:
         return thedate != None
-    start, end = date_range
-    if start == None and end == None:
+    start, end, spec = date_range
+    if spec == 'none':
         return thedate == None
+    elif spec == 'any':
+        return thedate != None
     elif thedate == None:
-        return start == None and end == None
+        return False
     elif start != None and end != None:
         return thedate.date() >= start.date() and thedate.date() <= end.date ()
     elif start != None:
@@ -192,12 +193,10 @@ def match_date_against_range (thedate, date_range):
     else:
         return thedate.date() <= end.date ()
 
-def date_range_to_str (spec):
-    if spec == None:
-        return 'any'
-    start, end = spec
-    if start == None and end == None:
-        return 'none'
+def date_range_to_str (rng):
+    start, end, spec = rng
+    if spec == 'none' or spec == 'any':
+        return spec
     elif start == None and end != None:
         return '..' + end.strftime (DATE_FMT)
     elif start != None and end == None:

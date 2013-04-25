@@ -251,7 +251,6 @@ class Test_datematch(unittest.TestCase):
         
         self.assertEquals("any", process_date_specifier_to_datestr (tue,"any"))
         self.assertEquals("none", process_date_specifier_to_datestr (tue,"none"))
-        self.assertEquals("none", process_date_specifier_to_datestr (tue, ''))
         
         self.assertEquals("2013-04-09", process_date_specifier_to_datestr (tue,"today"))
         self.assertEquals("2013-04-08", process_date_specifier_to_datestr (tue,"yesterday"))
