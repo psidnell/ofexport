@@ -235,9 +235,9 @@ class Test_cmd_parser(unittest.TestCase):
         self.assertTrue (expr(Task(name="")))
         self.assertFalse (expr(Task(name="", date_due=tue)))
         
-    #def test_parse_expr_any(self):
-    #    tue = datetime.strptime('Apr 9 2013 11:33PM', '%b %d %Y %I:%M%p')
-    #    expr = parse_expr(tokenise ('due = [any]'))[0]
-    #    self.assertFalse (expr(Task(name="")))
-    #    self.assertTrue (expr(Task(name="", date_due=tue)))
+    def test_parse_expr_any(self):
+        tue = datetime.strptime('Apr 9 2013 11:33PM', '%b %d %Y %I:%M%p')
+        expr = parse_expr(tokenise ('due = [any]'))[0]
+        self.assertFalse (expr(Task(name="")))
+        self.assertTrue (expr(Task(name="", date_due=tue)))
         

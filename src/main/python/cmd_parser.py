@@ -20,7 +20,7 @@ from datetime import datetime
 from datematch import process_date_specifier, match_date_against_range, date_range_to_str
 import logging
 import sys
-from visitors import Filter
+from visitors import Filter, Prune, Sort, Flatten
 
 logging.basicConfig(format='%(asctime)-15s %(levelname)s %(message)s', stream=sys.stdout)
 LOGGER = logging.getLogger('cmd_parser')
@@ -35,6 +35,8 @@ FLAGGED_ALIASES = ['flagged', 'flag']
 TYPE_ALIASES = ['type']
 
 FLATTEN_ALIASES = ['flat', 'flatten']
+PRUNE_ALIASES = ['prune']
+SORT_ALIASES = ['sort']
 
 def build_alias_lookups (): 
     mk_map = lambda x: {alias:x[0] for alias in x}
@@ -46,8 +48,18 @@ def build_alias_lookups ():
     result.update (mk_map (FLAGGED_ALIASES))
     result.update (mk_map (TYPE_ALIASES))
     return result
+
+def build_date_alias_lookups (): 
+    mk_map = lambda x: {alias:x[0] for alias in x}
+    result = {}
+    result.update (mk_map (START_ALIASES))
+    result.update (mk_map (COMPLETED_ALIASES))
+    result.update (mk_map (DUE_ALIASES))
+    return result
     
 ALIAS_LOOKUPS = build_alias_lookups ()
+
+DATE_ALIAS_LOOKUPS = build_date_alias_lookups ()
     
 TOKEN_PATTERNS = [
           # tok name, pattern, text equivalent
@@ -290,28 +302,56 @@ def log (x):
 def log2 (x):
     #LOGGER.info ('------- result %s', x)
     return x
-    
+
+def get_date_attrib_or_now (item, attrib):
+    if not attrib in item.__dict__:
+        return datetime.now()
+    result = item.__dict__[attrib]
+    if result == None:
+        return datetime.now()
+    return result
+
 def make_filter (expr_str):
     LOGGER.info ('filter %s', expr_str)
     
+    # First look for sort/prune
+    bits = re.split(' ', expr_str)
+    if len (bits) >= 2:
+        cmd = bits[0].strip()
+        if cmd in PRUNE_ALIASES:
+            assert len (bits) == 2, "don't understand: " + expr_str
+            typ = bits[1].strip
+            if typ == 'any':
+                return Prune ([TASK, PROJECT, CONTEXT, FOLDER])
+            assert typ in [TASK, PROJECT, CONTEXT, FOLDER], 'no such node type:' + typ
+            return Prune ([typ])
+        if cmd in FLATTEN_ALIASES:
+            assert len (bits) == 2, "don't understand: " + expr_str
+            typ = bits[1].strip ()
+            if typ == 'any':
+                return Flatten ([TASK, PROJECT, CONTEXT, FOLDER])
+            assert typ in [TASK, PROJECT, CONTEXT, FOLDER], 'no such node type:' + typ
+            return Flatten ([typ])
+        elif cmd in SORT_ALIASES:
+            assert len (bits) == 3, "don't understand: " + expr_str
+            typ = bits[1].strip()
+            if typ == 'any':
+                types = [TASK, PROJECT, CONTEXT, FOLDER]
+            else:
+                assert typ in [TASK, PROJECT, CONTEXT, FOLDER], 'no such node type:' + typ
+                types = [typ]
+            field = bits[2].strip()
+            assert field in ALIAS_LOOKUPS, 'no such field:' + field
+            if field in DATE_ALIAS_LOOKUPS:
+                get_date = lambda x: get_date_attrib_or_now (x, field)
+                return Sort (types, get_date, field)
+            else:
+                get_field = lambda x: x.__dict__[field]
+                return Sort (types, get_field, field)
+        
     match_fn, tokens_left = parse_expr (tokenise (expr_str))
-    match_fn_2 = lambda x,y: log2(match_fn (log(x)))
-    return Filter ([TASK, PROJECT, CONTEXT, FOLDER], match_fn_2, "zzz", True, "kaplooey")
-    '''
-    bits = re.split (' ', expr_str, maxsplit=1)
-    direction = bits[0].strip ()
-    expr_str = ' '.join(bits[1:])
-    
-    match_fn, tokens_left = parse_expr (tokenise (bits[1]))
     if len (tokens_left) > 0:
         assert False, 'don\'t know what to do with: ' + str (tokens_left)
     match_fn_2 = lambda x,y: log2(match_fn (log(x)))
-
-    if direction == '+':
-        LOGGER.info ('filter i "%s" "%s"', direction, expr_str)
-        return Filter ([TASK, PROJECT, CONTEXT, FOLDER], match_fn_2, "zzz", True, "kaplooey")
-    else:
-        LOGGER.info ('filter e "%s" "%s"', direction, expr_str)
-        return Filter ([TASK, PROJECT, CONTEXT, FOLDER], match_fn_2, "zzz", False, "kaplooey")
-    '''
+    return Filter ([TASK, PROJECT, CONTEXT, FOLDER], match_fn_2, "zzz", True, "kaplooey")
             
