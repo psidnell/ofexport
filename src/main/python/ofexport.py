@@ -15,14 +15,11 @@ limitations under the License.
 '''
 
 import os
-import re
 import codecs
 import getopt
 import sys
 import json
-from datetime import datetime
-from datematch import process_date_specifier, date_range_to_str, match_date_against_range
-from treemodel import traverse, Visitor, PROJECT, TASK, FOLDER, CONTEXT
+from treemodel import traverse, Visitor, FOLDER, CONTEXT
 from omnifocus import build_model, find_database
 from datetime import date
 from of_to_tp import PrintTaskpaperVisitor
@@ -31,82 +28,14 @@ from of_to_md import PrintMarkdownVisitor
 from of_to_opml import PrintOpmlVisitor
 from of_to_html import PrintHtmlVisitor
 from of_to_json import ConvertStructureToJsonVisitor, read_json
-from visitors import Filter, Sort, Prune, Flatten
 from help import print_help, SHORT_OPTS, LONG_OPTS
 from fmt_template import FmtTemplate, format_document
-from cmd_parser import make_filter, NAME_ALIASES, START_ALIASES, COMPLETED_ALIASES, DUE_ALIASES, FLAGGED_ALIASES, FLATTEN_ALIASES
+from cmd_parser import make_filter
+import logging
 
-def get_date_attrib_or_now (item, attrib):
-    if not attrib in item.__dict__:
-        return datetime.now()
-    result = item.__dict__[attrib]
-    if result == None:
-        return datetime.now()
-    return result
-
-def build_filter (item_types, include, field, arg):
-    if 'prune' == field:
-        item_types = [x for x in item_types if x in [PROJECT, CONTEXT, FOLDER]]
-        return Prune (item_types)
-    elif 'flatten' == field:
-        return Flatten (item_types)
-    elif 'sort' == field:
-        if arg == None or arg in NAME_ALIASES:
-            get_name = lambda x: x.name
-            return Sort (item_types, get_name, 'text')
-        elif arg in START_ALIASES:
-            item_types = [x for x in item_types if x in [TASK, PROJECT]]
-            get_start = lambda x: get_date_attrib_or_now (x, 'start')
-            return Sort (item_types, get_start, 'start')
-        elif arg in COMPLETED_ALIASES:
-            item_types = [x for x in item_types if x in [TASK, PROJECT]]
-            get_completion = lambda x: get_date_attrib_or_now (x, 'date_completed')
-            return Sort (item_types, get_completion, 'completion')
-        elif arg in DUE_ALIASES:
-            item_types = [x for x in item_types if x in [TASK, PROJECT]]
-            get_due = lambda x: get_date_attrib_or_now (x, 'due')
-            return Sort (item_types, get_due, 'due')
-        elif arg in FLAGGED_ALIASES:
-            item_types = [x for x in item_types if x in [TASK, PROJECT]]
-            get_not_flagged = lambda x: not x.flagged
-            return Sort (item_types, get_not_flagged, 'flagged')
-        else:
-            assert False, 'unsupported field: ' + field
-    else:
-        if field in NAME_ALIASES or field == "":
-            nice_str = NAME_ALIASES[0] + ' = ' + arg
-            match_name = lambda item, regexp: re.compile (arg).search (item.name) != None
-            return Filter (item_types, match_name, arg, include, nice_str)
-        elif field in START_ALIASES:
-            item_types = [x for x in item_types if x in [TASK, PROJECT]]
-            rng = process_date_specifier (datetime.now(), arg)
-            nice_str = START_ALIASES[0] + ' = ' + date_range_to_str (rng)
-            match_start = lambda x, r: match_date_against_range (x.date_to_start, r)
-            return Filter (item_types, match_start, rng, include, nice_str)
-        elif field in COMPLETED_ALIASES:
-            item_types = [x for x in item_types if x in [TASK, PROJECT]]
-            rng = process_date_specifier (datetime.now(), arg)
-            nice_str = COMPLETED_ALIASES[0] + ' = ' + date_range_to_str (rng)
-            match_completed = lambda x, r: match_date_against_range (x.date_completed, r)
-            return Filter (item_types, match_completed, rng, include, nice_str)
-        elif field in DUE_ALIASES:
-            item_types = [x for x in item_types if x in [TASK, PROJECT]]
-            rng = process_date_specifier (datetime.now(), arg)
-            nice_str = DUE_ALIASES[0] + ' = ' + date_range_to_str (rng)
-            match_due = lambda x, r: match_date_against_range (x.date_due, r)
-            return Filter (item_types, match_due, rng, include, nice_str)
-        elif field in FLAGGED_ALIASES:
-            item_types = [x for x in item_types if x in [TASK, PROJECT]]
-            match_flagged = lambda x, ignore: x.flagged
-            return Filter (item_types, match_flagged, None, include, field)
-        elif field =='flagged_or_due':
-            item_types = [x for x in item_types if x in [TASK, PROJECT]]
-            rng = process_date_specifier (datetime.now(), arg)
-            nice_str = DUE_ALIASES[0] + ' = ' + date_range_to_str (rng)
-            match_due = lambda x, r: match_date_against_range (x.date_due, r) or x.flagged
-            return Filter (item_types, match_due, rng, include, nice_str)
-        else:
-            assert False, 'unsupported field: "' + field + '"'
+logging.basicConfig(format='%(asctime)-15s %(name)s %(levelname)s %(message)s', stream=sys.stdout)
+logger = logging.getLogger(__name__)
+logger.setLevel(level=logging.INFO)
 
 class SummaryVisitor (Visitor):
     def __init__ (self):
@@ -125,63 +54,24 @@ class SummaryVisitor (Visitor):
         if FOLDER in self.counts:
             self.counts[FOLDER] = self.counts[FOLDER]-1
         
-        print 'Report Contents:'
-        print '----------------'
+        logger.info ('Report Contents:')
+        logger.info ('----------------')
         for k,v in [(k,self.counts[k]) for k in sorted(self.counts.keys())]:
             k = ' ' * (8 - len(k)) + k + 's:'
-            print k, v
-        print '----------------'
-    
-def parse_command (param):
-    if param in FLAGGED_ALIASES:
-        return (True, 'flagged', None)
-    elif param.startswith ('!') and param[1:] in FLAGGED_ALIASES:
-        return (False, 'flagged', None)
-    elif param =='prune':
-        return (True, 'prune', None)
-    elif param == 'sort':
-        return (True, 'sort', None)
-    elif param in FLATTEN_ALIASES:
-        return (True, 'flatten', None)
-    
-    params = param.split('=', 1)
-    assert len(params) == 2
-    # We've got x=y or x!=y
-    include = True
-    if params[0].endswith ('!'):
-        include = False
-        field=params[0][:-1]
-        value=params[1]
-    else:
-        field=params[0]
-        value=params[1]
-    return (include, field, value)
-    
-    
-    instruction = params[0]
-    field = None
-    arg = None
-    if 'include'.startswith(instruction) or 'exclude'.startswith (instruction):
-        assert 'command invalid: ' + param, len (params>=2)
-        field = params[1]
-        arg = None
-        if not 'flagged'.startswith(field):
-            assert 'command invalid: ' + param, len (params==3)
-            arg = params[2]
-    elif 'sort'.startswith (instruction):
-        assert 'command invalid: ' + param, len (params==2)
-        field = params[1]
-    else:
-        assert False, 'command invalid: ' + param
-    return (instruction, field, arg)
-
+            logger.info (k + ' ' + str(v))
+        logger.info ('----------------')
 
 def load_template (template_dir, name):
-    print 'loading template: ' + name
+    logger.info ('loading template: %s', name)
     instream=codecs.open(template_dir + name + '.json', 'r', 'utf-8')
     template = FmtTemplate (json.loads(instream.read()))
     instream.close ()
     return template
+
+def fix_abbrieviated_expr (arg):
+    if arg.startswith ('=') or arg.startswith ('!='):
+        return 'name' + arg
+    return arg
 
 if __name__ == "__main__":
     
@@ -215,7 +105,7 @@ if __name__ == "__main__":
     
     
     if file_name.find ('.') == -1:
-        print 'output file name must have suffix: ' + file_name
+        logger.error ('output file name must have suffix: %s', file_name)
         sys.exit()
     dot = file_name.index ('.')
     fmt = file_name[dot+1:]
@@ -230,25 +120,15 @@ if __name__ == "__main__":
     for opt, arg in opts:
         visitor = None
         if opt in ('--project', '-p'):
-            included, field, arg = parse_command (arg)
-            visitor = build_filter ([PROJECT], included, field, arg)
-            #visitor = make_filter ('(type=Project)and(' + arg + ')')
+            visitor = make_filter ('(type=Project)and(' + fix_abbrieviated_expr(arg) + ')')
         elif opt in ('--task', '-t'):
-            included, field, arg = parse_command (arg)
-            visitor = build_filter ([TASK], included, field, arg)
-            #visitor = make_filter ('(type=Project)and(' + arg + ')')
+            visitor = make_filter ('(type=Task)and(' + fix_abbrieviated_expr(arg) + ')')
         elif opt in ('--context', '-c'):
-            included, field, arg = parse_command (arg)
-            visitor = build_filter ([CONTEXT], included, field, arg)
-            #visitor = make_filter ('(type=Context)and(' + arg + ')')
+            visitor = make_filter ('(type=Context)and(' + fix_abbrieviated_expr(arg) + ')')
         elif opt in ('--folder', '-f'):
-            included, field, arg = parse_command (arg)
-            visitor = build_filter ([FOLDER], included, field, arg)
-            #visitor = make_filter ('(type=Folder)and(' + arg + ')')
+            visitor = make_filter ('(type=Folder)and(' + fix_abbrieviated_expr(arg) + ')')
         elif opt in ('--any', '-a'):
-            included, field, arg = parse_command (arg)
-            visitor = build_filter ([TASK,PROJECT,FOLDER,CONTEXT], included, field, arg)
-            #visitor = make_filter (arg)
+            visitor = make_filter (fix_abbrieviated_expr(arg))
         elif opt in ('--expression', '-e'):
             visitor = make_filter (arg)
         elif '-C' == opt:
@@ -257,10 +137,10 @@ if __name__ == "__main__":
             subject = root_project
         
         if visitor != None: 
-            print str (visitor)
-            traverse (visitor, subject, project_mode=project_mode)
+            logger.info (str (visitor))
+            traverse ('Filter: %s', visitor, subject, project_mode=project_mode)
                     
-    print 'Generating', file_name
+    logger.info ('Generating: %s', file_name)
     
     out=codecs.open(file_name, 'w', 'utf-8')
     

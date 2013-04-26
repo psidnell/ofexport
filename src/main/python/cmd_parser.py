@@ -18,13 +18,13 @@ import re
 from treemodel import TASK, PROJECT, CONTEXT, FOLDER
 from datetime import datetime
 from datematch import process_date_specifier, match_date_against_range, date_range_to_str
-import logging
 import sys
 from visitors import Filter, Prune, Sort, Flatten
+import logging
 
-logging.basicConfig(format='%(asctime)-15s %(levelname)s %(message)s', stream=sys.stdout)
-LOGGER = logging.getLogger('cmd_parser')
-LOGGER.setLevel(level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)-15s %(name)s %(levelname)s %(message)s', stream=sys.stdout)
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(level=logging.INFO)
 
 # Primary/Real name is first
 NAME_ALIASES = ['name', 'title', 'text', 'name']
@@ -374,14 +374,6 @@ def parse_expr (tokens, now = datetime.now(), lhs_is_field = False, level = 0):
         LOGGER.debug ('built %s:7 %s', level, expr_string)
         return (lambda x: ne_fn (lhs (x), rhs (x), lhs_is_field)), tokens, expr_string 
 
-def log (x):
-    #LOGGER.info ('------- analysing %s %s %s', x.id, x.type, x.name)
-    return x
-
-def log2 (x):
-    #LOGGER.info ('------- result %s', x)
-    return x
-
 def get_date_attrib_or_now (item, attrib):
     if not attrib in item.__dict__:
         return datetime.now()
@@ -390,9 +382,7 @@ def get_date_attrib_or_now (item, attrib):
         return datetime.now()
     return result
 
-def make_command_filter (expr_str):
-    LOGGER.info ('filter %s', expr_str)
-    
+def make_command_filter (expr_str):    
     # First look for sort/prune
     bits = re.split(' ', expr_str)
     if len (bits) >= 2:
@@ -400,21 +390,21 @@ def make_command_filter (expr_str):
         if cmd in PRUNE_ALIASES:
             assert len (bits) == 2, 'prune takes one node type argument, got: ' + expr_str
             typ = bits[1].strip ()
-            if typ == 'any':
+            if typ == 'any' or typ == 'all':
                 return Prune ([TASK, PROJECT, CONTEXT, FOLDER])
             assert typ in [TASK, PROJECT, CONTEXT, FOLDER], 'no such node type in prune: ' + typ
             return Prune ([typ])
         if cmd in FLATTEN_ALIASES:
             assert len (bits) == 2, 'flatten takes one node type argument, got: ' + expr_str
             typ = bits[1].strip ()
-            if typ == 'any':
+            if typ == 'any' or typ == 'all':
                 return Flatten ([TASK, PROJECT, CONTEXT, FOLDER])
             assert typ in [TASK, PROJECT, CONTEXT, FOLDER], 'no such node type in flatten: ' + typ
             return Flatten ([typ])
         elif cmd in SORT_ALIASES:
             assert len (bits) == 3, 'sort takes two arguments, node type and field, got: ' + expr_str
             typ = bits[1].strip()
-            if typ == 'any':
+            if typ == 'any' or typ == 'all':
                 types = [TASK, PROJECT, CONTEXT, FOLDER]
             else:
                 assert typ in [TASK, PROJECT, CONTEXT, FOLDER], 'no such node type in sort: ' + typ
@@ -430,19 +420,17 @@ def make_command_filter (expr_str):
     return None
 
 def make_expr_filter (expr_str):
-    match_fn, tokens_left, string = parse_expr (tokenise (expr_str))
+    match_fn, tokens_left, expr_string = parse_expr (tokenise (expr_str))
     if len (tokens_left) > 0:
         assert False, 'don\'t know what to do with: ' + str (tokens_left)
-    match_fn_2 = lambda x,y: log2(match_fn (log(x)))
-    return Filter ([TASK, PROJECT, CONTEXT, FOLDER], match_fn_2, "zzz", True, "kaplooey")
+    match_fn_2 = lambda x,y: match_fn (x)
+    return Filter ([TASK, PROJECT, CONTEXT, FOLDER], match_fn_2, "zzz", True, expr_string)
 
 def make_filter (expr_str):
-    LOGGER.info ('filter %s', expr_str)
     
     filtr = make_command_filter (expr_str)
-    if filtr != None:
-        return filtr
-    if expr_str.startswith ('='):
-        expr_str = 'name' + expr_str
-    return make_expr_filter (expr_str)
+    if filtr == None:
+        filtr = make_expr_filter (expr_str)
+    LOGGER.info ('command filter %s', filtr)
+
             

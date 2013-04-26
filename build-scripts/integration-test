@@ -8,15 +8,15 @@
 # that format alone
 ####################
 
-#set -o xtrace
+set -o xtrace
 set -e
 
 #########################################################
 # Run some tests against a test folder in my OmniFocus DB
 #########################################################
 
-TEST_FOLDER="Test Folder"
-TEST_CONTEXT="Test Context"
+TEST_FOLDER="^Test"
+TEST_CONTEXT="^Test"
 INFILE=src/test/data/db-1.json
 
 ######################
@@ -43,18 +43,18 @@ function run_tool {
         sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/01$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" > /dev/null
         sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/02$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE=a > /dev/null
         sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/03$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE!=a > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/04$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE done="this week" > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/05$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE done!="this week" > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/06$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE due="this week" > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/07$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE due!="this week" > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/08$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE completed="this week" > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/09$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE completed!="this week" > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/10$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE start="this week" > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/11$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE start!="this week" > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/12$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE done="this week" > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/13$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE done!="this week" > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/14$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE due="this week" > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/15$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE due!="this week" > /dev/null
+        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/04$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE done="[this week]" > /dev/null
+        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/05$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE done!="[this week]" > /dev/null
+        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/06$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE due="[this week]" > /dev/null
+        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/07$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE due!="[this week]" > /dev/null
+        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/08$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE completed="[this week]" > /dev/null
+        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/09$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE completed!="[this week]" > /dev/null
+        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/10$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE start="[this week]" > /dev/null
+        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/11$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE start!="[this week]" > /dev/null
+        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/12$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE done="[this week]" > /dev/null
+        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/13$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE done!="[this week]" > /dev/null
+        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/14$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE due="[this week]" > /dev/null
+        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/15$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE due!="[this week]" > /dev/null
         sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/16$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE flagged > /dev/null
         sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/17$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE !flagged > /dev/null
         sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/18$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE sort > /dev/null
