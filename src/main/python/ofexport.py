@@ -22,7 +22,7 @@ import sys
 import json
 from datetime import datetime
 from datematch import process_date_specifier, date_range_to_str, match_date_against_range
-from treemodel import traverse, traverse_list, Visitor, PROJECT, TASK, FOLDER, CONTEXT
+from treemodel import traverse, Visitor, PROJECT, TASK, FOLDER, CONTEXT
 from omnifocus import build_model, find_database
 from datetime import date
 from of_to_tp import PrintTaskpaperVisitor
@@ -232,19 +232,23 @@ if __name__ == "__main__":
         if opt in ('--project', '-p'):
             included, field, arg = parse_command (arg)
             visitor = build_filter ([PROJECT], included, field, arg)
+            #visitor = make_filter ('(type=Project)and(' + arg + ')')
         elif opt in ('--task', '-t'):
             included, field, arg = parse_command (arg)
             visitor = build_filter ([TASK], included, field, arg)
+            #visitor = make_filter ('(type=Project)and(' + arg + ')')
         elif opt in ('--context', '-c'):
             included, field, arg = parse_command (arg)
             visitor = build_filter ([CONTEXT], included, field, arg)
+            #visitor = make_filter ('(type=Context)and(' + arg + ')')
         elif opt in ('--folder', '-f'):
             included, field, arg = parse_command (arg)
-            print '------------------------->', field, arg
             visitor = build_filter ([FOLDER], included, field, arg)
+            #visitor = make_filter ('(type=Folder)and(' + arg + ')')
         elif opt in ('--any', '-a'):
             included, field, arg = parse_command (arg)
             visitor = build_filter ([TASK,PROJECT,FOLDER,CONTEXT], included, field, arg)
+            #visitor = make_filter (arg)
         elif opt in ('--expression', '-e'):
             visitor = make_filter (arg)
         elif '-C' == opt:

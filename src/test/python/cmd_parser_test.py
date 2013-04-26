@@ -17,13 +17,17 @@ limitations under the License.
 import unittest
 from datetime import datetime
 from treemodel import Task, Project, Folder
-from cmd_parser import tokenise, consume_whitespace, parse_string, parse_expr, ALIAS_LOOKUPS
+from cmd_parser import tokenise, read_to_end_quote, consume_whitespace, parse_string, parse_expr, make_command_filter, make_expr_filter, ALIAS_LOOKUPS
 from datematch import date_range_to_str
+from visitors import Sort, Prune, Flatten, Filter
+from test_helper import catch_exception
 
 def pretty_tokens (tokens):
     result = []
     for typ, val in tokens:
         if typ == 'TXT':
+            result.append (val)
+        elif typ == 'QTXT':
             result.append ('"' + val + '"')
         else:
             result.append (typ)
@@ -35,30 +39,69 @@ class Test_cmd_parser(unittest.TestCase):
         self.assertEquals ('date_due', ALIAS_LOOKUPS['due'])
         self.assertEquals ('flagged', ALIAS_LOOKUPS['flagged'])
     
+    def test_read_to_end_quote (self):
+        string, remainder = read_to_end_quote ('"', '"')
+        self.assertEquals('', string)
+        self.assertEquals ('', remainder)
+        
+        string, remainder = read_to_end_quote ('"', 'a"')
+        self.assertEquals('a', string)
+        self.assertEquals ('', remainder)
+        
+        string, remainder = read_to_end_quote ('"', 'abc"')
+        self.assertEquals('abc', string)
+        self.assertEquals ('', remainder)
+        
+        string, remainder = read_to_end_quote ('"', 'abc"stuff')
+        self.assertEquals('abc', string)
+        self.assertEquals ('stuff', remainder)
+        
+        string, remainder = read_to_end_quote ('"', 'abc"stuff')
+        self.assertEquals('abc', string)
+        self.assertEquals ('stuff', remainder)
+        
+        string, remainder = read_to_end_quote ('"', 'abc\\"def"stuff')
+        self.assertEquals('abc"def', string)
+        self.assertEquals ('stuff', remainder)  
+        
+        string, remainder = read_to_end_quote ('"', 'abc\\def"stuff')
+        self.assertEquals('abc\\def', string)
+        self.assertEquals ('stuff', remainder)
+        
+        string, remainder = read_to_end_quote ('"', 'abc\\\\def"stuff')
+        self.assertEquals('abc\\def', string)
+        self.assertEquals ('stuff', remainder)  
+        
     def test_tokenisation(self):
-        self.assertEquals('"aa",OB,"bb",CB,"cc"', pretty_tokens(tokenise ('aa(bb)cc')))
-        self.assertEquals('"aa",DQ,"bb",DQ,"cc",EQ', pretty_tokens(tokenise ('aa"bb"cc=')))
-        self.assertEquals('"a",SP,NE,SP,"b"', pretty_tokens(tokenise ("a != b")))
-        self.assertEquals('"a",SP,AND,SP,"b"', pretty_tokens(tokenise ("a and b")))
-        self.assertEquals('"a",SP,OR,SP,"b"', pretty_tokens(tokenise ("a or b")))
-        self.assertEquals('NOT,SP,"a"', pretty_tokens(tokenise ("! a")))
-        self.assertEquals('"ab",BS,"cd"', pretty_tokens(tokenise ("ab\\cd")))
-        self.assertEquals('"a",""","b"', pretty_tokens(tokenise ('a\\"b')))
+        self.assertEquals('aa,OB,bb,CB,cc', pretty_tokens(tokenise ('aa(bb)cc')))
+        self.assertEquals('aa,"bb",cc,EQ', pretty_tokens(tokenise ('aa"bb"cc=')))
+        self.assertEquals('aa,"bb",cc,EQ', pretty_tokens(tokenise ("aa'bb'cc=")))
+        self.assertEquals('a,SP,NE,SP,b', pretty_tokens(tokenise ("a != b")))
+        self.assertEquals('a,SP,AND,SP,b', pretty_tokens(tokenise ("a and b")))
+        self.assertEquals('a,SP,OR,SP,b', pretty_tokens(tokenise ("a or b")))
+        self.assertEquals('a,CB,OR,OB,b', pretty_tokens(tokenise ("a)or(b")))
+        self.assertEquals('NOT,SP,a', pretty_tokens(tokenise ("! a")))
+        self.assertEquals('ab,BS,cd', pretty_tokens(tokenise ("ab\\cd")))
+        self.assertEquals('work', pretty_tokens(tokenise ('work'))) # Contains an or
+        self.assertEquals('OSB,a,CSB', pretty_tokens(tokenise ("[a]")))
+
+        
+        self.assertEquals("unclosed quote", catch_exception(lambda: tokenise ('a"b')))
 
     def test_consume_whitespace (self):
-        self.assertEquals('"x"', pretty_tokens (consume_whitespace ([('SP', ' '),('SP', ' '),('SP', ' '),('TXT','x')])))
-        self.assertEquals('"x"', pretty_tokens (consume_whitespace ([('SP', ' '),('SP', ' '),('TXT','x')])))
-        self.assertEquals('"x"', pretty_tokens (consume_whitespace ([('SP', ' '),('TXT','x')])))
-        self.assertEquals('"x"', pretty_tokens (consume_whitespace ([('TXT','x')])))
+        self.assertEquals('x', pretty_tokens (consume_whitespace ([('SP', ' '),('SP', ' '),('SP', ' '),('TXT','x')])))
+        self.assertEquals('x', pretty_tokens (consume_whitespace ([('SP', ' '),('SP', ' '),('TXT','x')])))
+        self.assertEquals('x', pretty_tokens (consume_whitespace ([('SP', ' '),('TXT','x')])))
+        self.assertEquals('x', pretty_tokens (consume_whitespace ([('TXT','x')])))
         self.assertEquals('', pretty_tokens (consume_whitespace ([])))
         
     def test_parse_string (self):
         string, tokens = parse_string ([('SP', ' '),('TXT','x'),('TXT','y'),('CB', ')')], 'CB')
-        self.assertEquals('xy', string)
+        self.assertEquals(' xy', string)
         self.assertEquals('CB', pretty_tokens (tokens))
         
         string, tokens = parse_string ([('SP', ' '),('TXT','x'),('TXT','y')], 'CB')
-        self.assertEquals('xy', string)
+        self.assertEquals(' xy', string)
         self.assertEquals('', pretty_tokens (tokens))
     
     def test_parse_expr_true (self):
@@ -104,7 +147,6 @@ class Test_cmd_parser(unittest.TestCase):
         expr = parse_expr(tokenise ('false and true and true'))[0]
         self.assertFalse(expr (None))
 
-
     def test_parse_expr_or (self):
         expr = parse_expr(tokenise ('true or true'))[0]
         self.assertTrue(expr (None))
@@ -149,7 +191,6 @@ class Test_cmd_parser(unittest.TestCase):
         expr = parse_expr(tokenise ('"xxx" = "yyy"'))[0]
         self.assertFalse(expr (None))
 
-        
     def test_parse_expr_not_equals (self):
         expr = parse_expr(tokenise ('true != true'))[0]
         self.assertFalse(expr (None))
@@ -208,8 +249,13 @@ class Test_cmd_parser(unittest.TestCase):
         self.assertTrue(expr (Task(flagged=True)))
         self.assertFalse(expr (Project(flagged=True)))
         
-    def test_parse_expr_string_literal(self):
+    def test_parse_expr_quoted_string_literal(self):
         expr = parse_expr(tokenise ('name="aabbccdd"'))[0]
+        self.assertTrue(expr (Task(name="aabbccdd")))
+        self.assertFalse(expr (Task(name="zzz")))
+        
+    def test_parse_expr_unquoted_string_literal(self):
+        expr = parse_expr(tokenise ('name=aabbccdd'))[0]
         self.assertTrue(expr (Task(name="aabbccdd")))
         self.assertFalse(expr (Task(name="zzz")))
         
@@ -218,7 +264,7 @@ class Test_cmd_parser(unittest.TestCase):
         self.assertTrue(expr (Task(name="aabbccdd")))
         self.assertFalse(expr (Task(name="zzz")))
 
-    def test_bug_2013_04_24_1 (self):
+    def test_bug_2013_04_24 (self):
         expr = parse_expr(tokenise ('(type="Folder") and (name!="^Misc")'))[0]
         self.assertFalse(expr (Folder(name="Miscellaneous")))
         expr = parse_expr(tokenise ('(type="Project") and (name="Misc")'))[0]
@@ -228,6 +274,18 @@ class Test_cmd_parser(unittest.TestCase):
         self.assertTrue(expr (Project(name="Miscellaneous")))
         self.assertFalse(expr (Project(name="xxx")))
         self.assertFalse(expr (Folder(name="Misc")))
+        
+    def test_bug_2013_04_26 (self):
+        #expr = parse_expr(tokenise ('text=^Work$|^Miscellaneous$'))[0]
+        #self.assertFalse(expr (Folder(name="Misc")))
+        #self.assertTrue(expr (Folder(name="Miscellaneous")))
+        
+        expr = parse_expr(tokenise ('(type=Folder)'))[0]
+        self.assertTrue(expr (Folder(name="Miscellaneous$")))
+        
+        expr = parse_expr(tokenise ('(type=Folder)and(text=^Work$|^Miscellaneous$)'))[0]
+        self.assertFalse(expr (Folder(name="Misc")))
+        self.assertTrue(expr (Folder(name="Miscellaneous")))
         
     def test_parse_expr_none(self):
         tue = datetime.strptime('Apr 9 2013 11:33PM', '%b %d %Y %I:%M%p')
@@ -241,3 +299,19 @@ class Test_cmd_parser(unittest.TestCase):
         self.assertFalse (expr(Task(name="")))
         self.assertTrue (expr(Task(name="", date_due=tue)))
         
+    def test_make_command_filter (self):
+        self.assertEquals (None, make_command_filter ("nonsense"))
+        self.assertEquals (Sort, type(make_command_filter ("sort Task name")))
+        self.assertEquals (Flatten, type(make_command_filter ("flatten Project")))
+        self.assertEquals (Prune, type(make_command_filter ("prune Folder")))
+        
+        self.assertEquals("prune takes one node type argument, got: prune x y", catch_exception(lambda: make_command_filter ("prune x y")))
+        self.assertEquals("no such node type in prune: Floder", catch_exception(lambda: make_command_filter ("prune Floder")))
+        self.assertEquals("flatten takes one node type argument, got: flatten x y", catch_exception(lambda: make_command_filter ("flatten x y")))
+        self.assertEquals("no such node type in flatten: Floder", catch_exception(lambda: make_command_filter ("flatten Floder")))
+        self.assertEquals("no such node type in sort: Kangaroo", catch_exception(lambda: make_command_filter ("sort Kangaroo ")))
+        self.assertEquals("sort takes two arguments, node type and field, got: sort x y z", catch_exception(lambda: make_command_filter ("sort x y z")))
+        self.assertEquals("no such sortable field:weight", catch_exception(lambda: make_command_filter ("sort Task weight")))
+
+    def test_make_expr_filter (self):
+        self.assertEquals (Filter, type(make_expr_filter ('type="Context"')))        

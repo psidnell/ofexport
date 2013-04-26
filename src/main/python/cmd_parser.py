@@ -60,61 +60,135 @@ def build_date_alias_lookups ():
 ALIAS_LOOKUPS = build_alias_lookups ()
 
 DATE_ALIAS_LOOKUPS = build_date_alias_lookups ()
-    
-TOKEN_PATTERNS = [
+
+# TOKENS
+SPACE = 'SP'
+TEXT = 'TXT'
+QUOTED_TEXT = 'QTXT'
+OPEN_BRACE = 'OB'
+CLOSE_BRACE = 'CB'
+OPEN_SQUARE_BRACE = 'OSB'
+CLOSE_SQUARE_BRACE = 'CSB'
+NOT_EQUAL = 'NE'
+EQUAL = 'EQ'
+DOUBLE_QUOTE = 'DQ'
+SINGLE_QUOTE = 'SQ'
+AND = 'AND'
+OR = 'OR'
+NOT = 'NOT'
+BACKSLASH = 'BS'
+ESCAPE = 'ESC'
+
+TOKEN_PATTERNS_OLD = [
           # tok name, pattern, text equivalent
-          ('SP', ' ', ' '),
-          ('TXT', '\\\\"', '"'),
-          ('TXT', "\\\\'", "'"),
-          ('TXT', "\\='", "="),
-          ('OB', '\(', '('),
-          ('CB', '\)', ')'),
-          ('OSB', '\[', '['),
-          ('CSB', '\]', ']'),
-          ('NE', '!=', '!='),
-          ('EQ', '=', '='),
-          ('DQ', '"', '"'),
-          ('AND', 'and', 'and'),
-          ('OR', 'or', 'or'),
-          ('NOT', '!', '!'),
-          ('BS', '\\\\', '\\')
+          
+          (TEXT, '\\\\"', '"'),
+          (TEXT, "\\\\'", "'"),
+          (TEXT, "\\='", "="),
+          (OPEN_BRACE, '\(', '('),
+          (CLOSE_BRACE, '\)', ')'),
+          (OPEN_SQUARE_BRACE, '\[', '['),
+          (CLOSE_SQUARE_BRACE, '\]', ']'),
+          (NOT_EQUAL, '!=', '!='),
+          (EQUAL, '=', '='),
+          (DOUBLE_QUOTE, '"', '"'),
+          (AND, ' and ', ' and '),
+          (AND, '^and$', 'and'),
+          (OR, ' or ', ' or '),
+          (OR, '^or$', 'or'),
+          (NOT, '!', '!'),
+          (BACKSLASH, '\\\\', '\\'),
+          (SPACE, ' ', ' ')
           ]
 
-def sub_tokenise (tokens, tok_name, pattern, equiv):
-    result = []
-    for typ, val in tokens:
-        if typ == 'UNK':
-            pieces = re.split (pattern, val)
-            if len (pieces) > 1:
-                result.append ((typ, pieces[0]))
-                pieces = pieces [1:]
-                for piece in pieces:
-                    result.append ((tok_name, equiv))
-                    result.append ((typ, piece))
+
+TOKEN_PATTERNS = [
+          # tok name, pattern, text equivalent
+          (OPEN_BRACE, re.compile('^(\()')),
+          (CLOSE_BRACE, re.compile('^(\))')),
+          (AND, re.compile('^(and)(\(| )')),
+          (OR, re.compile('^(or)(\(| )')),
+          (SPACE, re.compile('^( )')),
+          (DOUBLE_QUOTE, re.compile('^(")')),
+          (SINGLE_QUOTE, re.compile("^(')")),
+          (EQUAL, re.compile('^(=)')),
+          (NOT_EQUAL, re.compile('^(!=)')),
+          (NOT, re.compile('^(!)')),
+          (BACKSLASH, re.compile('^(\\\\)')),
+          (OPEN_SQUARE_BRACE, re.compile('^(\[)')),
+          (CLOSE_SQUARE_BRACE, re.compile('^(\])')),
+          ]
+
+ESCAPEABLE_CHARS = '"\\'
+
+def read_to_end_quote (quote_char,remainder):
+    text = ""
+    escaped = False
+    while len (remainder) > 0:
+        char = remainder[0]
+        remainder = remainder[1:]
+        if escaped:
+            if char in ESCAPEABLE_CHARS:
+                text += char
             else:
-                result.append ((typ, val))
+                text += '\\'
+                text += char
+            escaped = False
         else:
-            result.append ((typ, val))
-    return result
+            if char == '\\':
+                escaped = True
+            elif char == quote_char:
+                return (text, remainder)
+            else:
+                text += char 
+    assert False, "unclosed quote"
+            
+
+def tokenise (characters):
+    remainder = characters
+    text = ""
+    tokens = []
+    while len (remainder) > 0:
+        matched = False
+        for tok_name, cpattern in TOKEN_PATTERNS:
+            if len (remainder) > 0 and not matched:
+                match = cpattern.match (remainder)
+                if match != None:
+                    tok_value = match.group(1)
+                    LOGGER.debug ("remainder: %s", remainder)
+                    matched = True
+                    if len (text) > 0:
+                        tok = (TEXT, text)
+                        LOGGER.debug ("token: %s flushed", tok)
+                        tokens.append (tok)
+                        text = ''
+                    if tok_name == DOUBLE_QUOTE or tok_name == SINGLE_QUOTE:
+                        string, remainder = read_to_end_quote (tok_value, remainder[1:])
+                        tok = (QUOTED_TEXT, string)
+                        LOGGER.debug ("token: %s quoted", tok)
+                        tokens.append (tok)
+                    else:
+                        remainder = remainder[len(tok_value):]
+                        tok = (tok_name, tok_value)
+                        LOGGER.debug ("token: %s matched", tok)
+                        tokens.append (tok)
+        if not matched:
+            LOGGER.debug ("remainder: %s", remainder)
+            text += remainder[0]
+            remainder = remainder[1:]
         
-def tokenise (cmd):
-    tokens = [('UNK',cmd)]
-    for tok_name, pattern, equiv in TOKEN_PATTERNS:
-        tokens = sub_tokenise (tokens, tok_name, pattern, equiv)
-    result = []
-    # Anything we haven't recognised is text
-    for t,v in tokens:
-        if t == 'UNK':
-            if v != '':
-                result.append(('TXT', v))
-        else:
-            result.append ((t, v))
-    return result
+    if len (text) > 0:
+        tok = (TEXT, text)
+        LOGGER.debug ("token: %s final flush", tok)
+        tokens.append (tok)
+                             
+    LOGGER.debug ("tokens: %s", tokens)
+    return tokens
 
 def consume_whitespace (tokens):
     while len(tokens) > 0:
         t = tokens[0][0]
-        if t != 'SP':
+        if t != SPACE:
             return tokens
         else:
             tokens = tokens[1:]
@@ -129,7 +203,6 @@ def next_token (tokens, options):
     return (t,v), tokens[1:]
     
 def parse_string (tokens, stop_tokens):
-    tokens = consume_whitespace (tokens)
     buf = []
     while len(tokens) > 0:
         t,v = tokens[0]
@@ -214,86 +287,92 @@ def access_field (x, field):
         assert False, x.type + " does not have a '" + field + "'"
     result = x.__dict__[field]
     result = adapt (result)
-    LOGGER.debug ('accessing field %s %s: %s', str(type(result)), field, result)
+    LOGGER.debug ('accessing field %s.%s=\'%s\'', type(x), field, result)
     return adapt (result)
 
-def parse_expr (tokens, now = datetime.now(), level = 0):
+def parse_expr (tokens, now = datetime.now(), lhs_is_field = False, level = 0):
+    LOGGER.debug ('parsing %s tokens: %s', level, tokens)
     tokens = consume_whitespace (tokens)
-    (t,v), tokens = next_token (tokens, ['TXT', 'NOT', 'OB', 'OSB', 'DQ'])
+    tok, tokens = next_token (tokens, [TEXT, QUOTED_TEXT, NOT, OPEN_BRACE, OPEN_SQUARE_BRACE])
+    (t,v) = tok
     
     # NOT
-    if t == "NOT":
-        LOGGER.debug ('parse %s %s', level, t)
-        expr, tokens = parse_expr (tokens, now=now, level=level+1)
-        LOGGER.debug ('parse %s returned', level)
-        return (lambda x: not expr (x)), tokens
+    if t == NOT:
+        expr, tokens, expr_string = parse_expr (tokens, now=now, level=level+1)
+        LOGGER.debug ('built %s:1 %s', level, expr_string)
+        return (lambda x: not expr (x)), tokens, 'not(' + expr_string + ')'
     
     # LHS
-    lhs_is_field = False
-    LOGGER.debug ('parse %s looking for lhs', level)
-    if t == 'TXT' and v =='true':
-        LOGGER.debug ('parse %s literal %s', level, t)
+    if t == TEXT and v =='true':
         lhs = lambda x: True
-    elif t == 'TXT' and v =='false':
-        LOGGER.debug ('parse %s literal %s', level, t)
+        lhs_string = 'true'
+    elif t == TEXT and v =='false':
         lhs = lambda x: False
-    elif t == 'TXT' and v in ALIAS_LOOKUPS:
-        LOGGER.debug ('parse %s field %s', level, v)
+        lhs_string = 'true'
+    elif t == TEXT and v in ALIAS_LOOKUPS:
         field = ALIAS_LOOKUPS[v]
         lhs = lambda x: access_field(x, field)
+        lhs_string = 'field:' + field
         lhs_is_field = True
-    #elif t == 'TXT' and v == 'none':
-    #    LOGGER.debug ('parse %s literal none', level, v)
+    #elif t == TEXT and v == 'none':
     #    lhs = lambda x: None
     #    lhs_is_field = True
-    elif t == 'OB':
-        LOGGER.debug ('parse %s start sub expr', level)
-        lhs, tokens = parse_expr (tokens, now=now, level=level+1)
-        LOGGER.debug ('parse %s returned', level)
+    elif t == OPEN_BRACE:
+        lhs, tokens, lhs_string = parse_expr (tokens, now=now, level=level+1)
         tokens = consume_whitespace (tokens)
-        tokens = next_token (tokens, ['CB'])[1]
-        LOGGER.debug ('parse %s end sub expr', level)
-    elif t == 'DQ':
-        string, tokens = parse_string (tokens, 'DQ')
-        LOGGER.debug ('parse %s quoted string: %s', level, string)
-        lhs = lambda x: string
-        tokens = next_token (tokens, ['DQ'])[1]
-    elif t == 'OSB':
-        datespec, tokens = parse_string (tokens, 'CSB')
+        tokens = next_token (tokens, [CLOSE_BRACE])[1]
+    elif t == OPEN_SQUARE_BRACE:
+        datespec, tokens = parse_string (tokens, CLOSE_SQUARE_BRACE)
         rng = process_date_specifier (now, datespec)
-        LOGGER.debug ('parse %s date spec: %s', level, date_range_to_str(rng))
         lhs = lambda x: rng
-        tokens = next_token (tokens, ['CSB'])[1]
+        lhs_string = '[' + date_range_to_str(rng) + ']'
+        tokens = next_token (tokens, [CLOSE_SQUARE_BRACE])[1]
+    elif t == DOUBLE_QUOTE: #<------------------------------------------- CAN THIS EVER HAPPEN?
+        string, tokens = parse_string (tokens, [DOUBLE_QUOTE])
+        lhs = lambda x: string
+        tokens = next_token (tokens, [DOUBLE_QUOTE])[1]
+        lhs_string = '"' + string + '"'
+    elif t == QUOTED_TEXT:
+        text = v
+        lhs = lambda x: unicode (text)
+        lhs_string = '"' + v + '"'
+    elif t == TEXT:
+        text = v
+        lhs = lambda x: unicode (text)
+        lhs_string = text
     else:
-        assert False, "in expression found unexpected symbol: " + t + ':"' + v + '"'
-    
+        assert False, 'unexpected token: ' + v
+
     # OPERATOR 
-    LOGGER.debug ('parse %s looking for operator', level)
     tokens = consume_whitespace (tokens)
     if len(tokens) == 0:
-        LOGGER.debug ('parse %s done - no more tokens', level)
-        return lhs, tokens
+        LOGGER.debug ('built %s:2 %s', level, lhs_string)
+        return lhs, tokens, lhs_string
     
-    (op,v), tokens = next_token (tokens,['AND', 'OR', 'EQ', 'NE', 'CB'])
-    if op == 'CB':
-        LOGGER.debug ('parse %s done - hit end brace', level)
-        return lhs, [(op,v)] + tokens
+    tok, tokens = next_token (tokens,[AND, OR, EQUAL, NOT_EQUAL, CLOSE_BRACE])
+    op,v = tok
+    if op == CLOSE_BRACE:
+        LOGGER.debug ('built %s:3 %s', level, lhs_string)
+        return lhs, [tok] + tokens, lhs_string
+        
+    rhs, tokens, rhs_string = parse_expr (tokens, now=now, lhs_is_field = lhs_is_field, level=level+1)
     
-    LOGGER.debug ('parse %s operator: %s', level, op)
-    
-    LOGGER.debug ('parse %s looking for rhs', level)
-    rhs, tokens = parse_expr (tokens, now=now, level=level+1)
-    LOGGER.debug ('parse %s returned', level)
-    
-    LOGGER.debug ('parse %s building lambda %s', level, op)
-    if op == 'AND':
-        return (lambda x: and_fn(lhs, rhs, x)), tokens
-    elif op == 'OR':
-        return (lambda x: or_fn(lhs, rhs, x)), tokens
-    elif op == 'EQ':
-        return (lambda x: eq_fn (lhs (x), rhs (x), lhs_is_field)), tokens
-    elif op == 'NE':
-        return (lambda x: ne_fn (lhs (x), rhs (x), lhs_is_field)), tokens
+    if op == AND:
+        expr_string = '(' + lhs_string + ')AND(' + rhs_string + ')' 
+        LOGGER.debug ('built %s:4 %s', level, expr_string)
+        return (lambda x: and_fn(lhs, rhs, x)), tokens, expr_string
+    elif op == OR:
+        expr_string = '(' + lhs_string + ')OR(' + rhs_string + ')' 
+        LOGGER.debug ('built %s:5 %s', level, expr_string)
+        return (lambda x: or_fn(lhs, rhs, x)), tokens, expr_string
+    elif op == EQUAL:
+        expr_string = '(' + lhs_string + ')=(' + rhs_string + ')' 
+        LOGGER.debug ('built %s:6 %s', level, expr_string)
+        return (lambda x: eq_fn (lhs (x), rhs (x), lhs_is_field)), tokens, expr_string 
+    elif op == NOT_EQUAL:
+        expr_string = '(' + lhs_string + ')!=(' + rhs_string + ')' 
+        LOGGER.debug ('built %s:7 %s', level, expr_string)
+        return (lambda x: ne_fn (lhs (x), rhs (x), lhs_is_field)), tokens, expr_string 
 
 def log (x):
     #LOGGER.info ('------- analysing %s %s %s', x.id, x.type, x.name)
@@ -311,7 +390,7 @@ def get_date_attrib_or_now (item, attrib):
         return datetime.now()
     return result
 
-def make_filter (expr_str):
+def make_command_filter (expr_str):
     LOGGER.info ('filter %s', expr_str)
     
     # First look for sort/prune
@@ -319,39 +398,51 @@ def make_filter (expr_str):
     if len (bits) >= 2:
         cmd = bits[0].strip()
         if cmd in PRUNE_ALIASES:
-            assert len (bits) == 2, "don't understand: " + expr_str
-            typ = bits[1].strip
+            assert len (bits) == 2, 'prune takes one node type argument, got: ' + expr_str
+            typ = bits[1].strip ()
             if typ == 'any':
                 return Prune ([TASK, PROJECT, CONTEXT, FOLDER])
-            assert typ in [TASK, PROJECT, CONTEXT, FOLDER], 'no such node type:' + typ
+            assert typ in [TASK, PROJECT, CONTEXT, FOLDER], 'no such node type in prune: ' + typ
             return Prune ([typ])
         if cmd in FLATTEN_ALIASES:
-            assert len (bits) == 2, "don't understand: " + expr_str
+            assert len (bits) == 2, 'flatten takes one node type argument, got: ' + expr_str
             typ = bits[1].strip ()
             if typ == 'any':
                 return Flatten ([TASK, PROJECT, CONTEXT, FOLDER])
-            assert typ in [TASK, PROJECT, CONTEXT, FOLDER], 'no such node type:' + typ
+            assert typ in [TASK, PROJECT, CONTEXT, FOLDER], 'no such node type in flatten: ' + typ
             return Flatten ([typ])
         elif cmd in SORT_ALIASES:
-            assert len (bits) == 3, "don't understand: " + expr_str
+            assert len (bits) == 3, 'sort takes two arguments, node type and field, got: ' + expr_str
             typ = bits[1].strip()
             if typ == 'any':
                 types = [TASK, PROJECT, CONTEXT, FOLDER]
             else:
-                assert typ in [TASK, PROJECT, CONTEXT, FOLDER], 'no such node type:' + typ
+                assert typ in [TASK, PROJECT, CONTEXT, FOLDER], 'no such node type in sort: ' + typ
                 types = [typ]
             field = bits[2].strip()
-            assert field in ALIAS_LOOKUPS, 'no such field:' + field
+            assert field in ALIAS_LOOKUPS, 'no such sortable field:' + field
             if field in DATE_ALIAS_LOOKUPS:
                 get_date = lambda x: get_date_attrib_or_now (x, field)
                 return Sort (types, get_date, field)
             else:
                 get_field = lambda x: x.__dict__[field]
                 return Sort (types, get_field, field)
-        
-    match_fn, tokens_left = parse_expr (tokenise (expr_str))
+    return None
+
+def make_expr_filter (expr_str):
+    match_fn, tokens_left, string = parse_expr (tokenise (expr_str))
     if len (tokens_left) > 0:
         assert False, 'don\'t know what to do with: ' + str (tokens_left)
     match_fn_2 = lambda x,y: log2(match_fn (log(x)))
     return Filter ([TASK, PROJECT, CONTEXT, FOLDER], match_fn_2, "zzz", True, "kaplooey")
+
+def make_filter (expr_str):
+    LOGGER.info ('filter %s', expr_str)
+    
+    filtr = make_command_filter (expr_str)
+    if filtr != None:
+        return filtr
+    if expr_str.startswith ('='):
+        expr_str = 'name' + expr_str
+    return make_expr_filter (expr_str)
             
