@@ -97,16 +97,15 @@ def includes (include):
         return 'exclude'
     
 class Filter(BaseFilterVisitor):
-    def __init__(self, types, match_fn, filtr, include, nice_string):
+    def __init__(self, types, match_fn, include, nice_string):
         BaseFilterVisitor.__init__(self, include)
-        self.filter = filtr
         self.types = types
         self.match_fn = match_fn
         self.nice_string = nice_string
     def begin_any (self, item):
         BaseFilterVisitor.begin_any (self, item)
         if item.type in self.types and self.match_required(item):
-            matched = self.match_fn(item, self.filter)
+            matched = self.match_fn(item)
             self.set_item_matched(item, matched);
     def __str__(self):
         return includes (self.include) + ' ' + str(self.types) + ' where ' + self.nice_string

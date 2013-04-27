@@ -423,8 +423,7 @@ def make_expr_filter (expr_str, include):
     if len (tokens_left) > 0:
         assert False, 'don\'t know what to do with: ' + str (tokens_left)
     assert expr_type == BOOL_TYPE, "filter must have a boolean argument"
-    match_fn_2 = lambda x,y: match_fn (x)
-    return Filter ([TASK, PROJECT, CONTEXT, FOLDER], match_fn_2, "zzz", include, expr_string)
+    return Filter ([TASK, PROJECT, CONTEXT, FOLDER], match_fn, include, expr_string)
 
 def make_filter (expr_str, include):
     
