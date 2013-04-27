@@ -22,46 +22,43 @@ class PrintMarkdownVisitor(Formatter):
         self.header_depth = 0
         self.depth = 0
         self.out = out
-        self.blank_needed_on_end = False
+        self.last_line_was_text = False
     def begin_folder (self, folder):
+        if self.last_line_was_text:
+            print >> self.out
         print >>self.out, ('#' * (self.header_depth+1)),
         Formatter.begin_folder(self, folder)
         print >>self.out
         self.depth = 0
         self.header_depth+=1
-        self.blank_needed_on_end = False
+        self.last_line_was_text = False
     def begin_project (self, project):
+        if self.last_line_was_text:
+            print >> self.out
         print >>self.out, ('#' * (self.header_depth+1)),
         Formatter.begin_project(self, project)
         print >>self.out
         self.depth = 0
         self.header_depth+=1
-        self.blank_needed_on_end = False
+        self.last_line_was_text = False
     def begin_context (self, context):
+        if self.last_line_was_text:
+            print >> self.out
         print >>self.out, ('#' * (self.header_depth+1)),
         Formatter.begin_context(self, context)
         print >>self.out
         self.depth = 0
         self.header_depth+=1
-        self.blank_needed_on_end = False
+        self.last_line_was_text = False
     def end_task (self,task):
         Formatter.end_task(self, task)
-        self.blank_needed_on_end = True
+        self.last_line_was_text = True
     def end_context (self, context):
         self.header_depth-=1
         Formatter.end_context(self, context)
-        if self.blank_needed_on_end:
-            self.blank_needed_on_end = False
-            print >>self.out
     def end_project (self, project):
         self.header_depth-=1
         Formatter.end_project(self, project)
-        if self.blank_needed_on_end:
-            self.blank_needed_on_end = False
-            print >>self.out
     def end_folder (self, folder):
         self.header_depth-=1
         Formatter.end_folder(self, folder)
-        if self.blank_needed_on_end:
-            self.blank_needed_on_end = False
-            print >>self.out

@@ -205,7 +205,7 @@ def traverse (visitor, item, ignore_marked=False, project_mode=True):
     elif item.type == CONTEXT:
         traverse_context (visitor, item, ignore_marked=ignore_marked)
     elif item.type == PROJECT:
-        if project_mode:
+        if project_mode or len (item.children) == 0:
             traverse_project (visitor, item, ignore_marked=ignore_marked, project_mode=project_mode)
     elif item.type == TASK:
         traverse_task (visitor, item, ignore_marked=ignore_marked, project_mode=project_mode)
