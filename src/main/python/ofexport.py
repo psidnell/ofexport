@@ -19,7 +19,7 @@ import codecs
 import getopt
 import sys
 import json
-from treemodel import traverse, Visitor, FOLDER, CONTEXT
+from treemodel import traverse, Visitor, FOLDER, CONTEXT, PROJECT, TASK
 from omnifocus import build_model, find_database
 from datetime import date
 from of_to_tp import PrintTaskpaperVisitor
@@ -68,10 +68,17 @@ def load_template (template_dir, name):
     instream.close ()
     return template
 
-def fix_abbrieviated_expr (arg):
+def fix_abbrieviated_expr (typ, arg):
     if arg.startswith ('=') or arg.startswith ('!='):
-        return 'name' + arg
-    return arg
+        result = '(type=' + typ + ') and (name' + arg + ')'
+    elif arg in ['prune', 'flatten']:
+        result = arg + ' ' + typ
+    elif arg == 'sort':
+        result = arg + ' ' + typ + ' text'
+    else:
+        result = arg
+    logger.debug ("adapted argument: '%s'", result)
+    return result
 
 if __name__ == "__main__":
     
@@ -86,7 +93,9 @@ if __name__ == "__main__":
     include = True
     
     opts, args = getopt.optlist, args = getopt.getopt(sys.argv[1:],SHORT_OPTS, LONG_OPTS)
-              
+    
+    assert len (args) == 0, "unexpected arguments: " + str (args)
+        
     for opt, arg in opts:
         if '--open' == opt:
             opn = True
@@ -105,6 +114,8 @@ if __name__ == "__main__":
             assert len(bits) == 2
             name = bits[0]
             level = bits[1]
+            if name=='ofexport':
+                name = __name__
             logging.getLogger(name).setLevel (logging.__dict__[level])
         elif opt in ('-?', '-h', '--help'):
             print_help ()
@@ -128,15 +139,20 @@ if __name__ == "__main__":
     subject = root_project
         
     for opt, arg in opts:
+        logger.debug ("executing option %s : %s", opt, arg)
         visitor = None
         if opt in ('--project', '-p'):
-            visitor = make_filter ('(type=Project)and(' + fix_abbrieviated_expr(arg) + ')', include)
+            fixed_arg = fix_abbrieviated_expr(PROJECT, arg)
+            visitor = make_filter (fixed_arg, include)
         elif opt in ('--task', '-t'):
-            visitor = make_filter ('(type=Task)and(' + fix_abbrieviated_expr(arg) + ')', include)
+            fixed_arg = fix_abbrieviated_expr(TASK, arg)
+            visitor = make_filter (fixed_arg, include)
         elif opt in ('--context', '-c'):
-            visitor = make_filter ('(type=Context)and(' + fix_abbrieviated_expr(arg) + ')', include)
+            fixed_arg = fix_abbrieviated_expr(CONTEXT, arg)
+            visitor = make_filter (fixed_arg, include)
         elif opt in ('--folder', '-f'):
-            visitor = make_filter ('(type=Folder)and(' + fix_abbrieviated_expr(arg) + ')', include)
+            fixed_arg = fix_abbrieviated_expr(FOLDER, arg)
+            visitor = make_filter (fixed_arg, include)
         elif opt in ('--any', '-a'):
             visitor = make_filter (fix_abbrieviated_expr(arg), include)
         elif opt in ('--expression', '-e'):
@@ -146,11 +162,11 @@ if __name__ == "__main__":
         elif '-P' == opt:
             subject = root_project
         
+        logger.debug ("created filter %s", visitor)
         if visitor != None:
             logger.info ('running filter %s', visitor)
             traverse (visitor, subject, project_mode=project_mode)
             
-                    
     logger.info ('Generating: %s', file_name)
     
     out=codecs.open(file_name, 'w', 'utf-8')

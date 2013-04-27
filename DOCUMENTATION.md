@@ -365,6 +365,30 @@ For example, this is the current text template:
 
 Browsing the existing templates, making copies and experimenting is probably the best way to start - but beware: json is an unforgiving format and errors that result from a missing  coma or quote are "not towards the helpful end of the spectrum".
 
+### Expression Syntax
+
+The expression syntax in an approximation of [EBNF](http://en.wikipedia.org/wiki/Extended_Backus–Naur_Form).
+
+        <expression> = <string> | <dateExpr> | <nodeType> | <field> | <quotedString> | <bracketedExpression>
+        <bracketedExpression> = "(" <expression> ")"
+        <logicalExpression> = <logicalConst> | "!" expression | <logicalExpression> <operator> <logicalExpression>
+        <opertator> = "and" | "or" | "=" | "!="
+        <logicalConst> = "true" | "false"
+        <nodeType> = "Task" | "Project" | "Folder" | "Context"
+        <field> = the name of any node field like **due**, **text** or **flagged**
+        <dateExpr> = <dateConst> | <day> | <week> | <month> | <dateRange>
+        <dateRange> = "from" <dateExpr> | "to" <dateExpr> | <dateExpr> "to" <dateExpr>
+        <day> = ["next" | "next"] (<longDow> | <shortDow>)
+        <week> = ["this" | "last" | "next"] "week"
+        <month> = ["this" | "last"] (<shortMonth | <longMonth>)
+        <longDow> = "Monday" | "Tuesday" | "Wednesday" etc...
+        <shortDow> = "mon" | "tue" | "wed" etc..
+        <longMonth> = "January" | "February" etc..
+        <shortMonth> = "jan" | "feb" etc..
+        <dateConst> = "today" | "tomorrow" | "yesterday" | YY-MM-DD
+        <quotedString> = "\"" <escapedString> "\"" | "'" <escapedString> "'"
+        <escapedString> = any char with backslash escaped quotes or backslashes
+        
 ### Usage Examples:
 
 This produces a document containing all tasks completed yesterday from any folder with "Work" in it's title:

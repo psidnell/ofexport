@@ -167,18 +167,10 @@ def tokenise (characters):
         tok = (TEXT, text)
         LOGGER.debug ("token: %s final flush", tok)
         tokens.append (tok)
-                             
+
+    tokens = [token for token in tokens if token[0] != SPACE]                  
     LOGGER.debug ("tokens: %s", tokens)
     return tokens
-
-def consume_whitespace (tokens):
-    while len(tokens) > 0:
-        t = tokens[0][0]
-        if t != SPACE:
-            return tokens
-        else:
-            tokens = tokens[1:]
-    return []
 
 def next_token (tokens, options):
     if len(tokens) == 0:
@@ -279,7 +271,6 @@ def access_field (x, field):
 
 def parse_expr (tokens, type_required=BOOL_TYPE, now = datetime.now(), level = 0):
     LOGGER.debug ('parsing %s tokens: %s', level, tokens)
-    tokens = consume_whitespace (tokens)
     tok, tokens = next_token (tokens, [TEXT, QUOTED_TEXT, NOT, OPEN_BRACE])
     (t,v) = tok
     
@@ -312,7 +303,6 @@ def parse_expr (tokens, type_required=BOOL_TYPE, now = datetime.now(), level = 0
             lhs_type = BOOL_TYPE
     elif t == OPEN_BRACE:
         lhs, tokens, lhs_type, lhs_string = parse_expr (tokens, now=now, level=level+1)
-        tokens = consume_whitespace (tokens)
         tokens = next_token (tokens, [CLOSE_BRACE])[1]
     elif t == QUOTED_TEXT:
         text = v
@@ -338,7 +328,6 @@ def parse_expr (tokens, type_required=BOOL_TYPE, now = datetime.now(), level = 0
         assert False, 'unexpected token: ' + v
         
     # OPERATOR 
-    tokens = consume_whitespace (tokens)
     if len(tokens) == 0:
         LOGGER.debug ('built %s:2 %s', level, lhs_string)
         assert type_required == lhs_type, "expecting a " + type_required + ' got a ' + lhs_type + ': ' + lhs_string
@@ -410,6 +399,7 @@ def make_command_filter (expr_str):
                 types = [typ]
             field = bits[2].strip()
             assert field in ALIAS_LOOKUPS, 'no such sortable field:' + field
+            field = ALIAS_LOOKUPS.get(field)
             if field in DATE_ALIAS_LOOKUPS:
                 get_date = lambda x: get_date_attrib_or_now (x, field)
                 return Sort (types, get_date, field)

@@ -17,7 +17,7 @@ limitations under the License.
 import unittest
 from datetime import datetime
 from treemodel import Task, Project, Folder
-from cmd_parser import DATE_TYPE, STRING_TYPE, tokenise, read_to_end_quote, consume_whitespace, parse_string, parse_expr, make_command_filter, make_expr_filter, ALIAS_LOOKUPS
+from cmd_parser import DATE_TYPE, STRING_TYPE, tokenise, read_to_end_quote, parse_string, parse_expr, make_command_filter, make_expr_filter, ALIAS_LOOKUPS
 from datematch import date_range_to_str
 from visitors import Sort, Prune, Flatten, Filter
 from test_helper import catch_exception
@@ -77,22 +77,15 @@ class Test_cmd_parser(unittest.TestCase):
         self.assertEquals('aa,OB,bb,CB,cc', pretty_tokens(tokenise ('aa(bb)cc')))
         self.assertEquals('aa,"bb",cc,EQ', pretty_tokens(tokenise ('aa"bb"cc=')))
         self.assertEquals('aa,"bb",cc,EQ', pretty_tokens(tokenise ("aa'bb'cc=")))
-        self.assertEquals('a,SP,NE,SP,b', pretty_tokens(tokenise ("a != b")))
-        self.assertEquals('a,SP,AND,SP,b', pretty_tokens(tokenise ("a and b")))
-        self.assertEquals('a,SP,OR,SP,b', pretty_tokens(tokenise ("a or b")))
+        self.assertEquals('a,NE,b', pretty_tokens(tokenise ("a != b")))
+        self.assertEquals('a,AND,b', pretty_tokens(tokenise ("a and b")))
+        self.assertEquals('a,OR,b', pretty_tokens(tokenise ("a or b")))
         self.assertEquals('a,CB,OR,OB,b', pretty_tokens(tokenise ("a)or(b")))
-        self.assertEquals('NOT,SP,a', pretty_tokens(tokenise ("! a")))
+        self.assertEquals('NOT,a', pretty_tokens(tokenise ("! a")))
         self.assertEquals('ab,BS,cd', pretty_tokens(tokenise ("ab\\cd")))
         self.assertEquals('work', pretty_tokens(tokenise ('work'))) # Contains an or
         
         self.assertEquals("unclosed quote", catch_exception(lambda: tokenise ('a"b')))
-
-    def test_consume_whitespace (self):
-        self.assertEquals('x', pretty_tokens (consume_whitespace ([('SP', ' '),('SP', ' '),('SP', ' '),('TXT','x')])))
-        self.assertEquals('x', pretty_tokens (consume_whitespace ([('SP', ' '),('SP', ' '),('TXT','x')])))
-        self.assertEquals('x', pretty_tokens (consume_whitespace ([('SP', ' '),('TXT','x')])))
-        self.assertEquals('x', pretty_tokens (consume_whitespace ([('TXT','x')])))
-        self.assertEquals('', pretty_tokens (consume_whitespace ([])))
         
     def test_parse_string (self):
         string, tokens = parse_string ([('SP', ' '),('TXT','x'),('TXT','y'),('CB', ')')], 'CB')
@@ -232,6 +225,14 @@ class Test_cmd_parser(unittest.TestCase):
         expr = parse_expr(tokenise ('(false) or (true)'))[0]
         self.assertTrue(expr (None))
         expr = parse_expr(tokenise ('((false) or (true))'))[0]
+        self.assertTrue(expr (None))
+    
+    def test_parse_expr_missing_brackets (self):
+        expr = parse_expr(tokenise ('true=false or true=true))'))[0]
+        self.assertTrue(expr (None))
+        expr = parse_expr(tokenise ('true=false or true=false))'))[0]
+        self.assertFalse(expr (None))
+        expr = parse_expr(tokenise ('true=true or true=false))'))[0]
         self.assertTrue(expr (None))
         
     def test_parse_expr_date(self):

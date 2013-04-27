@@ -15,6 +15,12 @@ limitations under the License.
 '''
 
 from treemodel import Visitor, TASK, PROJECT, FOLDER
+import logging
+import sys
+
+logging.basicConfig(format='%(asctime)-15s %(name)s %(levelname)s %(message)s', stream=sys.stdout)
+logger = logging.getLogger(__name__)
+logger.setLevel(level=logging.INFO)
 
 INCLUDED='INCLUDED'
 EXCLUDED='EXCLUDED'
@@ -122,7 +128,7 @@ class Sort(Visitor):
     def sort_list (self, items):
         items.sort(key=lambda x:self.get_key_fn (x))
     def __str__(self):
-        return 'sort ' + str(self.types) + ' by ' + self.nice_string
+        return 'Sort ' + str(self.types) + ' by ' + self.nice_string
 
 class Prune (Visitor):
     def __init__(self, types):
@@ -130,14 +136,16 @@ class Prune (Visitor):
         self.types = types
     def end_any (self, item):
         if item.type in self.types:
+            logger.debug ("pruning candidate id:%s %s", item.id, item.name)
             self.prune_if_empty(item)
     def prune_if_empty (self, item):
         if item.marked:
             empty = len ([x for x in item.children if x.marked]) == 0
             if empty:
+                logger.debug ("pruning id:%s %s", item.id, item.name)
                 item.marked = False
     def __str__ (self):
-        return 'prune ' + str(self.types)
+        return 'Prune ' + str(self.types)
 
 class Flatten (Visitor):
     def __init__(self, types):
@@ -146,11 +154,15 @@ class Flatten (Visitor):
     def end_any (self, item):
         self.flatten (item)
     def flatten (self, item):
+        logger.debug ("flattening candidate L1 id:%s %s %s", item.id, item.type, item.name)
         new_children = []
         for child in item.children:
             if child.type in self.types:
+                logger.debug ("flattening candidate L2 id:%s %s %s", child.id, child.type, child.name)
                 for grandchild in list(child.children):
+                    logger.debug ("flattening candidate L3 id:%s %s %s", grandchild.id, grandchild.type, grandchild.name)
                     if grandchild.type == child.type or child.type == FOLDER:
+                        logger.debug ("flattening id:%s %s %s", grandchild.id, grandchild.type, grandchild.name)
                         new_children.append(grandchild)
                         child.children.remove (grandchild)
             new_children.append(child)
@@ -158,4 +170,4 @@ class Flatten (Visitor):
         for child in new_children:
             item.add_child (child)
     def __str__ (self):
-        return 'Flatten'
+        return 'Flatten' + str(self.types)

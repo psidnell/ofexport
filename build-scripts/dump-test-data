@@ -1,2 +1,2 @@
 #!/bin/bash
-ofexport -f='Test Folder' -C -c prune -o ~/Desktop/OF.json "$@"
+ofexport -f='^Test' -C -c="^Test" -o ~/Desktop/OF.json "$@"

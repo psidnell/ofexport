@@ -9,12 +9,14 @@ mkdir target
 ################
 echo -- HELP
 ################
-#ofexport | sed -e 's/^Version: [0-9].*/Version: XXX XXX/' > src/test/data/help.txt
-ofexport | sed -e 's/^Version: [0-9].*/Version: XXX XXX/' > target/help.txt
+#ofexport --log ofexport=ERROR | sed -e 's/^Version: [0-9].*/Version: XXX XXX/' > src/test/data/help.txt
+ofexport --log ofexport=ERROR | sed -e 's/^Version: [0-9].*/Version: XXX XXX/' > target/help.txt
 diff src/test/data/help.txt target/help.txt
 
 
 #build-scripts/dump-test-data --open -o src/test/data/db-1.json
+
+#---------------------------------------------------------------------
 
 ################
 echo FORMAT TESTS - Project
@@ -25,8 +27,8 @@ for FMT in taskpaper md html opml ft json; do
     ################
     echo -- $FMT
     ################
-    #ofexport -i src/test/data/db-1.json -o src/test/data/db-1.$FMT
-    ofexport -i src/test/data/db-1.json -o target/db-1.$FMT
+    #ofexport --log ofexport=ERROR -i src/test/data/db-1.json -o src/test/data/db-1.$FMT
+    ofexport --log ofexport=ERROR -i src/test/data/db-1.json -o target/db-1.$FMT
     diff src/test/data/db-1.$FMT target/db-1.$FMT
 
 done
@@ -40,11 +42,116 @@ for FMT in taskpaper md html opml ft json; do
     ################
     echo -- $FMT
     ################
-    #ofexport -i src/test/data/db-1.json -C -o src/test/data/db-1-C.$FMT
-    ofexport -i src/test/data/db-1.json -C -o target/db-1-C.$FMT
+    #ofexport --log ofexport=ERROR -i src/test/data/db-1.json -C -o src/test/data/db-1-C.$FMT
+    ofexport --log ofexport=ERROR -i src/test/data/db-1.json -C -o target/db-1-C.$FMT
     diff src/test/data/db-1-C.$FMT target/db-1-C.$FMT
 
 done
+
+# Empty project should appear in context mode
+FMT=taskpaper
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-2.json -o src/test/data/db-2-C.$FMT
+ofexport --log ofexport=ERROR -i src/test/data/db-2.json -o target/db-2-C.$FMT
+diff src/test/data/db-2-C.$FMT target/db-2-C.$FMT
+
+#---------------------------------------------------------------------
+
+################
+echo FLATTENING TESTS
+################
+
+for TYPE in Task Folder; do
+
+    ################
+    echo -- $TYPE
+    ################
+    #ofexport --log ofexport=ERROR --open -i src/test/data/db-3.json -o src/test/data/db-3-$TYPE-flatten.taskpaper -e "flatten $TYPE"
+    ofexport --log ofexport=ERROR -i src/test/data/db-3.json -o target/db-3-$TYPE-flatten.taskpaper -e "flatten $TYPE"
+    diff src/test/data/db-3-$TYPE-flatten.taskpaper target/db-3-$TYPE-flatten.taskpaper
+
+done
+
+TYPE=Context
+################
+echo -- $TYPE
+################
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-3.json -o src/test/data/db-3-$TYPE-flatten.taskpaper -C -e "flatten $TYPE"
+ofexport --log ofexport=ERROR -i src/test/data/db-3.json -o target/db-3-$TYPE-flatten.taskpaper -C -e "flatten $TYPE"
+diff src/test/data/db-3-$TYPE-flatten.taskpaper target/db-3-$TYPE-flatten.taskpaper
+
+TYPE=Task
+################
+echo -- $TYPE abbrieviated
+################
+ofexport --log ofexport=ERROR -i src/test/data/db-3.json -o target/db-3-$TYPE-flatten.taskpaper -t flatten
+diff src/test/data/db-3-$TYPE-flatten.taskpaper target/db-3-$TYPE-flatten.taskpaper
+
+TYPE=any
+################
+echo -- $TYPE
+################
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-3.json -o src/test/data/db-3-$TYPE-flatten.taskpaper -e "flatten $TYPE"
+ofexport --log ofexport=ERROR -i src/test/data/db-3.json -o target/db-3-$TYPE-flatten.taskpaper -e "flatten $TYPE"
+diff src/test/data/db-3-$TYPE-flatten.taskpaper target/db-3-$TYPE-flatten.taskpaper
+
+#---------------------------------------------------------------------
+
+################
+echo PRUNING TESTS
+################
+
+for TYPE in Project Folder; do
+
+    ################
+    echo -- $TYPE
+    ################
+    #ofexport --log ofexport=ERROR --open -i src/test/data/db-3.json -o src/test/data/db-3-$TYPE-prune.taskpaper -e "prune $TYPE"
+    ofexport --log ofexport=ERROR -i src/test/data/db-3.json -o target/db-3-$TYPE-prune.taskpaper -e "prune $TYPE"
+    diff src/test/data/db-3-$TYPE-prune.taskpaper target/db-3-$TYPE-prune.taskpaper
+
+done
+
+TYPE=Context
+################
+echo -- $TYPE
+################
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-3.json -o src/test/data/db-3-$TYPE-prune.taskpaper -C -e "prune $TYPE"
+ofexport --log ofexport=ERROR -i src/test/data/db-3.json -o target/db-3-$TYPE-prune.taskpaper -C -e "prune $TYPE"
+diff src/test/data/db-3-$TYPE-prune.taskpaper target/db-3-$TYPE-prune.taskpaper
+
+#---------------------------------------------------------------------
+
+################
+echo SORTING TESTS
+################
+
+for TYPE in Project Folder; do
+
+    ################
+    echo -- $TYPE
+    ################
+    #ofexport --log ofexport=ERROR --open -i src/test/data/db-4.json -o src/test/data/db-4-$TYPE-sort.taskpaper -e "sort $TYPE name"
+    ofexport --log ofexport=ERROR -i src/test/data/db-4.json -o target/db-4-$TYPE-sort.taskpaper -e "sort $TYPE name"
+    diff src/test/data/db-4-$TYPE-sort.taskpaper target/db-4-$TYPE-sort.taskpaper
+
+done
+
+TYPE=Context
+################
+echo -- $TYPE
+################
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-4.json -o src/test/data/db-4-$TYPE-sort.taskpaper -C -e "sort $TYPE name"
+ofexport --log ofexport=ERROR -i src/test/data/db-4.json -o target/db-4-$TYPE-sort.taskpaper -C -e "sort $TYPE name"
+diff src/test/data/db-4-$TYPE-sort.taskpaper target/db-4-$TYPE-sort.taskpaper
+
+TYPE=Project
+################
+echo -- $TYPE abbrieviated
+################
+ofexport --log ofexport=ERROR -i src/test/data/db-4.json -o target/db-4-$TYPE-sort.taskpaper -p sort
+diff src/test/data/db-4-$TYPE-sort.taskpaper target/db-4-$TYPE-sort.taskpaper
+
+#---------------------------------------------------------------------
 
 ################
 echo FILTER TESTS
@@ -54,69 +161,69 @@ echo FILTER TESTS
 echo -- Folder
 ################
 TEST=f1
-#ofexport -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -e '(type=Folder) and (name="Sub Folder 1")'
-ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -e '(type=Folder) and (name="Sub Folder 1")'
+#ofexport --log ofexport=ERROR -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -e '(type=Folder) and (name="Sub Folder 1")'
+ofexport --log ofexport=ERROR  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -e '(type=Folder) and (name="Sub Folder 1")'
 diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
 
 TEST=f2
-#ofexport -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -e '(type=Folder) and (name="Sub Folder 2")'
-ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -e '(type=Folder) and (name="Sub Folder 2")'
+#ofexport --log ofexport=ERROR -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -e '(type=Folder) and (name="Sub Folder 2")'
+ofexport --log ofexport=ERROR  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -e '(type=Folder) and (name="Sub Folder 2")'
 diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
 
 TEST=f3
-#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -e '(type=Folder) and (name=".*Folder 2")'
-ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -e '(type=Folder) and (name="Sub Folder 2")'
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -e '(type=Folder) and (name=".*Folder 2")'
+ofexport --log ofexport=ERROR  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -e '(type=Folder) and (name="Sub Folder 2")'
 diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
 
 TEST=f4
-#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -E -e '(type=Folder) and (name=".*Folder 2")'
-ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -E -e '(type=Folder) and (name=".*Folder 2")'
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -E -e '(type=Folder) and (name=".*Folder 2")'
+ofexport --log ofexport=ERROR  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -E -e '(type=Folder) and (name=".*Folder 2")'
 diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
 
 ################
 echo -- Project
 ################
 TEST=p1
-#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -e '(type=Project) and (name="F1 Project 1")'
-ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -e '(type=Project) and (name="F1 Project 1")'
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -e '(type=Project) and (name="F1 Project 1")'
+ofexport --log ofexport=ERROR  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -e '(type=Project) and (name="F1 Project 1")'
 diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
 
 TEST=p2
-#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -e '(type=Project) and (name="F1 Project 2")'
-ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -e '(type=Project) and (name="F1 Project 2")'
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -e '(type=Project) and (name="F1 Project 2")'
+ofexport --log ofexport=ERROR  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -e '(type=Project) and (name="F1 Project 2")'
 diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
 
 TEST=p3
-#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -e '(type=Project) and (name=".*1 Project 2")'
-ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -e '(type=Project) and (name=".*1 Project 2")'
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -e '(type=Project) and (name=".*1 Project 2")'
+ofexport --log ofexport=ERROR  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -e '(type=Project) and (name=".*1 Project 2")'
 diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
 
 TEST=p4
-#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -E -e '(type=Project) and (name=".*1 Project 2")'
-ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -E -e '(type=Project) and (name=".*1 Project 2")'
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -E -e '(type=Project) and (name=".*1 Project 2")'
+ofexport --log ofexport=ERROR  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -E -e '(type=Project) and (name=".*1 Project 2")'
 diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
 
 ################
 echo -- Task
 ################
 TEST=t1
-#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -e '(type=Task) and (name="task F1 P1 1")'
-ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -e '(type=Task) and (name="task F1 P1 1")'
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -e '(type=Task) and (name="task F1 P1 1")'
+ofexport --log ofexport=ERROR  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -e '(type=Task) and (name="task F1 P1 1")'
 diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
 
 TEST=t2
-#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -e '(type=Task) and (name="task F1 P1 2")'
-ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -e '(type=Task) and (name="task F1 P1 2")'
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -e '(type=Task) and (name="task F1 P1 2")'
+ofexport --log ofexport=ERROR  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -e '(type=Task) and (name="task F1 P1 2")'
 diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
 
 TEST=t3
-#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -e '(type=Task) and (name=".*sk F1 P1 1")'
-ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -e '(type=Task) and (name=".*sk F1 P1 1")'
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -e '(type=Task) and (name=".*sk F1 P1 1")'
+ofexport --log ofexport=ERROR  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -e '(type=Task) and (name=".*sk F1 P1 1")'
 diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
 
 TEST=t4
-#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -E -e '(type=Task) and (name="task F1 P1 2")'
-ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -E -e '(type=Task) and (name="task F1 P1 2")'
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -E -e '(type=Task) and (name="task F1 P1 2")'
+ofexport --log ofexport=ERROR  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -E -e '(type=Task) and (name="task F1 P1 2")'
 diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
 
 
@@ -124,26 +231,28 @@ diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
 echo -- Context
 ################
 TEST=c1
-#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -C -e '(type=Context) and (name="Context 1")'
-ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -C -e '(type=Context) and (name="Context 1")'
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -C -e '(type=Context) and (name="Context 1")'
+ofexport --log ofexport=ERROR  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -C -e '(type=Context) and (name="Context 1")'
 diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
 
 TEST=c2
-#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -C -e '(type=Context) and (name="Context 2")'
-ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -C -e '(type=Context) and (name="Context 2")'
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -C -e '(type=Context) and (name="Context 2")'
+ofexport --log ofexport=ERROR  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -C -e '(type=Context) and (name="Context 2")'
 diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
 
 TEST=c3
-#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -C -e '(type=Context) and (name="Co.*ext 1")'
-ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -C -e '(type=Context) and (name="Co.*ext 1")'
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -C -e '(type=Context) and (name="Co.*ext 1")'
+ofexport --log ofexport=ERROR  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -C -e '(type=Context) and (name="Co.*ext 1")'
 diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
 
 TEST=c4
-#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -C -E -e '(type=Context) and (name="Context 2")'
-ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -C -E -e '(type=Context) and (name="Context 2")'
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -C -E -e '(type=Context) and (name="Context 2")'
+ofexport --log ofexport=ERROR  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -C -E -e '(type=Context) and (name="Context 2")'
 diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
 
-VERSION=`ofexport | grep Version`
+#---------------------------------------------------------------------
+
+VERSION=`ofexport --log ofexport=ERROR | grep Version`
 echo '###############################################################################'
 echo "PASSED UNIT TESTS $VERSION"
 echo '###############################################################################'
