@@ -334,5 +334,5 @@ class Test_cmd_parser(unittest.TestCase):
         self.assertEquals("expecting a Boolean got a String: field:name", catch_exception(lambda: make_expr_filter ('name', True)))
         self.assertEquals("expecting a Boolean got a Date: field:date_due", catch_exception(lambda: make_expr_filter ('due', True)))
         self.assertEquals("expecting a Date got a String: field:name", catch_exception(lambda: make_expr_filter ('due = name', True)))
+        self.assertEquals('found "name" not: [\'AND\', \'OR\', \'EQ\', \'NE\', \'CB\']', catch_exception(lambda: make_expr_filter ('not name', True)))
 
-               
