@@ -83,6 +83,7 @@ if __name__ == "__main__":
     infile = None
     template = None
     template_dir = os.environ['OFEXPORT_HOME'] + '/templates/'
+    include = True
     
     opts, args = getopt.optlist, args = getopt.getopt(sys.argv[1:],SHORT_OPTS, LONG_OPTS)
               
@@ -92,9 +93,19 @@ if __name__ == "__main__":
         elif '-o' == opt:
             file_name = arg
         elif '-i' == opt:
-            infile = arg;
+            infile = arg
+        elif '-I' == opt:
+            include = True
+        elif '-E' == opt:
+            include = False
         elif '-T' == opt:
             template = load_template (template_dir, arg)
+        elif '--log' == opt:
+            bits = arg.split('=')
+            assert len(bits) == 2
+            name = bits[0]
+            level = bits[1]
+            logging.getLogger(name).setLevel (logging.__dict__[level])
         elif opt in ('-?', '-h', '--help'):
             print_help ()
             sys.exit()
@@ -102,7 +113,6 @@ if __name__ == "__main__":
     if file_name == None:
             print_help ()
             sys.exit()
-    
     
     if file_name.find ('.') == -1:
         logger.error ('output file name must have suffix: %s', file_name)
@@ -120,17 +130,17 @@ if __name__ == "__main__":
     for opt, arg in opts:
         visitor = None
         if opt in ('--project', '-p'):
-            visitor = make_filter ('(type=Project)and(' + fix_abbrieviated_expr(arg) + ')')
+            visitor = make_filter ('(type=Project)and(' + fix_abbrieviated_expr(arg) + ')', include)
         elif opt in ('--task', '-t'):
-            visitor = make_filter ('(type=Task)and(' + fix_abbrieviated_expr(arg) + ')')
+            visitor = make_filter ('(type=Task)and(' + fix_abbrieviated_expr(arg) + ')', include)
         elif opt in ('--context', '-c'):
-            visitor = make_filter ('(type=Context)and(' + fix_abbrieviated_expr(arg) + ')')
+            visitor = make_filter ('(type=Context)and(' + fix_abbrieviated_expr(arg) + ')', include)
         elif opt in ('--folder', '-f'):
-            visitor = make_filter ('(type=Folder)and(' + fix_abbrieviated_expr(arg) + ')')
+            visitor = make_filter ('(type=Folder)and(' + fix_abbrieviated_expr(arg) + ')', include)
         elif opt in ('--any', '-a'):
-            visitor = make_filter (fix_abbrieviated_expr(arg))
+            visitor = make_filter (fix_abbrieviated_expr(arg), include)
         elif opt in ('--expression', '-e'):
-            visitor = make_filter (arg)
+            visitor = make_filter (arg, include)
         elif '-C' == opt:
             subject = root_context
         elif '-P' == opt:

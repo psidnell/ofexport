@@ -1,88 +1,151 @@
 #!/bin/bash
 
-####################
-# Run all the tests.
-#
-# If run with an argument then that argument is expected
-# to be a file format and the tool tests are run in
-# that format alone
-####################
-
 #set -o xtrace
 set -e
+export PYTHONPATH=`pwd`/src/main/python
 
-#########################################################
-# Run some tests against a test folder in my OmniFocus DB
-#########################################################
+mkdir target
 
-TEST_FOLDER="^Test"
-TEST_CONTEXT="^Test"
-INFILE=src/test/data/db-1.json
+################
+echo -- HELP
+################
+#ofexport | sed -e 's/^Version: [0-9].*/Version: XXX XXX/' > src/test/data/help.txt
+ofexport | sed -e 's/^Version: [0-9].*/Version: XXX XXX/' > target/help.txt
+diff src/test/data/help.txt target/help.txt
 
-######################
-echo INTEGRATION TESTS
-#####################
 
-function run_tool {
+#build-scripts/dump-test-data --open -o src/test/data/db-1.json
 
-    FMT=$1
-    MODE=$2
-    SLEEP=0
-    
-    ###################'
-    echo "-- $FMT $MODE"
-    ###################'
-    
-	set +e
-	mkdir -p target/$FMT
-	set -e
-	
-	for TYPE in -t -f -p -c; do
-	
-	    # Be nice to my cpu fans...
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/01$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/02$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE=a > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/03$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE!=a > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/04$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE done="[this week]" > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/05$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE done!="[this week]" > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/06$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE due="[this week]" > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/07$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE due!="[this week]" > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/08$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE completed="[this week]" > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/09$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE completed!="[this week]" > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/10$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE start="[this week]" > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/11$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE start!="[this week]" > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/12$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE done="[this week]" > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/13$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE done!="[this week]" > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/14$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE due="[this week]" > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/15$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE due!="[this week]" > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/16$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE flagged > /dev/null
-        sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/17$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE !flagged > /dev/null
-        
-        #sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/18$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE sort > /dev/null
-        #sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/19$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE sort=start > /dev/null
-        #sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/20$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE sort=due > /dev/null
-        #sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/21$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE sort=completed > /dev/null
-        #sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/22$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE prune > /dev/null
-        #sleep $SLEEP; nice -20 python src/main/python/ofexport.py -i $INFILE -o target/$FMT/23$MODE$TYPE.$FMT $MODE -f="$TEST_FOLDER" $TYPE flat > /dev/null
-        
-    done
-	
-}
+################
+echo FORMAT TESTS - Project
+################
 
-FMT=$1
+for FMT in taskpaper md html opml ft json; do
 
-if [ -z "$FMT" ]; then
-    for FMT in tp md html opml ft json; do
-        for MODE in -P -C; do
-            run_tool $FMT $MODE
-        done
-    done
-else
-    run_tool $FMT -P
-    run_tool $FMT -C
-fi
+    ################
+    echo -- $FMT
+    ################
+    #ofexport -i src/test/data/db-1.json -o src/test/data/db-1.$FMT
+    ofexport -i src/test/data/db-1.json -o target/db-1.$FMT
+    diff src/test/data/db-1.$FMT target/db-1.$FMT
+
+done
+
+################
+echo FORMAT TESTS - Context
+################
+
+for FMT in taskpaper md html opml ft json; do
+
+    ################
+    echo -- $FMT
+    ################
+    #ofexport -i src/test/data/db-1.json -C -o src/test/data/db-1-C.$FMT
+    ofexport -i src/test/data/db-1.json -C -o target/db-1-C.$FMT
+    diff src/test/data/db-1-C.$FMT target/db-1-C.$FMT
+
+done
+
+################
+echo FILTER TESTS
+################
+
+################
+echo -- Folder
+################
+TEST=f1
+#ofexport -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -e '(type=Folder) and (name="Sub Folder 1")'
+ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -e '(type=Folder) and (name="Sub Folder 1")'
+diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
+
+TEST=f2
+#ofexport -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -e '(type=Folder) and (name="Sub Folder 2")'
+ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -e '(type=Folder) and (name="Sub Folder 2")'
+diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
+
+TEST=f3
+#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -e '(type=Folder) and (name=".*Folder 2")'
+ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -e '(type=Folder) and (name="Sub Folder 2")'
+diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
+
+TEST=f4
+#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -E -e '(type=Folder) and (name=".*Folder 2")'
+ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -E -e '(type=Folder) and (name=".*Folder 2")'
+diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
+
+################
+echo -- Project
+################
+TEST=p1
+#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -e '(type=Project) and (name="F1 Project 1")'
+ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -e '(type=Project) and (name="F1 Project 1")'
+diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
+
+TEST=p2
+#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -e '(type=Project) and (name="F1 Project 2")'
+ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -e '(type=Project) and (name="F1 Project 2")'
+diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
+
+TEST=p3
+#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -e '(type=Project) and (name=".*1 Project 2")'
+ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -e '(type=Project) and (name=".*1 Project 2")'
+diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
+
+TEST=p4
+#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -E -e '(type=Project) and (name=".*1 Project 2")'
+ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -E -e '(type=Project) and (name=".*1 Project 2")'
+diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
+
+################
+echo -- Task
+################
+TEST=t1
+#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -e '(type=Task) and (name="task F1 P1 1")'
+ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -e '(type=Task) and (name="task F1 P1 1")'
+diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
+
+TEST=t2
+#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -e '(type=Task) and (name="task F1 P1 2")'
+ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -e '(type=Task) and (name="task F1 P1 2")'
+diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
+
+TEST=t3
+#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -e '(type=Task) and (name=".*sk F1 P1 1")'
+ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -e '(type=Task) and (name=".*sk F1 P1 1")'
+diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
+
+TEST=t4
+#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -E -e '(type=Task) and (name="task F1 P1 2")'
+ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -E -e '(type=Task) and (name="task F1 P1 2")'
+diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
+
+
+################
+echo -- Context
+################
+TEST=c1
+#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -C -e '(type=Context) and (name="Context 1")'
+ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -C -e '(type=Context) and (name="Context 1")'
+diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
+
+TEST=c2
+#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -C -e '(type=Context) and (name="Context 2")'
+ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -C -e '(type=Context) and (name="Context 2")'
+diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
+
+TEST=c3
+#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -C -e '(type=Context) and (name="Co.*ext 1")'
+ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -C -e '(type=Context) and (name="Co.*ext 1")'
+diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
+
+TEST=c4
+#ofexport --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -C -E -e '(type=Context) and (name="Context 2")'
+ofexport  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -C -E -e '(type=Context) and (name="Context 2")'
+diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
 
 VERSION=`ofexport | grep Version`
 echo '###############################################################################'
-echo "PASSED INTEGRATION TESTS $VERSION"
+echo "PASSED UNIT TESTS $VERSION"
 echo '###############################################################################'
+
+

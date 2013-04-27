@@ -7,15 +7,17 @@ def print_help ():
     print
     print 'ofexport [options...] -o file_name'
     print
-    print
     print 'options:'
     print '  -h,-?,--help       : print help'
     print '  -C                 :  context mode (as opposed to project mode)'
     print '  -P                 :  project mode - the default (as opposed to context mode)'
+    print '  -I                 :  include mode (as opposed to exclude mode)'
+    print '  -E                 :  exclude mode - the default (as opposed to include mode)'
     print '  -o file_name       : the output file name, must end in a recognised suffix - see documentation'
     print '  -i file_name       : read file_name instead of the OmniFocus database, must be in json format'
     print '  -T - template_name : use the specified template instead of one derived from the output file extension'
     print '  --open             : open the output file with the registered application (if one is installed)'
+    print '  --log name=level   : set a logger to a particular level'
     print
     print 'filters:'
     print '  -a,--any arg     : filter tasks, projects, contexts and folders against the argument'
@@ -40,5 +42,5 @@ def print_help ():
     print
     print '  See DOCUMENTATION.md for more information'
 
-SHORT_OPTS = 'h?CPo:i:T:a:t:p:f:c:e:'
-LONG_OPTS = ['help','open','any=','task=','project=','folder=','context=','expression=']
+SHORT_OPTS = 'h?CPIEo:i:T:a:t:p:f:c:e:'
+LONG_OPTS = ['help','open','log=','any=','task=','project=','folder=','context=','expression=']

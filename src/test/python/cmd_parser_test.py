@@ -21,6 +21,7 @@ from cmd_parser import tokenise, read_to_end_quote, consume_whitespace, parse_st
 from datematch import date_range_to_str
 from visitors import Sort, Prune, Flatten, Filter
 from test_helper import catch_exception
+import logging
 
 def pretty_tokens (tokens):
     result = []
@@ -276,17 +277,27 @@ class Test_cmd_parser(unittest.TestCase):
         self.assertFalse(expr (Folder(name="Misc")))
         
     def test_bug_2013_04_26 (self):
-        #expr = parse_expr(tokenise ('text=^Work$|^Miscellaneous$'))[0]
-        #self.assertFalse(expr (Folder(name="Misc")))
-        #self.assertTrue(expr (Folder(name="Miscellaneous")))
+        expr = parse_expr(tokenise ('text=^Work$|^Miscellaneous$'))[0]
+        self.assertFalse(expr (Folder(name="Misc")))
+        self.assertTrue(expr (Folder(name="Miscellaneous")))
         
         expr = parse_expr(tokenise ('(type=Folder)'))[0]
-        self.assertTrue(expr (Folder(name="Miscellaneous$")))
+        self.assertTrue(expr (Folder(name="Miscellaneous")))
         
         expr = parse_expr(tokenise ('(type=Folder)and(text=^Work$|^Miscellaneous$)'))[0]
         self.assertFalse(expr (Folder(name="Misc")))
         self.assertTrue(expr (Folder(name="Miscellaneous")))
+    
+    def test_bug_2013_04_27 (self):
+        logging.getLogger('cmd_parser').setLevel (logging.DEBUG)
+        expr = parse_expr(tokenise ('(type=Folder) and !name=".*Folder 2"'))[0]
+        self.assertTrue(expr (Folder(name="Miscellaneous")))
+        self.assertFalse(expr (Folder(name="xxx Folder 2")))
         
+        expr = parse_expr(tokenise ('(type=Folder) and name!=".*Folder 2"'))[0]
+        self.assertTrue(expr (Folder(name="Miscellaneous")))
+        self.assertFalse(expr (Folder(name="xxx Folder 2")))
+    
     def test_parse_expr_none(self):
         tue = datetime.strptime('Apr 9 2013 11:33PM', '%b %d %Y %I:%M%p')
         expr = parse_expr(tokenise ('due = [none]'))[0]
@@ -314,4 +325,4 @@ class Test_cmd_parser(unittest.TestCase):
         self.assertEquals("no such sortable field:weight", catch_exception(lambda: make_command_filter ("sort Task weight")))
 
     def test_make_expr_filter (self):
-        self.assertEquals (Filter, type(make_expr_filter ('type="Context"')))        
+        self.assertEquals (Filter, type(make_expr_filter ('type="Context"', True)))        

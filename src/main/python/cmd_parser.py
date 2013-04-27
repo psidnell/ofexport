@@ -419,18 +419,18 @@ def make_command_filter (expr_str):
                 return Sort (types, get_field, field)
     return None
 
-def make_expr_filter (expr_str):
+def make_expr_filter (expr_str, include):
     match_fn, tokens_left, expr_string = parse_expr (tokenise (expr_str))
     if len (tokens_left) > 0:
         assert False, 'don\'t know what to do with: ' + str (tokens_left)
     match_fn_2 = lambda x,y: match_fn (x)
-    return Filter ([TASK, PROJECT, CONTEXT, FOLDER], match_fn_2, "zzz", True, expr_string)
+    return Filter ([TASK, PROJECT, CONTEXT, FOLDER], match_fn_2, "zzz", include, expr_string)
 
-def make_filter (expr_str):
+def make_filter (expr_str, include):
     
     filtr = make_command_filter (expr_str)
     if filtr == None:
-        filtr = make_expr_filter (expr_str)
+        filtr = make_expr_filter (expr_str, include)
     return filtr
 
             
