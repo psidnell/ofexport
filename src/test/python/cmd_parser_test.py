@@ -17,7 +17,7 @@ limitations under the License.
 import unittest
 from datetime import datetime
 from treemodel import Task, Project, Folder
-from cmd_parser import tokenise, read_to_end_quote, consume_whitespace, parse_string, parse_expr, make_command_filter, make_expr_filter, ALIAS_LOOKUPS
+from cmd_parser import DATE_TYPE, STRING_TYPE, tokenise, read_to_end_quote, consume_whitespace, parse_string, parse_expr, make_command_filter, make_expr_filter, ALIAS_LOOKUPS
 from datematch import date_range_to_str
 from visitors import Sort, Prune, Flatten, Filter
 from test_helper import catch_exception
@@ -84,8 +84,6 @@ class Test_cmd_parser(unittest.TestCase):
         self.assertEquals('NOT,SP,a', pretty_tokens(tokenise ("! a")))
         self.assertEquals('ab,BS,cd', pretty_tokens(tokenise ("ab\\cd")))
         self.assertEquals('work', pretty_tokens(tokenise ('work'))) # Contains an or
-        self.assertEquals('OSB,a,CSB', pretty_tokens(tokenise ("[a]")))
-
         
         self.assertEquals("unclosed quote", catch_exception(lambda: tokenise ('a"b')))
 
@@ -238,12 +236,19 @@ class Test_cmd_parser(unittest.TestCase):
         
     def test_parse_expr_date(self):
         tue = datetime.strptime('Apr 9 2013 11:33PM', '%b %d %Y %I:%M%p')
-        expr = parse_expr(tokenise ('[today]'), now=tue)[0]
+        wed = datetime.strptime('Apr 10 2013 11:33PM', '%b %d %Y %I:%M%p')
+        expr = parse_expr(tokenise ('today'), type_required=STRING_TYPE, now=tue)[0]
+        self.assertEquals ("today", expr(None))
+        expr = parse_expr(tokenise ('today'), type_required = DATE_TYPE, now=tue)[0]
         self.assertEquals ("2013-04-09", date_range_to_str (expr(None)))
-        expr = parse_expr(tokenise ('[last tues]'), now=tue)[0]
+        expr = parse_expr(tokenise ('"last tues"'), type_required = DATE_TYPE, now=tue)[0]
         self.assertEquals ("2013-04-02", date_range_to_str (expr(None)))
-        expr = parse_expr(tokenise ('due = [today]'), now=tue)[0]
+        expr = parse_expr(tokenise ('due = today'), now=tue)[0]
         self.assertTrue (expr(Task(name="", date_due=tue)))
+        expr = parse_expr(tokenise ('due = start'), now=tue)[0]
+        self.assertTrue (expr(Task(name="", date_due=tue, date_to_start=tue)))
+        self.assertFalse (expr(Task(name="", date_due=tue, date_to_start=wed)))
+        self.assertFalse (expr(Task(name="", date_due=tue)))
         
     def test_parse_expr_type(self):
         expr = parse_expr(tokenise ('type="Task"'))[0]
@@ -289,7 +294,6 @@ class Test_cmd_parser(unittest.TestCase):
         self.assertTrue(expr (Folder(name="Miscellaneous")))
     
     def test_bug_2013_04_27 (self):
-        logging.getLogger('cmd_parser').setLevel (logging.DEBUG)
         expr = parse_expr(tokenise ('(type=Folder) and !name=".*Folder 2"'))[0]
         self.assertTrue(expr (Folder(name="Miscellaneous")))
         self.assertFalse(expr (Folder(name="xxx Folder 2")))
@@ -300,13 +304,13 @@ class Test_cmd_parser(unittest.TestCase):
     
     def test_parse_expr_none(self):
         tue = datetime.strptime('Apr 9 2013 11:33PM', '%b %d %Y %I:%M%p')
-        expr = parse_expr(tokenise ('due = [none]'))[0]
+        expr = parse_expr(tokenise ('due = none'))[0]
         self.assertTrue (expr(Task(name="")))
         self.assertFalse (expr(Task(name="", date_due=tue)))
         
     def test_parse_expr_any(self):
         tue = datetime.strptime('Apr 9 2013 11:33PM', '%b %d %Y %I:%M%p')
-        expr = parse_expr(tokenise ('due = [any]'))[0]
+        expr = parse_expr(tokenise ('due = any'))[0]
         self.assertFalse (expr(Task(name="")))
         self.assertTrue (expr(Task(name="", date_due=tue)))
         
@@ -325,4 +329,10 @@ class Test_cmd_parser(unittest.TestCase):
         self.assertEquals("no such sortable field:weight", catch_exception(lambda: make_command_filter ("sort Task weight")))
 
     def test_make_expr_filter (self):
-        self.assertEquals (Filter, type(make_expr_filter ('type="Context"', True)))        
+        self.assertEquals (Filter, type(make_expr_filter ('type="Context"', True))) 
+        
+        self.assertEquals("expecting a Boolean got a String: field:name", catch_exception(lambda: make_expr_filter ('name', True)))
+        self.assertEquals("expecting a Boolean got a Date: field:date_due", catch_exception(lambda: make_expr_filter ('due', True)))
+        self.assertEquals("expecting a Date got a String: field:name", catch_exception(lambda: make_expr_filter ('due = name', True)))
+
+               

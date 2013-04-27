@@ -56,10 +56,19 @@ def build_date_alias_lookups ():
     result.update (mk_map (COMPLETED_ALIASES))
     result.update (mk_map (DUE_ALIASES))
     return result
+
+def build_string_alias_lookups (): 
+    mk_map = lambda x: {alias:x[0] for alias in x}
+    result = {}
+    result.update (mk_map (NAME_ALIASES))
+    result.update (mk_map (TYPE_ALIASES))
+    return result
     
 ALIAS_LOOKUPS = build_alias_lookups ()
 
 DATE_ALIAS_LOOKUPS = build_date_alias_lookups ()
+
+STRING_ALIAS_LOOKUPS = build_string_alias_lookups ()
 
 # TOKENS
 SPACE = 'SP'
@@ -67,8 +76,6 @@ TEXT = 'TXT'
 QUOTED_TEXT = 'QTXT'
 OPEN_BRACE = 'OB'
 CLOSE_BRACE = 'CB'
-OPEN_SQUARE_BRACE = 'OSB'
-CLOSE_SQUARE_BRACE = 'CSB'
 NOT_EQUAL = 'NE'
 EQUAL = 'EQ'
 DOUBLE_QUOTE = 'DQ'
@@ -77,30 +84,6 @@ AND = 'AND'
 OR = 'OR'
 NOT = 'NOT'
 BACKSLASH = 'BS'
-ESCAPE = 'ESC'
-
-TOKEN_PATTERNS_OLD = [
-          # tok name, pattern, text equivalent
-          
-          (TEXT, '\\\\"', '"'),
-          (TEXT, "\\\\'", "'"),
-          (TEXT, "\\='", "="),
-          (OPEN_BRACE, '\(', '('),
-          (CLOSE_BRACE, '\)', ')'),
-          (OPEN_SQUARE_BRACE, '\[', '['),
-          (CLOSE_SQUARE_BRACE, '\]', ']'),
-          (NOT_EQUAL, '!=', '!='),
-          (EQUAL, '=', '='),
-          (DOUBLE_QUOTE, '"', '"'),
-          (AND, ' and ', ' and '),
-          (AND, '^and$', 'and'),
-          (OR, ' or ', ' or '),
-          (OR, '^or$', 'or'),
-          (NOT, '!', '!'),
-          (BACKSLASH, '\\\\', '\\'),
-          (SPACE, ' ', ' ')
-          ]
-
 
 TOKEN_PATTERNS = [
           # tok name, pattern, text equivalent
@@ -114,12 +97,15 @@ TOKEN_PATTERNS = [
           (EQUAL, re.compile('^(=)')),
           (NOT_EQUAL, re.compile('^(!=)')),
           (NOT, re.compile('^(!)')),
-          (BACKSLASH, re.compile('^(\\\\)')),
-          (OPEN_SQUARE_BRACE, re.compile('^(\[)')),
-          (CLOSE_SQUARE_BRACE, re.compile('^(\])')),
+          (BACKSLASH, re.compile('^(\\\\)'))
           ]
 
 ESCAPEABLE_CHARS = '"\\'
+
+
+BOOL_TYPE = 'Boolean'
+DATE_TYPE = 'Date'
+STRING_TYPE = 'String'
 
 def read_to_end_quote (quote_char,remainder):
     text = ""
@@ -246,34 +232,35 @@ def reorder (lhs, rhs):
         return rhs, lhs
     return lhs, rhs
     
-def eq_fn (lhs, rhs, lhs_is_field):
+def eq_fn (lhs, rhs):
     lhs, rhs = reorder (lhs, rhs)
-    if lhs == None and rhs == None:
-        result = True
-    elif type (lhs) == datetime or type (rhs) == tuple:
-        LOGGER.debug ('eval =: (%s) = (%s)', lhs, date_range_to_str(rhs))
+    LOGGER.debug ('eval =: (%s) = (%s)', lhs, rhs)
+    
+    if type(rhs) == tuple:
+        LOGGER.debug ('eval 1 =: (%s) = (%s)', lhs, rhs)
         result = match_date_against_range (lhs, rhs)
-    elif type (lhs) == tuple and rhs == None:
-        LOGGER.debug ('eval =:  (%s) = (%s)', date_range_to_str(lhs), rhs)
-        result = match_date_against_range (rhs, lhs)
-    elif type (lhs) == unicode and type (rhs) == unicode:
-        if lhs_is_field:
-            LOGGER.debug ('eval =: (%s) matches (%s)', lhs, rhs)
+    elif (lhs == None and rhs != None) or (lhs != None and rhs == None):
+        LOGGER.debug ('eval 2 =: (%s) = (%s)', lhs, rhs)
+        result= False
+    elif type(lhs) == type(rhs):
+        if type(lhs) == str or type(lhs) == unicode: 
+            LOGGER.debug ('eval 3 =: (%s) = (%s)', lhs, rhs)
             result = re.search(rhs, lhs) != None
         else:
-            LOGGER.debug ('eval =: (%s) = (%s)', lhs, rhs)
+            LOGGER.debug ('eval 4 =: (%s) = (%s)', lhs, rhs)
             result = lhs == rhs
-    elif type(lhs) == bool and type (rhs) == bool:
-        LOGGER.debug ('eval =: (%s) = (%s)', lhs, rhs)
-        result = lhs == rhs
+    elif type(rhs) == tuple:
+        LOGGER.debug ('eval 5 =: (%s) = (%s)', lhs, rhs)
+        result = match_date_against_range (lhs, rhs)
     else:
         assert False, 'unknown or incompatible types: ' + str(type(lhs)) + ' and ' + str(type(rhs))
+    
     LOGGER.debug ('result =: (%s)', result)
     return result
 
-def ne_fn (lhs, rhs, lhs_is_field):
+def ne_fn (lhs, rhs):
     LOGGER.debug ('eval !=: (%s) != (%s)', lhs, rhs)
-    result = not eq_fn (lhs, rhs, lhs_is_field)
+    result = not eq_fn (lhs, rhs)
     LOGGER.debug ('result !=: (%s)', result)
     return result
 
@@ -290,89 +277,101 @@ def access_field (x, field):
     LOGGER.debug ('accessing field %s.%s=\'%s\'', type(x), field, result)
     return adapt (result)
 
-def parse_expr (tokens, now = datetime.now(), lhs_is_field = False, level = 0):
+def parse_expr (tokens, type_required=BOOL_TYPE, now = datetime.now(), level = 0):
     LOGGER.debug ('parsing %s tokens: %s', level, tokens)
     tokens = consume_whitespace (tokens)
-    tok, tokens = next_token (tokens, [TEXT, QUOTED_TEXT, NOT, OPEN_BRACE, OPEN_SQUARE_BRACE])
+    tok, tokens = next_token (tokens, [TEXT, QUOTED_TEXT, NOT, OPEN_BRACE])
     (t,v) = tok
     
     # NOT
     if t == NOT:
-        expr, tokens, expr_string = parse_expr (tokens, now=now, level=level+1)
+        assert type_required == BOOL_TYPE, "expecting a ' + required_type' expression, not " + BOOL_TYPE
+        expr, tokens, expr_type, expr_string = parse_expr (tokens, now=now, level=level+1)
+        assert expr_type == BOOL_TYPE, "not must have a boolean argument"
         LOGGER.debug ('built %s:1 %s', level, expr_string)
-        return (lambda x: not expr (x)), tokens, 'not(' + expr_string + ')'
+        return (lambda x: not expr (x)), tokens, BOOL_TYPE, 'not(' + expr_string + ')'
     
     # LHS
     if t == TEXT and v =='true':
         lhs = lambda x: True
         lhs_string = 'true'
+        lhs_type = BOOL_TYPE
     elif t == TEXT and v =='false':
         lhs = lambda x: False
         lhs_string = 'true'
+        lhs_type = BOOL_TYPE
     elif t == TEXT and v in ALIAS_LOOKUPS:
         field = ALIAS_LOOKUPS[v]
         lhs = lambda x: access_field(x, field)
         lhs_string = 'field:' + field
-        lhs_is_field = True
-    #elif t == TEXT and v == 'none':
-    #    lhs = lambda x: None
-    #    lhs_is_field = True
+        if field in DATE_ALIAS_LOOKUPS:
+            lhs_type = DATE_TYPE
+        elif field in STRING_ALIAS_LOOKUPS:
+            lhs_type = STRING_TYPE
+        else:
+            lhs_type = BOOL_TYPE
     elif t == OPEN_BRACE:
-        lhs, tokens, lhs_string = parse_expr (tokens, now=now, level=level+1)
+        lhs, tokens, lhs_type, lhs_string = parse_expr (tokens, now=now, level=level+1)
         tokens = consume_whitespace (tokens)
         tokens = next_token (tokens, [CLOSE_BRACE])[1]
-    elif t == OPEN_SQUARE_BRACE:
-        datespec, tokens = parse_string (tokens, CLOSE_SQUARE_BRACE)
-        rng = process_date_specifier (now, datespec)
-        lhs = lambda x: rng
-        lhs_string = '[' + date_range_to_str(rng) + ']'
-        tokens = next_token (tokens, [CLOSE_SQUARE_BRACE])[1]
-    elif t == DOUBLE_QUOTE: #<------------------------------------------- CAN THIS EVER HAPPEN?
-        string, tokens = parse_string (tokens, [DOUBLE_QUOTE])
-        lhs = lambda x: string
-        tokens = next_token (tokens, [DOUBLE_QUOTE])[1]
-        lhs_string = '"' + string + '"'
     elif t == QUOTED_TEXT:
         text = v
         lhs = lambda x: unicode (text)
         lhs_string = '"' + v + '"'
+        lhs_type = STRING_TYPE
+        if type_required == DATE_TYPE:
+            rng = process_date_specifier (now, text)
+            lhs = lambda x: rng
+            lhs_string = '[' + date_range_to_str(rng) + ']'
+            lhs_type = DATE_TYPE
     elif t == TEXT:
         text = v
         lhs = lambda x: unicode (text)
         lhs_string = text
+        lhs_type = STRING_TYPE
+        if type_required == DATE_TYPE:
+            rng = process_date_specifier (now, text)
+            lhs = lambda x: rng
+            lhs_string = '[' + date_range_to_str(rng) + ']'
+            lhs_type = DATE_TYPE
     else:
         assert False, 'unexpected token: ' + v
-
+        
     # OPERATOR 
     tokens = consume_whitespace (tokens)
     if len(tokens) == 0:
         LOGGER.debug ('built %s:2 %s', level, lhs_string)
-        return lhs, tokens, lhs_string
+        assert type_required == lhs_type, "expecting a " + type_required + ' got a ' + lhs_type + ': ' + lhs_string
+        return lhs, tokens, lhs_type, lhs_string
     
     tok, tokens = next_token (tokens,[AND, OR, EQUAL, NOT_EQUAL, CLOSE_BRACE])
     op,v = tok
     if op == CLOSE_BRACE:
         LOGGER.debug ('built %s:3 %s', level, lhs_string)
-        return lhs, [tok] + tokens, lhs_string
+        assert type_required == lhs_type, "expecting a " + type_required + ' got a ' + lhs_type + ': ' + lhs_string
+        return lhs, [tok] + tokens, lhs_type, lhs_string
         
-    rhs, tokens, rhs_string = parse_expr (tokens, now=now, lhs_is_field = lhs_is_field, level=level+1)
-    
+    rhs, tokens, rhs_type, rhs_string = parse_expr (tokens, type_required = lhs_type, now=now, level=level+1)         
+    assert lhs_type == rhs_type, "incompatible types, " + lhs_type + ' ' + rhs_type
+
+    assert type_required == BOOL_TYPE, "expecting a " + type_required
+
     if op == AND:
         expr_string = '(' + lhs_string + ')AND(' + rhs_string + ')' 
         LOGGER.debug ('built %s:4 %s', level, expr_string)
-        return (lambda x: and_fn(lhs, rhs, x)), tokens, expr_string
+        return (lambda x: and_fn(lhs, rhs, x)), tokens, BOOL_TYPE, expr_string
     elif op == OR:
         expr_string = '(' + lhs_string + ')OR(' + rhs_string + ')' 
         LOGGER.debug ('built %s:5 %s', level, expr_string)
-        return (lambda x: or_fn(lhs, rhs, x)), tokens, expr_string
+        return (lambda x: or_fn(lhs, rhs, x)), tokens, BOOL_TYPE, expr_string
     elif op == EQUAL:
         expr_string = '(' + lhs_string + ')=(' + rhs_string + ')' 
         LOGGER.debug ('built %s:6 %s', level, expr_string)
-        return (lambda x: eq_fn (lhs (x), rhs (x), lhs_is_field)), tokens, expr_string 
+        return (lambda x: eq_fn (lhs (x), rhs (x))), tokens, BOOL_TYPE, expr_string 
     elif op == NOT_EQUAL:
         expr_string = '(' + lhs_string + ')!=(' + rhs_string + ')' 
         LOGGER.debug ('built %s:7 %s', level, expr_string)
-        return (lambda x: ne_fn (lhs (x), rhs (x), lhs_is_field)), tokens, expr_string 
+        return (lambda x: ne_fn (lhs (x), rhs (x))), tokens, BOOL_TYPE, expr_string 
 
 def get_date_attrib_or_now (item, attrib):
     if not attrib in item.__dict__:
@@ -420,9 +419,10 @@ def make_command_filter (expr_str):
     return None
 
 def make_expr_filter (expr_str, include):
-    match_fn, tokens_left, expr_string = parse_expr (tokenise (expr_str))
+    match_fn, tokens_left, expr_type, expr_string = parse_expr (tokenise (expr_str))
     if len (tokens_left) > 0:
         assert False, 'don\'t know what to do with: ' + str (tokens_left)
+    assert expr_type == BOOL_TYPE, "filter must have a boolean argument"
     match_fn_2 = lambda x,y: match_fn (x)
     return Filter ([TASK, PROJECT, CONTEXT, FOLDER], match_fn_2, "zzz", include, expr_string)
 
