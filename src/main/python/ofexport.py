@@ -136,9 +136,10 @@ if __name__ == "__main__":
         elif '-P' == opt:
             subject = root_project
         
-        if visitor != None: 
-            logger.info (str (visitor))
-            traverse ('Filter: %s', visitor, subject, project_mode=project_mode)
+        if visitor != None:
+            logger.info ('running filter %s', visitor)
+            traverse (visitor, subject, project_mode=project_mode)
+            
                     
     logger.info ('Generating: %s', file_name)
     

@@ -284,7 +284,7 @@ def adapt (x):
 
 def access_field (x, field):
     if not field in x.__dict__:
-        assert False, x.type + " does not have a '" + field + "'"
+        return None
     result = x.__dict__[field]
     result = adapt (result)
     LOGGER.debug ('accessing field %s.%s=\'%s\'', type(x), field, result)
@@ -391,7 +391,7 @@ def make_command_filter (expr_str):
             assert len (bits) == 2, 'prune takes one node type argument, got: ' + expr_str
             typ = bits[1].strip ()
             if typ == 'any' or typ == 'all':
-                return Prune ([TASK, PROJECT, CONTEXT, FOLDER])
+                return Prune ([PROJECT, CONTEXT, FOLDER]) # NOT TASKS!!!
             assert typ in [TASK, PROJECT, CONTEXT, FOLDER], 'no such node type in prune: ' + typ
             return Prune ([typ])
         if cmd in FLATTEN_ALIASES:
@@ -431,6 +431,6 @@ def make_filter (expr_str):
     filtr = make_command_filter (expr_str)
     if filtr == None:
         filtr = make_expr_filter (expr_str)
-    LOGGER.info ('command filter %s', filtr)
+    return filtr
 
             
