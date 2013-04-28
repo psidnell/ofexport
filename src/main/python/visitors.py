@@ -112,6 +112,8 @@ class Filter(BaseFilterVisitor):
         BaseFilterVisitor.begin_any (self, item)
         if item.type in self.types and self.match_required(item):
             matched = self.match_fn(item)
+            if matched:
+                logger.debug ("matched id:%s %s %s", item.id, item.type, item.name)
             self.set_item_matched(item, matched);
     def __str__(self):
         return includes (self.include) + ' ' + str(self.types) + ' where ' + self.nice_string
@@ -124,6 +126,7 @@ class Sort(Visitor):
         self.nice_string = nice_string
     def begin_any (self, item):
         if item.type in self.types:
+            logger.debug ("sorting id:%s %s %s", item.id, item.type, item.name)
             self.sort_list(item.children)
     def sort_list (self, items):
         items.sort(key=lambda x:self.get_key_fn (x))

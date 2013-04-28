@@ -70,13 +70,19 @@ def load_template (template_dir, name):
 
 def fix_abbrieviated_expr (typ, arg):
     if arg.startswith ('=') or arg.startswith ('!='):
-        result = '(type=' + typ + ') and (name' + arg + ')'
+        if typ == 'any' or typ == 'all':
+            result = 'name' + arg + ''
+        else:
+            result = '(type=' + typ + ') and (name' + arg + ')'
     elif arg in ['prune', 'flatten']:
         result = arg + ' ' + typ
     elif arg == 'sort':
         result = arg + ' ' + typ + ' text'
     else:
-        result = arg
+        if typ == 'any' or typ == 'all':
+            result = arg
+        else:
+            result = '(type=' + typ + ') and (' + arg + ')'
     logger.debug ("adapted argument: '%s'", result)
     return result
 
@@ -103,12 +109,12 @@ if __name__ == "__main__":
             file_name = arg
         elif '-i' == opt:
             infile = arg
-        elif '-I' == opt:
-            include = True
-        elif '-E' == opt:
-            include = False
         elif '-T' == opt:
             template = load_template (template_dir, arg)
+        elif '-v' == opt:
+            logging.getLogger(__name__).setLevel (logging.DEBUG)
+            logging.getLogger('cmd_parser').setLevel (logging.DEBUG)
+            logging.getLogger('visitors').setLevel (logging.DEBUG)
         elif '--log' == opt:
             bits = arg.split('=')
             assert len(bits) == 2
@@ -154,13 +160,19 @@ if __name__ == "__main__":
             fixed_arg = fix_abbrieviated_expr(FOLDER, arg)
             visitor = make_filter (fixed_arg, include)
         elif opt in ('--any', '-a'):
-            visitor = make_filter (fix_abbrieviated_expr(arg), include)
-        elif opt in ('--expression', '-e'):
-            visitor = make_filter (arg, include)
+            visitor = make_filter (fix_abbrieviated_expr('any', arg), include)
         elif '-C' == opt:
+            logger.info ('context mode')
             subject = root_context
         elif '-P' == opt:
+            logger.info ('project mode')
             subject = root_project
+        elif '-I' == opt:
+            logger.info ('include mode')
+            include = True
+        elif '-E' == opt:
+            include = False
+            logger.info ('exclude mode')
         
         logger.debug ("created filter %s", visitor)
         if visitor != None:

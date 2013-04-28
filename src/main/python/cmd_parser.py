@@ -205,10 +205,9 @@ def and_fn (lhs_fn, rhs_fn, x):
     return rhs
 
 def or_fn (lhs_fn, rhs_fn, x):
-    
     lhs = lhs_fn (x)
     LOGGER.debug ('eval or: lhs=(%s)', lhs)
-    assert type(lhs) == bool
+    assert type(lhs) == bool, "expected " + BOOL_TYPE + ' but got ' + str(type(lhs))
     if lhs:
         return True;
     
@@ -263,6 +262,7 @@ def adapt (x):
 
 def access_field (x, field):
     if not field in x.__dict__:
+        LOGGER.debug ('accessing field %s.%s - not in dict, returning None', type(x), field)
         return None
     result = x.__dict__[field]
     result = adapt (result)
@@ -279,7 +279,7 @@ def parse_expr (tokens, type_required=BOOL_TYPE, now = datetime.now(), level = 0
         assert type_required == BOOL_TYPE, "expecting a ' + required_type' expression, not " + BOOL_TYPE
         expr, tokens, expr_type, expr_string = parse_expr (tokens, now=now, level=level+1)
         assert expr_type == BOOL_TYPE, "not must have a boolean argument"
-        LOGGER.debug ('built %s:1 %s', level, expr_string)
+        LOGGER.debug ('built %s:1 %s %s', level, expr_type, expr_string)
         return (lambda x: not expr (x)), tokens, BOOL_TYPE, 'not(' + expr_string + ')'
     
     # LHS
@@ -326,40 +326,42 @@ def parse_expr (tokens, type_required=BOOL_TYPE, now = datetime.now(), level = 0
             lhs_type = DATE_TYPE
     else:
         assert False, 'unexpected token: ' + v
-        
+    
+    LOGGER.debug ('built %s:2 %s %s', level, lhs_type, lhs_string)
+    
     # OPERATOR 
     if len(tokens) == 0:
-        LOGGER.debug ('built %s:2 %s', level, lhs_string)
+        LOGGER.debug ('built %s:3 %s %s', level, lhs_type, lhs_string)
         assert type_required == lhs_type, "expecting a " + type_required + ' got a ' + lhs_type + ': ' + lhs_string
         return lhs, tokens, lhs_type, lhs_string
     
     tok, tokens = next_token (tokens,[AND, OR, EQUAL, NOT_EQUAL, CLOSE_BRACE])
     op,v = tok
     if op == CLOSE_BRACE:
-        LOGGER.debug ('built %s:3 %s', level, lhs_string)
+        LOGGER.debug ('built %s:4 %s %s', level, lhs_type, lhs_string)
         assert type_required == lhs_type, "expecting a " + type_required + ' got a ' + lhs_type + ': ' + lhs_string
         return lhs, [tok] + tokens, lhs_type, lhs_string
         
     rhs, tokens, rhs_type, rhs_string = parse_expr (tokens, type_required = lhs_type, now=now, level=level+1)         
     assert lhs_type == rhs_type, "incompatible types, " + lhs_type + ' ' + rhs_type
 
-    assert type_required == BOOL_TYPE, "expecting a " + type_required
+    assert type_required == BOOL_TYPE, "expecting a " + type_required + ' but got ' + BOOL_TYPE
 
     if op == AND:
         expr_string = '(' + lhs_string + ')AND(' + rhs_string + ')' 
-        LOGGER.debug ('built %s:4 %s', level, expr_string)
+        LOGGER.debug ('built %s:5 %s %s', level, BOOL_TYPE, expr_string)
         return (lambda x: and_fn(lhs, rhs, x)), tokens, BOOL_TYPE, expr_string
     elif op == OR:
         expr_string = '(' + lhs_string + ')OR(' + rhs_string + ')' 
-        LOGGER.debug ('built %s:5 %s', level, expr_string)
+        LOGGER.debug ('built %s:6 %s %s', level, BOOL_TYPE, expr_string)
         return (lambda x: or_fn(lhs, rhs, x)), tokens, BOOL_TYPE, expr_string
     elif op == EQUAL:
         expr_string = '(' + lhs_string + ')=(' + rhs_string + ')' 
-        LOGGER.debug ('built %s:6 %s', level, expr_string)
+        LOGGER.debug ('built %s:7 %s %s', level, BOOL_TYPE, expr_string)
         return (lambda x: eq_fn (lhs (x), rhs (x))), tokens, BOOL_TYPE, expr_string 
     elif op == NOT_EQUAL:
         expr_string = '(' + lhs_string + ')!=(' + rhs_string + ')' 
-        LOGGER.debug ('built %s:7 %s', level, expr_string)
+        LOGGER.debug ('built %s:8 %s %s', level, BOOL_TYPE, expr_string)
         return (lambda x: ne_fn (lhs (x), rhs (x))), tokens, BOOL_TYPE, expr_string 
 
 def get_date_attrib_or_now (item, attrib):

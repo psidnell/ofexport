@@ -303,6 +303,24 @@ class Test_cmd_parser(unittest.TestCase):
         self.assertTrue(expr (Folder(name="Miscellaneous")))
         self.assertFalse(expr (Folder(name="xxx Folder 2")))
     
+    def test_bug_2013_04_28 (self):
+        tue = datetime.strptime('Apr 9 2013 11:33PM', '%b %d %Y %I:%M%p')
+        expr = parse_expr(tokenise ("flagged or true"), now=tue)[0]
+        self.assertTrue(expr (Project()))
+        
+        expr = parse_expr(tokenise ("flagged or due=today"), now=tue)[0]
+        self.assertFalse(expr (Project()))
+        self.assertTrue(expr (Project(flagged=True)))
+        self.assertTrue(expr (Project(date_due=tue)))
+        
+    def test_bug_2013_04_28_2 (self):
+        tue = datetime.strptime('Apr 9 2013 11:33PM', '%b %d %Y %I:%M%p')
+        logging.getLogger('cmd_parser').setLevel(logging.DEBUG)
+        expr = parse_expr(tokenise ("flagged or (due='to tomorrow')"), now=tue)[0]
+        self.assertFalse(expr (Task()))
+        self.assertTrue(expr (Task(flagged=True)))
+        self.assertTrue(expr (Task(date_due=tue)))
+            
     def test_parse_expr_none(self):
         tue = datetime.strptime('Apr 9 2013 11:33PM', '%b %d %Y %I:%M%p')
         expr = parse_expr(tokenise ('due = none'))[0]

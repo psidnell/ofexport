@@ -25,9 +25,11 @@ Related Applications:
 
 For example:
 
-        ofexport -a=Work -a completed="this week" -o ~/Desktop/doc.taskpaper --open
+        ofexport -a=Work -a "completed='last week'" -o ~/Desktop/doc.taskpaper --open
 
 will produce a TaskPaper document on your desktop containing all items completed this week related to "Work" and open it (if you have TaskPaper installed).
+
+There's a [list of usage examples here](documentation/examples.md) if you're not the kind of person to read instructions.
 
 ### Example Uses ###
 
@@ -92,7 +94,7 @@ Given that **ofexport** is using a completely undocumented and unsupported means
 - Notes/attachments (I'm not completely sure how these are encoded yet)
 - Project Type/Status (I don't know they're stored is in the database yet)
 
-### WARNINGS ###
+### OBLIGATORY WARNINGS ###
 
 - If you don't know what a bash script is, have never used the command line or don't know what a correct $PATH variable looks like then reading on is probably just going to give you a headache.
 - If Omni change the format of their database in a future update then **ofexport** will need to be fixed.
@@ -118,46 +120,6 @@ To get help on usage and the full list of options, run the command with no argum
 
         ofexport
 
-which prints:
-
-        Version: 1.1.0 2013-04-21
-        
-        Usage:
-        
-        ofexport [options...] -o file_name
-        
-        
-        options:
-          -h,-?,--help       : print help
-          -C                 :  context mode (as opposed to project mode)
-          -P                 :  project mode - the default (as opposed to context mode)
-          -o file_name       : the output file name, must end in a recognised suffix - see documentation
-          -i file_name       : read file_name instead of the OmniFocus database, must be in json format
-          -T - template_name : use the specified template instead of one derived from the output file extension
-          --open             : open the output file with the registered application (if one is installed)
-        
-        filters:
-          -a,--any arg     : filter tasks, projects, contexts and folders against the argument
-          -t,--task arg    : filter any task against task against the argument
-          -p,--project arg : filter any project against the argument
-          -f,--folder  arg : filter any folder against the argument
-          -c,--context arg : filter any context type against the argument
-        
-          A filter argument may be:
-            text=regexp
-            text!=regexp
-            =regexp (abbrieviation of text=regexp)
-            !=regexp (abbrieviation of text!=regexp)
-            flagged
-            !flagged
-            due=tomorrow
-            start!=this week (this will need quoting on the command line, because of the space)
-            sort=completed
-            prune
-            flatten
-        
-          See DOCUMENTATION.md for more information
-
 The most simple example of usage is:
 
         ofexport -o report.txt
@@ -174,12 +136,12 @@ The format of the report file is controlled by the suffix of the output file. So
 
 you'll get a text file. By changing the suffix you'll get different formats:
 
-- .txt or .text: a simple text file
-- .md or .markdown: a Markdown file
-- .ft or .foldingtext: a Folding Text document (the same format as .md)
-- .tp or .taskpaper: a taskpaper document
-- .opml: an OPML document
-- .html or .htm: an HTML document			 
+- **Plain Text:** .txt or .text
+- **Markdown**: .md or .markdown
+- **FoldingText:** .ft or .foldingtext (same as Markdown)
+- **TaskPaper:** .tp or .taskpaper
+- **OPML:** .opml
+- **HTML:** .html or .htm			 
 
 ### Project or Context Mode ###
 
@@ -189,7 +151,7 @@ By default tasks are organised by project. By selecting **-C** the tool will ins
 
 Filters are a powerful way of controlling the content or structure of your report.
 
-Filters generally have two forms: **include** and **exclude**.
+Filters are run in one of two modes: **include** and **exclude**. By default the tool is in **include** mode but by using the **-I** and **-E** options you can flip from one mode to the other and back. 
 
 We'll be referring to the following structure:
 
@@ -202,9 +164,9 @@ We'll be referring to the following structure:
                 Task: Send receipts
                 Task: Purge junk
  
-#### Include Filters
+#### Include Mode
 
-For example: **-t=Work** - any task with "Work" in it's text.
+For example: **-I -t=Work** - any task with "Work" in it's text.
 
 When an include filter matches an item then it (and it's descendants, and all items to the root) will appear in the report. All other items will be eliminated.
 
@@ -233,7 +195,7 @@ If you ran a filter searching for "Cat" you'd get:
  
 #### Exclude Filters ####
 
-For example: **-t!=junk** - exclude any task with "junk" in it's text.
+For example: **-E -t=junk** - exclude any task with "junk" in it's text.
 
 When an exclude filter matches an item then it (and it's descendants) will not in the report. All other items will be retained.
 
@@ -256,7 +218,7 @@ If you ran an exclude filter searching for ''Cat" you'd get:
 
 #### Sorting Filters
 
-To sort items its possible to use a sort filter e.g. **-t sort=due** which will sort all tasks by their due date  (if they have one), or **-p sort=text** which sorts projects alphabetically.
+To sort items its possible to use a sort filter e.g. **-t "sort due"** which will sort all tasks by their due date  (if they have one), or **-t "sort text"** which sorts projects alphabetically.
 
 Note that when we sort any type, it's it's direct descendants that get sorted, so if you sorted Projects alphabetically, it's the tasks within them that get sorted.
 
@@ -280,9 +242,35 @@ So you might start by including only your work folder, then exclude any project 
 
 It's possible to create quite sophisticated queries on your OmniFocus database by using a series of includes, excludes and regular expressions but even without an in-depth knowledge of what a regular expressions is, it's possible to achieve white a lot.
 
-It's possible to change between project and context mode by adding **-P** or **-C** between filters. The tools's final mode dictates how the report is printed. It's also possible to run all the filters in project mode and flip to context mode just for the output or vice versa. 
+It's possible to change between project and context mode by adding **-P** or **-C** between filters or between import and export mode by adding **-I** or **-E**. The tools's final mode dictates how the report is printed. It's also possible to run all the filters in project mode and flip to context mode just for the output or vice versa. 
 
-#### Filtering on Dates:
+#### Filtering with Expressions
+
+The filters we've seen so far have been quite straight forward, but it's possible to use general boolean expressions:
+
+- (type=Task or type=Project) and name=Work
+- name!='Regular Repeat' and due=today
+- (flagged or due='today to fri') and start='from today'
+
+See later for the full list of attributes and expression syntax.
+
+The filter **-t=xxx** actually gets expanded to **-t (type=Task)and(name=xxx)** 
+
+#### Spaces and Quotes
+
+The bash shell can make things complicated when there are spaces or quotes in an argument and the expression must still make sense when ofexport finally gets it.
+
+**-t name=Fred** works fine
+
+**-t "name='Fred Blogs'"** needs the double quotes to stop bash chopping the expression on the space and the single are needed to tell ofexport that it's **Fred Blogs** that you're looking for not **Fred**
+
+**-t 'name="Fred Blogs"'** will work.
+
+If you need need to search for a quote you'll need some horrific expression like this:
+
+**-a 'name="\""'** 
+
+#### Filtering on Dates
 
 A specific day can be expressed as:
 
@@ -302,6 +290,7 @@ A range of dates can be expressed as:
 - "this week" - everything from this Monday to this Sunday.
 - "next week"
 - "last week"
+- "next July"
 - "none" or "" - only matches items with no date
 - "any" - only matches items with a date
 
@@ -309,11 +298,11 @@ A range of dates can be expressed as:
 
 There are several different attributes, each of which may have alternatives for convenience:
 
-- title, text, name
-- start, started, begin, began
-- done, end, ended, complete, completed, finish, finished, completion
-- due, deadline  
-- flag, flagged
+- **title**, text, name
+- **start**, started, begin, began
+- **done**, end, ended, complete, completed, finish, finished, completion
+- **due**, deadline  
+- **flag**, flagged
 
 #### Templates - a Brief Overview####
 
@@ -378,47 +367,15 @@ The expression syntax in an approximation of [EBNF](http://en.wikipedia.org/wiki
         <field> = the name of any node field like **due**, **text** or **flagged**
         <dateExpr> = <dateConst> | <day> | <week> | <month> | <dateRange>
         <dateRange> = "from" <dateExpr> | "to" <dateExpr> | <dateExpr> "to" <dateExpr>
-        <day> = ["next" | "next"] (<longDow> | <shortDow>)
+        <day> = ["next" | "next"] dow
         <week> = ["this" | "last" | "next"] "week"
-        <month> = ["this" | "last"] (<shortMonth | <longMonth>)
-        <longDow> = "Monday" | "Tuesday" | "Wednesday" etc...
-        <shortDow> = "mon" | "tue" | "wed" etc..
-        <longMonth> = "January" | "February" etc..
-        <shortMonth> = "jan" | "feb" etc..
+        <month> = ["this" | "last"] <monthName>
+        <dow> = e.g. 'Monday', "Mon", "mon", "mo" etc...
+        <monthName> = "January", "Jan", "jan" etc..
         <dateConst> = "today" | "tomorrow" | "yesterday" | YY-MM-DD
         <quotedString> = "\"" <escapedString> "\"" | "'" <escapedString> "'"
         <escapedString> = any char with backslash escaped quotes or backslashes
-        
-### Usage Examples:
-
-This produces a document containing all tasks completed yesterday from any folder with "Work" in it's title:
-	
-        ofexport -o report.tp -f=Work -t done=yesterday -a prune --open
-	
-This uses a little regular expression magic to create a document containing all tasks completed today from any folder with the exact name "Work":
-	
-        ofexport -o report.tp -f='^Work$' -t done='today' -a prune --open
-	
-This produces a document containing all tasks completed today from any folder that does NOT have "Work" in it's title:
-	
-        ofexport -o report.tp -f!=Work -t done=today -a prune --open
-
-This uses a little regular expression magic to create a document containing all tasks completed today from any folder with the exact name "Work" or "Home".
-	
-        ofexport -o report.tp -f='^Work$|^Home$' -t done='today' -a prune --open
-
-This produces a document containing all tasks completed today from any folder with "Work" in it's title and the flattens/simplifies the indenting:
-	
-        ofexport -o report.tp -f=Work -t done='this week' -a prune -a flat --open
-
-This produces a report showing all tasks that contain "Beth" and their enclosing projects:
-			
-        ofexport -o report.tp -a=Beth -a prune -a flat --open
-
-This produces the report of what I have yet to do on this project			
-
-        ofexport -o TODO.md -f flatten -p='ofexport Todo' -t done!=any --open
-
+    
 ### Tips and Tricks ###
 
 - If you're generating a TaskPaper file you can include @tags in your task text and they'll be recognised by TaskPaper when it loads the fie.
