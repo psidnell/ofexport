@@ -119,6 +119,14 @@ echo -- $TYPE
 ofexport --log ofexport=ERROR -i src/test/data/db-3.json -o target/db-3-$TYPE-prune.taskpaper -C -e "prune $TYPE"
 diff src/test/data/db-3-$TYPE-prune.taskpaper target/db-3-$TYPE-prune.taskpaper
 
+TYPE=Project
+################
+echo -- $TYPE
+################
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-3.json -o src/test/data/db-3-$TYPE-prune.taskpaper -p prune
+ofexport --log ofexport=ERROR -i src/test/data/db-3.json -o target/db-3-$TYPE-prune.taskpaper -e "prune $TYPE"
+diff src/test/data/db-3-$TYPE-prune.taskpaper target/db-3-$TYPE-prune.taskpaper
+
 #---------------------------------------------------------------------
 
 ################
