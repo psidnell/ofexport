@@ -26,6 +26,14 @@ logging.basicConfig(format='%(asctime)-15s %(name)s %(levelname)s %(message)s', 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(level=logging.INFO)
 
+the_time = None
+
+def now ():
+    # allows us to test with a fixed date
+    if the_time != None:
+        return the_time
+    return datetime.now()
+
 # Primary/Real name is first
 NAME_ALIASES = ['name', 'title', 'text', 'name']
 START_ALIASES = ['date_to_start', 'start', 'started', 'begin', 'began']
@@ -269,7 +277,7 @@ def access_field (x, field):
     LOGGER.debug ('accessing field %s.%s=\'%s\'', type(x), field, result)
     return adapt (result)
 
-def parse_expr (tokens, type_required=BOOL_TYPE, now = datetime.now(), level = 0):
+def parse_expr (tokens, type_required=BOOL_TYPE, now = now (), level = 0):
     LOGGER.debug ('parsing %s tokens: %s', level, tokens)
     tok, tokens = next_token (tokens, [TEXT, QUOTED_TEXT, NOT, OPEN_BRACE])
     (t,v) = tok
@@ -382,7 +390,7 @@ def make_command_filter (expr_str):
             typ = bits[1].strip ()
             if typ == 'any' or typ == 'all':
                 return Prune ([PROJECT, CONTEXT, FOLDER]) # NOT TASKS!!!
-            assert typ in [TASK, PROJECT, CONTEXT, FOLDER], 'no such node type in prune: ' + typ
+            assert typ in [PROJECT, CONTEXT, FOLDER], 'no such node type in prune: ' + typ
             return Prune ([typ])
         if cmd in FLATTEN_ALIASES:
             assert len (bits) == 2, 'flatten takes one node type argument, got: ' + expr_str

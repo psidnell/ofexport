@@ -100,31 +100,29 @@ diff src/test/data/db-3-$TYPE-flatten.taskpaper target/db-3-$TYPE-flatten.taskpa
 echo PRUNING TESTS
 ################
 
-for TYPE in Project Folder; do
+TYPE=Project
+################
+echo -- $TYPE
+################
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-3.json -o src/test/data/db-3-$TYPE-prune.taskpaper -p prune
+ofexport --log ofexport=ERROR -i src/test/data/db-3.json -o target/db-3-$TYPE-prune.taskpaper -p prune
+diff src/test/data/db-3-$TYPE-prune.taskpaper target/db-3-$TYPE-prune.taskpaper
 
-    ################
-    echo -- $TYPE
-    ################
-    #ofexport --log ofexport=ERROR --open -i src/test/data/db-3.json -o src/test/data/db-3-$TYPE-prune.taskpaper -a "prune $TYPE"
-    ofexport --log ofexport=ERROR -i src/test/data/db-3.json -o target/db-3-$TYPE-prune.taskpaper -a "prune $TYPE"
-    diff src/test/data/db-3-$TYPE-prune.taskpaper target/db-3-$TYPE-prune.taskpaper
+TYPE=Folder
+################
+echo -- $TYPE
+################
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-3.json -o src/test/data/db-3-$TYPE-prune.taskpaper -f prune
+ofexport --log ofexport=ERROR -i src/test/data/db-3.json -o target/db-3-$TYPE-prune.taskpaper -f prune
+diff src/test/data/db-3-$TYPE-prune.taskpaper target/db-3-$TYPE-prune.taskpaper
 
-done
 
 TYPE=Context
 ################
 echo -- $TYPE
 ################
-#ofexport --log ofexport=ERROR --open -i src/test/data/db-3.json -o src/test/data/db-3-$TYPE-prune.taskpaper -C -a "prune $TYPE"
-ofexport --log ofexport=ERROR -i src/test/data/db-3.json -o target/db-3-$TYPE-prune.taskpaper -C -a "prune $TYPE"
-diff src/test/data/db-3-$TYPE-prune.taskpaper target/db-3-$TYPE-prune.taskpaper
-
-TYPE=Project
-################
-echo -- $TYPE abbrieviated
-################
-#ofexport --log ofexport=ERROR --open -i src/test/data/db-3.json -o src/test/data/db-3-$TYPE-prune.taskpaper -p prune
-ofexport --log ofexport=ERROR -i src/test/data/db-3.json -o target/db-3-$TYPE-prune.taskpaper -p prune
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-3.json -o src/test/data/db-3-$TYPE-prune.taskpaper -C -c prune
+ofexport --log ofexport=ERROR -i src/test/data/db-3.json -o target/db-3-$TYPE-prune.taskpaper -C -c prune
 diff src/test/data/db-3-$TYPE-prune.taskpaper target/db-3-$TYPE-prune.taskpaper
 
 #---------------------------------------------------------------------
@@ -133,23 +131,28 @@ diff src/test/data/db-3-$TYPE-prune.taskpaper target/db-3-$TYPE-prune.taskpaper
 echo SORTING TESTS
 ################
 
-for TYPE in Project Folder; do
+TYPE=Project
+################
+echo -- $TYPE
+################
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-4.json -o src/test/data/db-4-$TYPE-sort.taskpaper -p "sort name"
+ofexport --log ofexport=ERROR -i src/test/data/db-4.json -o target/db-4-$TYPE-sort.taskpaper -p "sort name"
+diff src/test/data/db-4-$TYPE-sort.taskpaper target/db-4-$TYPE-sort.taskpaper
 
-    ################
-    echo -- $TYPE
-    ################
-    #ofexport --log ofexport=ERROR --open -i src/test/data/db-4.json -o src/test/data/db-4-$TYPE-sort.taskpaper -a "sort $TYPE name"
-    ofexport --log ofexport=ERROR -i src/test/data/db-4.json -o target/db-4-$TYPE-sort.taskpaper -a "sort $TYPE name"
-    diff src/test/data/db-4-$TYPE-sort.taskpaper target/db-4-$TYPE-sort.taskpaper
-
-done
+TYPE=Folder
+################
+echo -- $TYPE
+################
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-4.json -o src/test/data/db-4-$TYPE-sort.taskpaper -f "sort name"
+ofexport --log ofexport=ERROR -i src/test/data/db-4.json -o target/db-4-$TYPE-sort.taskpaper -f "sort name"
+diff src/test/data/db-4-$TYPE-sort.taskpaper target/db-4-$TYPE-sort.taskpaper
 
 TYPE=Context
 ################
 echo -- $TYPE
 ################
-#ofexport --log ofexport=ERROR --open -i src/test/data/db-4.json -o src/test/data/db-4-$TYPE-sort.taskpaper -C -a "sort $TYPE name"
-ofexport --log ofexport=ERROR -i src/test/data/db-4.json -o target/db-4-$TYPE-sort.taskpaper -C -a "sort $TYPE name"
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-4.json -o src/test/data/db-4-$TYPE-sort.taskpaper -C -c "sort name"
+ofexport --log ofexport=ERROR -i src/test/data/db-4.json -o target/db-4-$TYPE-sort.taskpaper -C -c "sort name"
 diff src/test/data/db-4-$TYPE-sort.taskpaper target/db-4-$TYPE-sort.taskpaper
 
 TYPE=Project

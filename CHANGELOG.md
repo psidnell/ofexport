@@ -1,10 +1,11 @@
 # Changes #
 
-## 1.1.1 (?????)
+## 2.0.0 (2013-04-29)
 
-- Starting work on a more sophisticated expression parser.
+- New expression parsing engine for complex queries.
 - Thumbnails in the documentation.
 - Added dateFormat to templates.
+- Bugfixes
 
 ## 1.1.0 (2013-04-21)
 

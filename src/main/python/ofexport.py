@@ -21,7 +21,7 @@ import sys
 import json
 from treemodel import traverse, Visitor, FOLDER, CONTEXT, PROJECT, TASK
 from omnifocus import build_model, find_database
-from datetime import date
+from datetime import date, datetime
 from of_to_tp import PrintTaskpaperVisitor
 from of_to_text import PrintTextVisitor
 from of_to_md import PrintMarkdownVisitor
@@ -32,6 +32,7 @@ from help import print_help, SHORT_OPTS, LONG_OPTS
 from fmt_template import FmtTemplate, format_document
 from cmd_parser import make_filter
 import logging
+import datematch
 
 logging.basicConfig(format='%(asctime)-15s %(name)s %(levelname)s %(message)s', stream=sys.stdout)
 logger = logging.getLogger(__name__)
@@ -76,8 +77,13 @@ def fix_abbrieviated_expr (typ, arg):
             result = '(type=' + typ + ') and (name' + arg + ')'
     elif arg in ['prune', 'flatten']:
         result = arg + ' ' + typ
-    elif arg == 'sort':
-        result = arg + ' ' + typ + ' text'
+    elif arg.startswith ('sort'):
+        if arg == 'sort':
+            result = arg + ' ' + typ + ' text'
+        else:
+            bits = arg.split ()
+            assert len (bits) == 2, 'sort can have one field type argument'
+            result = 'sort' + ' ' + typ + ' ' + bits[1]
     else:
         if typ == 'any' or typ == 'all':
             result = arg
@@ -85,6 +91,11 @@ def fix_abbrieviated_expr (typ, arg):
             result = '(type=' + typ + ') and (' + arg + ')'
     logger.debug ("adapted argument: '%s'", result)
     return result
+
+def set_debug_opt (name, value):
+    if name== 'now' : 
+        the_time = datetime.strptime (value, "%Y-%m-%d")
+        datematch.the_time = the_time
 
 if __name__ == "__main__":
     
@@ -115,6 +126,12 @@ if __name__ == "__main__":
             logging.getLogger(__name__).setLevel (logging.DEBUG)
             logging.getLogger('cmd_parser').setLevel (logging.DEBUG)
             logging.getLogger('visitors').setLevel (logging.DEBUG)
+        elif '--debug' == opt:
+            bits = arg.split('=')
+            assert len(bits) == 2
+            name = bits[0]
+            value = bits[1]
+            set_debug_opt (name, value)
         elif '--log' == opt:
             bits = arg.split('=')
             assert len(bits) == 2

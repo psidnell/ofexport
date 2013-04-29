@@ -64,14 +64,14 @@ TaskPaper Document
 
 **Filter what gets exported:**
 
-- Include/exclude tasks, projects and folders with text searches (regular expressions)
+- Include/exclude tasks, projects and folders with text searches (regular/logical expressions)
 - Include/exclude tasks and projects by flag state.
 - Include/exclude, tasks and projects by start/completion/due date.
 
 **Restructure the data:**
 
-- Flatten the outport document to create a simpler document (just projects containing tasks)
-- Sort tasks by completion date or projects by name.
+- Flatten the outport document to create a simpler document (just projects containing tasks).
+- Sort tasks by date or text.
 - Eliminate empty projects/folders.
 - Organise by project or context hierarchy.
 
@@ -79,12 +79,7 @@ TaskPaper Document
 
 - **ofexport** is built on a re-useable python library.
 - You can use this in your own tools.
-- The code is licenced under the [Apache License](http://opensource.org/licenses/Apache-2.0)
-
-**Planned Features**
-
-- Custom template based formatting for document types.
-- "Tagging related" features.
+- The code is licenced under the [Apache License](http://opensource.org/licenses/Apache-2.0).
 
 ### Limitations ###
 
@@ -94,9 +89,13 @@ Given that **ofexport** is using a completely undocumented and unsupported means
 - Notes/attachments (I'm not completely sure how these are encoded yet)
 - Project Type/Status (I don't know they're stored is in the database yet)
 
+However I wrote this tool primarily for my own use and while I'm using it on a daily basis it's going to be pretty well supported.
+
+I plan to upgrade to OmniFocus 2 when it's ready and hope to ensure compatibility before it's released.
+
 ### OBLIGATORY WARNINGS ###
 
-- If you don't know what a bash script is, have never used the command line or don't know what a correct $PATH variable looks like then reading on is probably just going to give you a headache.
+- If you don't know what a bash script is, have never used the command line or don't know why **rm -rf** are the scariest 6 characters in the kingdom then reading on is probably just going to give you a headache or worse.
 - If Omni change the format of their database in a future update then **ofexport** will need to be fixed.
 - This program reads your OmniFocus database file directly. While it should be impossible (as written) for it to modify or delete that database, set fire to your Mac, empty your bank accounts or knock the earth out of orbit - bugs happen. But you obviously have backups - right?  
 
@@ -166,7 +165,7 @@ We'll be referring to the following structure:
  
 #### Include Mode
 
-For example: **-I -t=Work** - any task with "Work" in it's text.
+For example: **-I -t=Work** - include any task with "Work" in it's text.
 
 When an include filter matches an item then it (and it's descendants, and all items to the root) will appear in the report. All other items will be eliminated.
 
@@ -197,7 +196,7 @@ If you ran a filter searching for "Cat" you'd get:
 
 For example: **-E -t=junk** - exclude any task with "junk" in it's text.
 
-When an exclude filter matches an item then it (and it's descendants) will not in the report. All other items will be retained.
+When an exclude filter matches an item then it (and it's descendants) will not appear in the report. All other items will be retained.
 
 If you ran an exclude filter searching for 'junk' you'd get:
 
@@ -220,9 +219,9 @@ If you ran an exclude filter searching for ''Cat" you'd get:
 
 To sort items its possible to use a sort filter e.g. **-t "sort due"** which will sort all tasks by their due date  (if they have one), or **-t "sort text"** which sorts projects alphabetically.
 
-Note that when we sort any type, it's it's direct descendants that get sorted, so if you sorted Projects alphabetically, it's the tasks within them that get sorted.
+The directive **-t sort** has the same effect as **-t sort text**.
 
-If items are sorted by an attribute they may not all have (like due date) then any item without that date is assumed to have today's date.
+Note that when we sort any type, it's the direct descendants of any nodes of that type that get sorted, so if you sorted Projects alphabetically, it's the tasks within them that get sorted.
 
 #### Pruning Filters ####
 
@@ -232,7 +231,7 @@ It's possible to run a pruning filter: e.g. **-a prune** that can remove any fol
 
 #### Flattening Filters
 
-If the report is flattened e.g. with **-a flat** then all sub-folders, sub-context, sub-tasks are pulled up to to their parents level leaving a more readable document with a flattened hierarchy. Using the flatten filter on all node types will result in a document that simply has projects/contexts with a single level of tasks beneath.
+If the report is flattened e.g. with **-a flatten** then all sub-folders, sub-context, sub-tasks are pulled up to to their parents level leaving a more readable document with a flattened hierarchy. Using the flatten filter on all node types will result in a document that simply has projects/contexts with a single level of tasks beneath.
 
 #### Multiple Filters
 
@@ -272,6 +271,8 @@ If you need need to search for a quote you'll need some horrific expression like
 
 #### Filtering on Dates
 
+For example **-t due=today** or **-t 'start="next week"'**
+
 A specific day can be expressed as:
 
 - "Monday" - the monday that occurs within this week.
@@ -298,11 +299,12 @@ A range of dates can be expressed as:
 
 There are several different attributes, each of which may have alternatives for convenience:
 
-- **title**, text, name
-- **start**, started, begin, began
-- **done**, end, ended, complete, completed, finish, finished, completion
-- **due**, deadline  
-- **flag**, flagged
+- **type** - must be one of Project, Context, Task, Folder
+- **title** - alternatives: text, name
+- **start** - alternatives: started, begin, began
+- **done** - alternatives: end, ended, complete, completed, finish, finished, completion
+- **due** - alternatives: deadline  
+- **flag** - alternatives:  flagged
 
 #### Templates - a Brief Overview####
 
@@ -380,10 +382,11 @@ The expression syntax in an approximation of [EBNF](http://en.wikipedia.org/wiki
 
 - If you're generating a TaskPaper file you can include @tags in your task text and they'll be recognised by TaskPaper when it loads the fie.
 - Add filters one at a time and see what happens. Add the flatten/prune filters last since they can make it hard to diagnose why you're getting unexpected items in your output.
+- Create your own shell scripts for regularly used filter combinations.
 
 ### Pitfalls ###
 
-**Seeing things you don't expect in the report:** This happens a lot with task groups. If you create a filter to show all completed tasks then you'll get them in your report - and all their children even if they are completed. That's the way filters are designed. This seems intuitive for folders (show me everything in X) but less so here. If you then flatten the report you'll see a mix of completed/uncompleted tasks and probably assume it's a bug (which is arguable). You might want to consider flattening before filtering on completion or alternatively including all completed tasks then excluding uncompleted tasks. Nobody said it was easy.
+- **Seeing things you don't expect in the report**: This happens a lot with task groups. If you create a filter to show all completed tasks then you'll get them in your report - and all their children even if they are completed. That's the way filters are designed. This seems intuitive for folders (show me everything in X) but less so here. If you then flatten the report you'll see a mix of completed/uncompleted tasks and probably assume it's a bug (which is arguable). You might want to consider flattening before filtering on completion or alternatively including all completed tasks then excluding uncompleted tasks. Nobody said it was easy.
 
 # License #
 

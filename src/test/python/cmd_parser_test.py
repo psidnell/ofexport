@@ -315,7 +315,6 @@ class Test_cmd_parser(unittest.TestCase):
         
     def test_bug_2013_04_28_2 (self):
         tue = datetime.strptime('Apr 9 2013 11:33PM', '%b %d %Y %I:%M%p')
-        logging.getLogger('cmd_parser').setLevel(logging.DEBUG)
         expr = parse_expr(tokenise ("flagged or (due='to tomorrow')"), now=tue)[0]
         self.assertFalse(expr (Task()))
         self.assertTrue(expr (Task(flagged=True)))
