@@ -374,10 +374,10 @@ def parse_expr (tokens, type_required=BOOL_TYPE, now = now (), level = 0):
 
 def get_date_attrib_or_now (item, attrib):
     if not attrib in item.__dict__:
-        return datetime.now()
+        return now()
     result = item.__dict__[attrib]
     if result == None:
-        return datetime.now()
+        return now()
     return result
 
 def make_command_filter (expr_str):    
@@ -419,7 +419,7 @@ def make_command_filter (expr_str):
     return None
 
 def make_expr_filter (expr_str, include):
-    match_fn, tokens_left, expr_type, expr_string = parse_expr (tokenise (expr_str))
+    match_fn, tokens_left, expr_type, expr_string = parse_expr (tokenise (expr_str), now=now())
     if len (tokens_left) > 0:
         assert False, 'don\'t know what to do with: ' + str (tokens_left)
     assert expr_type == BOOL_TYPE, "filter must have a boolean argument"

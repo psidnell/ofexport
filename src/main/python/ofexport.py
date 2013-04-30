@@ -32,7 +32,7 @@ from help import print_help, SHORT_OPTS, LONG_OPTS
 from fmt_template import FmtTemplate, format_document
 from cmd_parser import make_filter
 import logging
-import datematch
+import cmd_parser
 
 logging.basicConfig(format='%(asctime)-15s %(name)s %(levelname)s %(message)s', stream=sys.stdout)
 logger = logging.getLogger(__name__)
@@ -95,7 +95,7 @@ def fix_abbrieviated_expr (typ, arg):
 def set_debug_opt (name, value):
     if name== 'now' : 
         the_time = datetime.strptime (value, "%Y-%m-%d")
-        datematch.the_time = the_time
+        cmd_parser.the_time = the_time
 
 if __name__ == "__main__":
     
