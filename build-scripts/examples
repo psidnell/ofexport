@@ -1,7 +1,12 @@
+#!/bin/bash
 set -e
+#C This file contains the examples as tests an then creates the examples.md file from itself
+#C Lines beginning with "set", "diff", '#!', '#C' are ignored
+#C Lines beginning with '#' have the # removed
+
 ## Usage Examples
 
-#ofexport -f='^Test' -C -c="^Test" -o src/test/data/db-5.json
+#C ofexport -f='^Test' -C -c="^Test" -o src/test/data/db-5.json
 
 #This produces a document containing all tasks completed last week from any folder with "Worms" in it's title:
     
@@ -18,24 +23,24 @@ diff target/ex2-ham-today.taskpaper src/test/data/ex2-ham-today.taskpaper
         ofexport -E -f=Worms -a prune -o target/ex3-not-worms.taskpaper --debug now=2013-04-29 -i src/test/data/db-5.json
 diff target/ex3-not-worms.taskpaper src/test/data/ex3-not-worms.taskpaper
 
-#This uses a little regular expression magic to create a document containing all tasks completed today from any folder with the exact name "Work" or "Home".
+#This uses a little regular expression magic to create a document containing all tasks completed today from any folder with the exact name "Worms" or "Ham":
     
         ofexport -f='^Worms$|^Ham$' -t done='today' -a prune -o target/ex4-worms-or-ham-today.taskpaper --debug now=2013-04-29
 diff target/ex4-worms-or-ham-today.taskpaper src/test/data/ex4-worms-or-ham-today.taskpaper
 
-#This produces a document containing all tasks completed this week from any folder with "Worms" in it's title and the flattens/simplifies the indenting:
+#This produces a document containing all tasks completed this week from any folder with "Worms" in it's title and then flattens/simplifies the indenting:
     
         ofexport -f=Worms -a flatten -a prune -o target/ex5-work-this-week-flat.taskpaper --debug now=2013-04-29
 diff target/ex5-work-this-week-flat.taskpaper src/test/data/ex5-work-this-week-flat.taskpaper
 
 #This produces the report of what I have yet to do on this project           
 
-        ofexport -f flatten -p="'ofexport Todo'" -E -t done=any -o target/ex7-ofexport-todo.taskpaper --debug now=2013-04-29
+        ofexport -o TODO.md -p='"ofexport Todo"' -f flatten -a prune -E -t done=any
 
 #This produces the report of all uncompleted tasks that are flagged or due soon
 
         ofexport -E -a done=any -I -t "flagged or (due='to tomorrow')" -o target/ex8-due-or-flagged.taskpaper --debug now=2013-04-29 -i src/test/data/db-5.json
 diff target/ex8-due-or-flagged.taskpaper src/test/data/ex8-due-or-flagged.taskpaper
 
-cat build-scripts/examples | egrep -v -e '^cat|^diff' -e '^set' | sed -e 's/^#//' -e 's/--debug.*//' -e 's/target/\/tmp/' > documentation/examples.md
+cat build-scripts/examples | egrep -v -e '^cat|^diff|^#C|^#!' -e '^set' | sed -e 's/^#//' -e 's/--debug.*//' -e 's/target/\/tmp/' > documentation/examples.md
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -o xtrace
+#set -o xtrace
 set -e
 export PYTHONPATH=`pwd`/src/main/python
 

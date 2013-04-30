@@ -107,9 +107,11 @@ This pre-supposes a certain familiarity with the command line.
 - Download the [zip file](https://github.com/psidnell/ofexport/archive/master.zip).
 - Double click on the zip file to unpack it.
 - Rename and move the folder to wherever you want it to live.
-- Edit the **ofexport** shell script and change the path to reflect the correct new location of  your files.
-- From the command line set execute permission on the **ofexport** script.
+- Edit the **ofexport** shell script and change the path to reflect the correct location of you chose. The script assumes you'll move/rename it to **ofexport** in your home folder.
+- From the command line set execute permission on the **ofexport** script: **chmod +x ofexport/bin/ofexport**
 - Add the installation directory to your **$PATH** in your in whatever shell you use.
+- If you're using bash this will mean adding a line like this to your **.bashrc**: **export PATH=$PATH:$HOME/ofexport/bin**
+- Then run **. ~/.bashrc** to update your PATH in your current shell - or start a new shell.
 - Run **ofexport** from the command line, if all is well then it should print it's help.
 - If it doesn't then all is not well and I have failed you.
 

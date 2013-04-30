@@ -1,9 +1,22 @@
 #!/bin/bash
+set -e
+##################################################################################
+# CHANGE "OFEXPORT_HOME" TO MATCH WHERE YOU'VE INSTALLED THE ofexport/... FOLDER #
+##################################################################################
+export OFEXPORT_HOME=$HOME/ofexport
 
-####################################################################
-# CHANGE THIS TO MATCH WHERE YOU'VE INSTALLED THE OFEXPORT DIRECTORY
-####################################################################
-export OFEXPORT_HOME=/Users/psidnell/Workspace/OmniFocus
+if [ ! -f $OFEXPORT_HOME/src/main/python/ofexport.py ]; then
+    echo
+    echo OOPS!
+    echo
+    echo OFEXPORT_HOME=$OFEXPORT_HOME
+    echo "\"$OFEXPORT_HOME\"" does not seem to the the installation location,
+    echo re-edit \"ofexport\" and correct the value of OFEXPORT_HOME
+    echo
+    echo Installation instructions can be found here: 'https://github.com/psidnell/ofexport/blob/master/DOCUMENTATION.md#downloadinstallation'
+    echo
+    exit 1
+fi
 
 python $OFEXPORT_HOME/src/main/python/ofexport.py "$@"
 

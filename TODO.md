@@ -1,107 +1,39 @@
 # ofexport Todo
 
-- V1.1.1
-    - Test tool filters properly in integration tests done:**2013-04-27**
-        - bug: '(type=Folder) and not name!=".*Folder 2"' done:**2013-04-27**
-        - bug: '(type=Folder) and not (name!=".*Folder 2")' done:**2013-04-27**
-        - bug include/exclude issue done:**2013-04-27**
-    - Test expression errors done:**2013-04-27**
-    - github margdown image link done:**2013-04-23**
-    - Getting negative folder count in summary done:**2013-04-22**
-    - Not sure I want projects visible in context mode at all - unless they're empty? done:**2013-04-27**
-    - md newline problem in context mode after removing folders done:**2013-04-27**
-    - How would I do due or flagged using existing filters? (experimenting)... done:**2013-04-27**
-    - Create an expression parser done:**2013-04-27**
-        - replace 'SP' with SP done:**2013-04-26**
-        - Clue about hrs from lhs, pass lhs type down done:**2013-04-26**
-        - Need a proper tokenizer that walks through the string properly and is aware of quotes and escapes done:**2013-04-26**
-        - spot prune/sort in expressions done:**2013-04-25**
-        - unit test cmd prune/sort/filter detection done:**2013-04-25**
-        - Unquoted strings - allow type=Project done:**2013-04-25**
-        - include task where expr, flatten, prune, done:**2013-04-24**
-        - regexps on name done:**2013-04-24**
-        - Ready to try expresssion from the command line - how? syntax? done:**2013-04-24**
-        - Bug: of --open -e '(type="Folder") and (name!="^Misc")' done:**2013-04-25**
-        - Bug : any == None so any matches no date :-( done:**2013-04-25**
-        - Bind expressions to existing opts? done:**2013-04-26**
-        - conser isn't flattening done:**2013-04-26**
-        - none/any == [none]/[any] done:**2013-04-27**
-        - any == all done:**2013-04-27**
-        - filters have a redundant argument done:**2013-04-27**
-        - Replace with command line values? done:**2013-04-26**
-        - integration tests of expressions done:**2013-04-27**
-        - Can I get rid of the need for […] around dates? done:**2013-04-27**
-    - relax parenthesis requirement? done:**2013-04-27**
-    - could strip all spaces after tokenising done:**2013-04-27**
-    - move to free form command line expressions? done:**2013-04-28**
-    - and I being smart about true/false type? done:**2013-04-28**
-    - -a due="this week", does that work? done:**2013-04-28**
-    - any as a node type - do I need a new type? done:**2013-04-28**
-    - test that empty projects appear in context mode done:**2013-04-28**
-    - int test pruning done:**2013-04-28**
-        - folder/project - fails done:**2013-04-28**
-        - contexts done:**2013-04-28**
-    - int test flattening done:**2013-04-28**
-        - failing project flattening test done:**2013-04-28**
-    - int test sorting done:**2013-04-28**
-        - sort fields not being aliased done:**2013-04-28**
-        - any problem with -a is this in the BNF? done:**2013-04-28**
-    - test examples
-        - put them in a script
-            - ofexport -E -f=Work -I --open -o ~/Desktop/ex3-not-work-today.taskpaper done:**2013-04-28**
-        - example of complex expression
-            - test_bug_2013_04_28
-            - bug: ofexport -o TODO.md -E -a done=any -I -t "flagged or due='to tomorrow'" --open -o /Users/psidnell/Desktop/ex7-ofexport-todo.taskpaper -v
-    - document expressions
-    - BNF done:**2013-04-28**
-    - want day in Taskpaper report - how to get in template? done:**2013-04-27**
-    - document all variables - built in, node properties
-    - document new command line
-    - Has flattening changed? update documentation done:**2013-04-28**
-    - does -t prune still work? done:**2013-04-28**
-    - blog: what's in my status bar done:**2013-04-23**
-    - Make command line parsing more robust - how? done:**2013-04-27**
-    - from == since in dates? maybe tokenise properly done:**2013-04-27**
-    - anydate and nodate done:**2013-04-27**
+- V2.0.0
+    - release
 - Backlog
-    - logging off in tests?
-    - note types could be "TPF"
-    - default template in code such that an empty file still works
-    - comma separate prune types
-    - type should be a template variable
-    - natural sort
-    - $date and $time variables
+    - Install it myself separately from my dev environment
+    - Update the paths accordingly
+    - look for OFEXPORT_HOME in the environment first
+    - Need more than twe levels of debug
+        - Keep -v and -Vn, 0=error, 1=debug, 2=trace
+        - Add logging to more modules
+    - Bug: unexpected arguments error prints whole line, not just bad arg
+    - Have a default template in code such that an empty template file still works
+    - "type" should be a template variable
+    - Add "natural" sort - i.e. sort by the order from the OF DB (this is done initially already)
+    - $date and $time variables in templates
     - Write up geektool integration - create section on integration with other tools - by objective e.g. tasks on the desktop, add to features - SCREENSHOT
-    - What about task availability?
-    - Use stdout if no file
+    - What about task availability? Where is it stored?
+    - Use stdout if no file specified with -o
     - Assertions to prevent mis-wiring of type hierarchies
-    - More general config - e.g. date format?
-    - Select input database location
-    - A visitor to prepend type to items - for debugging
+    - More general config - e.g. global date format?
+    - Select input database location - necessary for OmniFocus 2 alpha testing
+    - A filter that prepends type to items - for debugging
     - Scan for #xxx in the text and add tp tag?
-    - Put file extension associations in the templates.
-    - test all the assertions
+    - Put file extension associations in the templates
+    - test all the assertions properly with unit tests (done most of them)
     - Document How I use it
-    - Try ofexport with omnifocus 2
+    - Try ofexport with OF 2
     - Where are inbox items stored in in the OF DB?
-    - proper logging: with on/off on the command line
-    - merge projects folders etc if they have same name?
-    - Allow "weekend", "weekday" in date ranges
-    - I don't like the command line parsing, would like +/- switches for include exclude, beyond what getopt can do - I have a sneaky idea done:**2013-04-21**
-    - Json output done:**2013-04-21**
-    - Allow +-3d, 2w etc
-    - Templates for document types done:**2013-04-21**
-    - Configurable formatting for printers? "stylesheets"? done:**2013-04-21**
-    - Named tagging strategies? (or rely on templates) done:**2013-04-21**
-    - What tags to include in taskpaper, due? start? context? done:**2013-04-21**
-    - Context mode is barely tested done:**2013-04-15**
-    - Links (from persistent identifier) done:**2013-04-21**
+    - Filter to merge projects folders etc if they have same name?
+    - Allow +-3d, 2w etc?
     - Dump OF schema programatically
-    - Genericise printing visitor base class done:**2013-04-15**
-    - Sort on start dates done:**2013-04-11**
-    - Extract note text (even possible?)
+    - Extract note text (even possible?) attachments and unicode issues…
     - Create a taggable dump of projects as files with links to corresponing Omnifocus entities - for hazel and openmeta scripts
-    - Read other file types such as Taskpaper?
-    - Resolve utf8/ascii issues - not sure what's going on - redirecting stdout "changes things"?!?!?!
-    - Can I detect a if a project is paused?
-    - depth as argument
+    - Read other file types such as Taskpaper/OPML (done json)
+    - Resolve utf8/ascii issues - not sure what's going on - redirecting stdout "changes things" as does invocation from applescript?!?!?!
+    - Can I detect a if a project/context is paused?
+    - Add item depth as filterable parameter
+    - document any new filter variables
