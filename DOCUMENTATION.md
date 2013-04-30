@@ -219,11 +219,11 @@ If you ran an exclude filter searching for ''Cat" you'd get:
 
 #### Sorting Filters
 
-To sort items its possible to use a sort filter e.g. **-t "sort due"** which will sort all tasks by their due date  (if they have one), or **-t "sort text"** which sorts projects alphabetically.
+To sort items its possible to use a sort filter e.g. **-p "sort due"** which will sort the contents of all projects by their due date  (if they have one), or **-p "sort text"** which sorts alphabetically.
 
-The directive **-t sort** has the same effect as **-t sort text**.
+The directive **-p sort** has the same effect as **-p sort text**.
 
-Note that when we sort any type, it's the direct descendants of any nodes of that type that get sorted, so if you sorted Projects alphabetically, it's the tasks within them that get sorted.
+Note that when we sort any type, it's the direct descendants of any nodes of that type that get sorted, so if you sorted Folders alphabetically with **-f sort**, it's the folders/projects within them that get sorted.
 
 #### Pruning Filters ####
 
@@ -297,7 +297,7 @@ A range of dates can be expressed as:
 - "none" or "" - only matches items with no date
 - "any" - only matches items with a date
 
-####  Attributes for filtering  and sorting ####
+####  Attributes for filtering and sorting ####
 
 There are several different attributes, each of which may have alternatives for convenience:
 
