@@ -1,7 +1,10 @@
 # ofexport Todo
 
 - Backlog
-    - Debug
+    - Command Line
+        - Use stdout if no file specified with -o
+            - but what format?
+        - Select input database location - necessary for OmniFocus 2 alpha testing
     - Database
         - What about task availability? Where is it stored?
         - Try ofexport with OF 2
@@ -22,9 +25,6 @@
         - Write up geektool integration - create section on integration with other tools - by objective e.g. tasks on the desktop, add to features - SCREENSHOT
         - Document How I use it
         - document any new filter variables
-    - Command Line
-        - Use stdout if no file specified with -o
-        - Select input database location - necessary for OmniFocus 2 alpha testing
     - Architecture
         - Assertions to prevent mis-wiring of type hierarchies
         - More general config - e.g. global date format?

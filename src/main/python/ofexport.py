@@ -106,6 +106,7 @@ def set_debug_opt (name, value):
         cmd_parser.the_time = the_time
 
 if __name__ == "__main__":
+    sys.stdout = codecs.getwriter('utf8')(sys.stdout)
     
     today = date.today ()
     time_fmt='%Y-%m-%d'
@@ -159,14 +160,11 @@ if __name__ == "__main__":
             sys.exit()
     
     if file_name == None:
-            print_help ()
-            sys.exit()
-    
-    if file_name.find ('.') == -1:
-        logger.error ('output file name must have suffix: %s', file_name)
-        sys.exit()
-    dot = file_name.index ('.')
-    fmt = file_name[dot+1:]
+        fmt = 'txt'
+    else:
+        assert file_name.find ('.') != -1, "filename has no suffix"
+        dot = file_name.index ('.')
+        fmt = file_name[dot+1:]
     
     if infile != None:
         root_project, root_context = read_json (infile)
@@ -212,8 +210,11 @@ if __name__ == "__main__":
             
     logger.info ('Generating: %s', file_name)
     
-    out=codecs.open(file_name, 'w', 'utf-8')
-    
+    if file_name != None:
+        out=codecs.open(file_name, 'w', 'utf-8')
+    else: 
+        out = sys.stdout
+        
     if fmt in ('txt', 'text'):
         template = template if template != None else load_template (template_dir, 'text')
         visitor = PrintTextVisitor (out, template)
@@ -246,11 +247,10 @@ if __name__ == "__main__":
     else:
         raise Exception ('unknown format ' + fmt)
     
-    # Close the file and open it
-    out.close()
-    
-    if opn:
-        os.system("open '" + file_name + "'")
+    if file_name != None:
+        out.close()
+        if opn:
+            os.system("open '" + file_name + "'")
         
     visitor = SummaryVisitor ()
     traverse (visitor, root_project, project_mode=True)

@@ -2,7 +2,10 @@
 
 ## 2.0.1 (2013-05-01)
 
-- Added notes from the OmniFocus database
+- Added notes from the OmniFocus database.
+- Better logging.
+- Prints to standard out if no file specified.
+- Resolved some utf-8 issues.
 
 ## 2.0.0 (2013-04-29)
 

@@ -111,14 +111,14 @@ This pre-supposes a certain familiarity with the command line.
 - Add the installation directory to your **$PATH** in your in whatever shell you use.
 - If you're using bash this will mean adding a line like this to your **.bashrc**: **export PATH=$PATH:$HOME/ofexport/bin**
 - Then run **. ~/.bashrc** to update your PATH in your current shell - or start a new shell.
-- Run **ofexport** from the command line, if all is well then it should print it's help.
+- Run **ofexport -?** from the command line, if all is well then it should print it's help.
 - If it doesn't then all is not well and I have failed you.
 
 ## Tutorial:
 		
-To get help on usage and the full list of options, run the command with no arguments:
+To get help on usage and the full list of options, run the command as follows:
 
-        ofexport
+        ofexport -?
 
 The most simple example of usage is:
 

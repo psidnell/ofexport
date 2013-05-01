@@ -10,7 +10,11 @@ mkdir target
 echo -- HELP
 ################
 #ofexport --log ofexport=ERROR | sed -e 's/^Version: [0-9].*/Version: XXX XXX/' > src/test/data/help.txt
-ofexport --log ofexport=ERROR | sed -e 's/^Version: [0-9].*/Version: XXX XXX/' > target/help.txt
+ofexport --log ofexport=ERROR -? | sed -e 's/^Version: [0-9].*/Version: XXX XXX/' > target/help.txt
+diff src/test/data/help.txt target/help.txt
+ofexport --log ofexport=ERROR -h | sed -e 's/^Version: [0-9].*/Version: XXX XXX/' > target/help.txt
+diff src/test/data/help.txt target/help.txt
+ofexport --log ofexport=ERROR --help | sed -e 's/^Version: [0-9].*/Version: XXX XXX/' > target/help.txt
 diff src/test/data/help.txt target/help.txt
 
 
@@ -271,7 +275,7 @@ build-scripts/examples > /dev/null
 
 #---------------------------------------------------------------------
 
-VERSION=`ofexport --log ofexport=ERROR | grep Version`
+VERSION=`ofexport -? --log ofexport=ERROR | grep Version`
 echo '###############################################################################'
 echo "PASSED UNIT TESTS $VERSION"
 echo '###############################################################################'
