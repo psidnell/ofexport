@@ -20,7 +20,7 @@ import sys
 
 logging.basicConfig(format='%(asctime)-15s %(name)s %(levelname)s %(message)s', stream=sys.stdout)
 logger = logging.getLogger(__name__)
-logger.setLevel(level=logging.INFO)
+logger.setLevel(level=logging.ERROR)
 
 INCLUDED='INCLUDED'
 EXCLUDED='EXCLUDED'

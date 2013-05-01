@@ -18,6 +18,12 @@ from datetime import datetime
 from typeof import TypeOf
 from util import strip_tabs_newlines
 import uuid
+import logging
+import sys
+
+logging.basicConfig(format='%(asctime)-15s %(name)s %(levelname)s %(message)s', stream=sys.stdout)
+logger = logging.getLogger(__name__)
+logger.setLevel(level=logging.ERROR)
 
 TASK = 'Task'
 PROJECT = 'Project'
@@ -221,6 +227,7 @@ def traverse (visitor, item, ignore_marked=False, project_mode=True):
         traverse_task (visitor, item, ignore_marked=ignore_marked, project_mode=project_mode)
 
 def traverse_context (visitor, context, ignore_marked=False):
+    logger.debug ('start traversing context: %s %s', context.id, context.name)
     visitor.project_mode = False
     if context.marked or ignore_marked:
         visitor.begin_any (context)
@@ -229,8 +236,10 @@ def traverse_context (visitor, context, ignore_marked=False):
             traverse_list (visitor, context.children, ignore_marked=ignore_marked, project_mode=False)
         visitor.end_context (context) # must match calls to begin_...
         visitor.end_any (context)
+    logger.debug ('end traversing context: %s %s', context.id, context.name)
 
 def traverse_task (visitor, task, ignore_marked=False, project_mode=True):
+    logger.debug ('start traversing task: %s %s', task.id, task.name)
     visitor.project_mode = project_mode
     if task.marked or ignore_marked:
         visitor.begin_any (task)
@@ -240,8 +249,10 @@ def traverse_task (visitor, task, ignore_marked=False, project_mode=True):
                 traverse_list (visitor, task.children, ignore_marked=ignore_marked, project_mode=project_mode)
         visitor.end_task (task) # must match calls to begin_...
         visitor.end_any (task)
+    logger.debug ('end traversing task: %s %s', task.id, task.name)
     
 def traverse_project (visitor, project,ignore_marked=False, project_mode=True):
+    logger.debug ('start traversing project: %s %s', project.id, project.name)
     visitor.project_mode = project_mode
     if project.marked or ignore_marked:
         visitor.begin_any (project)
@@ -251,8 +262,10 @@ def traverse_project (visitor, project,ignore_marked=False, project_mode=True):
                 traverse_list (visitor, project.children, ignore_marked=ignore_marked, project_mode=project_mode)
         visitor.end_project (project) # must match calls to begin_...
         visitor.end_any (project)
+    logger.debug ('end traversing project: %s %s', project.id, project.name)
     
 def traverse_folder (visitor, folder, ignore_marked=False):
+    logger.debug ('start traversing folder: %s %s', folder.id, folder.name)
     visitor.project_mode = True
     if folder.marked or ignore_marked:
         visitor.begin_any (folder)
@@ -261,3 +274,4 @@ def traverse_folder (visitor, folder, ignore_marked=False):
             traverse_list (visitor, folder.children, ignore_marked=ignore_marked)
         visitor.end_folder (folder) # must match calls to begin_...
         visitor.end_any (folder)
+    logger.debug ('end traversing folder: %s %s', folder.id, folder.name)

@@ -24,7 +24,7 @@ import logging
 
 logging.basicConfig(format='%(asctime)-15s %(name)s %(levelname)s %(message)s', stream=sys.stdout)
 LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(level=logging.INFO)
+LOGGER.setLevel(level=logging.ERROR)
 
 the_time = None
 

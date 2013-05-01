@@ -19,7 +19,13 @@ import sqlite3
 from os import environ, path
 from datetime import datetime
 from typeof import TypeOf
-from xml.dom.minidom import parse, parseString
+from xml.dom.minidom import parseString
+import logging
+import sys
+
+logging.basicConfig(format='%(asctime)-15s %(name)s %(levelname)s %(message)s', stream=sys.stdout)
+logger = logging.getLogger(__name__)
+logger.setLevel(level=logging.ERROR)
 
 '''
 A library for loading a data model from the Omnifocus SQLite database.
@@ -131,6 +137,8 @@ class OFContext(OFNodeMixin, Context):
         self.ofattribs = ofattribs
         if 'persistentIdentifier' in ofattribs:
             self.link = 'omnifocus:///context/' + ofattribs['persistentIdentifier']
+        logger.debug ('loaded context: %s %s', self.id, self.name)
+
             
 class OFTask(OFNodeMixin, Task):
     TABLE='task'
@@ -151,6 +159,7 @@ class OFTask(OFNodeMixin, Task):
         noteXMLData = ofattribs['noteXMLData']
         if noteXMLData != None:
             self.note = OFNote (noteXMLData)
+        logger.debug ('loaded task: %s %s', self.id, self.name)
     
 class OFFolder(OFNodeMixin, Folder):
     TABLE='folder'
@@ -161,6 +170,7 @@ class OFFolder(OFNodeMixin, Folder):
         self.ofattribs = ofattribs
         if 'persistentIdentifier' in ofattribs:
             self.link = 'omnifocus:///folder/' + ofattribs['persistentIdentifier']
+        logger.debug ('loaded folder: %s %s', self.id, self.name)
         
 class ProjectInfo(Node):
     TABLE='projectinfo'
@@ -196,9 +206,11 @@ def transmute_projects (project_infos, tasks):
     '''
     Some tasks are actually projects, convert them
     '''
+    logger.debug ('transmuting projects')
     projects = {}
     for project in tasks.values():        
         if project.ofattribs['projectInfo'] != None:
+            logger.debug ('transmuting: %s %s', project.id, project.name)
             projects[project.ofattribs['persistentIdentifier']] = project
             project_info = project_infos[project.ofattribs['projectInfo']]
             project.__class__ = OFProject
@@ -209,30 +221,38 @@ def transmute_projects (project_infos, tasks):
     return projects
 
 def wire_projects_and_folders (projects, folders):
+    logger.debug ('wiring projects and folders')
     for project in projects.values():
         project_info = project.project_info
         if project.project_info != None:
             folder_ref = project_info.ofattribs['folder']
             if folder_ref != None:
+                logger.debug ('wiring: %s %s', project.id, project.name)
                 folder = folders[folder_ref]
                 project.folder = folder
                 folder.add_child (project)
 
 def wire_task_hierarchy (tasks):
+    logger.debug ('wiring type hierarchy')
     for task in tasks.values():  
         if task.ofattribs['parent'] != None:
+            logger.debug ('wiring: %s %s', task.id, task.name)
             parent = tasks[task.ofattribs['parent']]
             parent.add_child (task)
             
 def wire_tasks_to_enclosing_projects (project_infos, tasks):
+    logger.debug ('wiring tasks to enclosing projects')
     for task in tasks.values():  
         if task.ofattribs['containingProjectInfo'] != None:
+            logger.debug ('wiring: %s %s', task.id, task.name)
             project_info = project_infos[task.ofattribs['containingProjectInfo']]
             project = project_info.project
             task.project = project
        
 def wire_tasks_and_contexts (contexts, tasks, no_context):
-    for task in tasks.values():  
+    logger.debug ('wiring tasks and contexts')
+    for task in tasks.values():
+        logger.debug ('wiring: %s %s', task.id, task.name)
         if task.ofattribs['context'] != None:
             context = contexts[task.ofattribs['context']]
             task.context = context
@@ -242,14 +262,18 @@ def wire_tasks_and_contexts (contexts, tasks, no_context):
             no_context.children.append(task)
             
 def wire_folder_hierarchy (folders):
+    logger.debug ('wiring folder hierarchy')
     for folder in folders.values():
         if folder.ofattribs['parent'] != None:
+            logger.debug ('wiring: %s %s', folder.id, folder.name)
             parent = folders[folder.ofattribs['parent']]
             parent.add_child (folder)
                 
 def wire_context_hierarchy (contexts):
+    logger.debug ('wiring context hierarchy')
     for context in contexts.values():
         if context.ofattribs['parent'] != None:
+            logger.debug ('wiring: %s %s', context.id, context.name)
             parent = contexts[context.ofattribs['parent']]
             parent.add_child (context)
 

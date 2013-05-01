@@ -15,6 +15,8 @@ options:
   -T - template_name : use the specified template instead of one derived from the output file extension
   --open             : open the output file with the registered application (if one is installed)
   -v                 : verbose output
+  -z                 : maximum diagnostics
+  -V level           : set the global log level (ERROR, INFO, DEBUG, TRACE)
   --log name=level   : set a logger to a particular level
   --debug arg        : set test options
 

@@ -1,6 +1,7 @@
 # ofexport Todo
 
 - Backlog
+    - Debug
     - Database
         - What about task availability? Where is it stored?
         - Try ofexport with OF 2
@@ -11,9 +12,6 @@
         - "type" should be a template variable
         - $date and $time variables in templates
         - Add item depth as filterable parameter
-    - Debug
-        - Keep -v and -Vn, 0=error, 1=debug, 2=trace
-        - Add logging to more modules
     - Templates
         - Have a default template in code such that an empty template file still works
         - Put file extension associations in the templates

@@ -36,7 +36,15 @@ import cmd_parser
 
 logging.basicConfig(format='%(asctime)-15s %(name)s %(levelname)s %(message)s', stream=sys.stdout)
 logger = logging.getLogger(__name__)
-logger.setLevel(level=logging.INFO)
+logger.setLevel(level=logging.ERROR)
+
+LOGGER_NAMES = [
+                __name__,
+                'cmd_parser',
+                'visitors',
+                'datematch',
+                'treemodel',
+                'omnifocus']
 
 class SummaryVisitor (Visitor):
     def __init__ (self):
@@ -123,15 +131,15 @@ if __name__ == "__main__":
         elif '-T' == opt:
             template = load_template (template_dir, arg)
         elif '-v' == opt:
-            logging.getLogger(__name__).setLevel (logging.DEBUG)
-            logging.getLogger('cmd_parser').setLevel (logging.DEBUG)
-            logging.getLogger('visitors').setLevel (logging.DEBUG)
-        elif '--debug' == opt:
-            bits = arg.split('=')
-            assert len(bits) == 2
-            name = bits[0]
-            value = bits[1]
-            set_debug_opt (name, value)
+            for logname in LOGGER_NAMES:
+                logging.getLogger(logname).setLevel (logging.INFO)
+        elif '-V' == opt:
+            level = arg
+            for logname in LOGGER_NAMES:
+                logging.getLogger(logname).setLevel (logging.__dict__[arg])
+        elif '-z' == opt:
+            for logname in LOGGER_NAMES:
+                logging.getLogger(logname).setLevel (logging.DEBUG)
         elif '--log' == opt:
             bits = arg.split('=')
             assert len(bits) == 2
@@ -140,6 +148,12 @@ if __name__ == "__main__":
             if name=='ofexport':
                 name = __name__
             logging.getLogger(name).setLevel (logging.__dict__[level])
+        elif '--debug' == opt:
+            bits = arg.split('=')
+            assert len(bits) == 2
+            name = bits[0]
+            value = bits[1]
+            set_debug_opt (name, value)
         elif opt in ('-?', '-h', '--help'):
             print_help ()
             sys.exit()

@@ -18,6 +18,8 @@ def print_help ():
     print '  -T - template_name : use the specified template instead of one derived from the output file extension'
     print '  --open             : open the output file with the registered application (if one is installed)'
     print '  -v                 : verbose output'
+    print '  -z                 : maximum diagnostics'
+    print '  -V level           : set the global log level (ERROR, INFO, DEBUG, TRACE)'
     print '  --log name=level   : set a logger to a particular level'
     print '  --debug arg        : set test options'
     print
@@ -30,5 +32,5 @@ def print_help ():
     print
     print '  See DOCUMENTATION.md for more information'
 
-SHORT_OPTS = 'h?CPIEo:i:T:va:t:p:f:c:'
+SHORT_OPTS = 'h?CPIEo:i:T:vzV:a:t:p:f:c:'
 LONG_OPTS = ['help','open','log=','debug=','any=','task=','project=','folder=','context=']
