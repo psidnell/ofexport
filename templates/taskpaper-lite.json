@@ -7,8 +7,7 @@
         "FolderStart": "$indent$name:", 
         "ContextStart": "$indent$name:\n$indent\t$link",
         "TaskStart": "$indent- $name $date_completed", 
-        "TaskGroupStart": "$indent$name:$date_completed",
-        "NoteLine": "$indent\t$note_line"
+        "TaskGroupStart": "$indent$name:$date_completed"
     }, 
     "NodeAttributeDefaults": {
         "date_to_start": "", 

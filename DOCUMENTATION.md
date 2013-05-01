@@ -86,7 +86,6 @@ TaskPaper Document
 Given that **ofexport** is using a completely undocumented and unsupported means of accessing the OmniFocus database, there are inevitably some shortcomings. The tool doesn't load all the metadata you might expect from the OmniFocus database such as:
 
 - Context Status (I don't know where it's in the database yet)
-- Notes/attachments (I'm not completely sure how these are encoded yet)
 - Project Type/Status (I don't know they're stored is in the database yet)
 
 However I wrote this tool primarily for my own use and while I'm using it on a daily basis it's going to be pretty well supported.

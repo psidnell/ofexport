@@ -1,5 +1,9 @@
 # Changes #
 
+## 2.0.1 (2013-05-01)
+
+- Added notes from the OmniFocus database
+
 ## 2.0.0 (2013-04-29)
 
 - New expression parsing engine for complex queries.

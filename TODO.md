@@ -1,14 +1,5 @@
 # ofexport Todo
 
-- 2.1.1 - Extracting Note Data
-    - Taskpaper template
-    - HTML template
-    - Markdown template
-    - Text Template
-    - OPML template
-    - make safe unicode fn a util method
-    - notes in the json
-    - tests
 - Backlog
     - Database
         - What about task availability? Where is it stored?
