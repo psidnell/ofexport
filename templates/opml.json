@@ -12,7 +12,8 @@
         "FolderEnd": "$indent</outline>", 
         "TaskEnd": "$indent</outline>", 
         "TaskGroupEnd": "$indent</outline>", 
-        "ContextEnd": "$indent</outline>"
+        "ContextEnd": "$indent</outline>",
+        "NoteLine": "$indent<outline text=\"$note_line\"/>"
     }, 
     "NodeAttributeDefaults": {
         "date_to_start": "", 

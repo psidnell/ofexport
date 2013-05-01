@@ -5,4 +5,6 @@ Test Folder:
 		F1 Project 2: @flagged @context(TestContext)
 			omnifocus:///task/i0LhrVuFaPc
 			- task F1 P2 1  @context(SubContext1)
+				Note line 1.
+				Note line 2.
 			- task F1 P2 2  @context(SubContext2)

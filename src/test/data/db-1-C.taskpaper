@@ -8,6 +8,8 @@ Test Context:
 		- parent task F1 P1 1  @context(SubContext1)
 		- task F2 P2 1  @context(SubContext1)
 		- task F1 P2 1  @context(SubContext1)
+			Note line 1.
+			Note line 2.
 		- task F2 P1 1  @flagged @context(SubContext1)
 	Sub Context 2:
 		omnifocus:///context/gOdcF2qsrrV

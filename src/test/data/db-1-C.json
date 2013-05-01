@@ -39,6 +39,10 @@
                 "id": "499d8b42-aa62-11e2-97a6-a820662fff7a", 
                 "link": "omnifocus:///task/d39BskyduPI", 
                 "name": "F1 Project 1", 
+                "note": [
+                  "Note line 1.", 
+                  "Note line 2."
+                ], 
                 "type": "Project"
               }, 
               {
@@ -49,6 +53,10 @@
                     "id": "499d998f-aa62-11e2-a0ae-a820662fff7a", 
                     "link": "omnifocus:///task/pjLhUi9hY4F", 
                     "name": "task F1 P2 1", 
+                    "note": [
+                      "Note line 1.", 
+                      "Note line 2."
+                    ], 
                     "type": "Task"
                   }, 
                   {

@@ -9,6 +9,8 @@
 - parent task F1 P1 1
 - task F2 P2 1
 - task F1 P2 1
+    Note line 1.
+    Note line 2.
 - task F2 P1 1
 
 ## Sub Context 2

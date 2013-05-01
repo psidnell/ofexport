@@ -15,6 +15,8 @@
         <outline text="task F2 P2 1" completed="">
         </outline>
         <outline text="task F1 P2 1" completed="">
+        <outline text="Note line 1."/>
+        <outline text="Note line 2."/>
         </outline>
         <outline text="task F2 P1 1" completed="">
         </outline>

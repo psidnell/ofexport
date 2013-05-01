@@ -24,6 +24,10 @@ PROJECT = 'Project'
 CONTEXT = 'Context'
 FOLDER = 'Folder'
 
+class Note:
+    def get_note_lines (self):
+        assert False, "not implemented"
+
 class NodeFwdDecl (object):
     # How to do forward class declarations in python?
     pass
@@ -91,6 +95,7 @@ class Task(Node):
     date_completed = TypeOf ('date_completed', datetime)
     date_to_start = TypeOf ('date_to_start', datetime)
     date_due = TypeOf ('date_due', datetime)
+    note = TypeOf ('note', Note)
     
     def __init__ (self,
                   name=None,
@@ -103,7 +108,8 @@ class Task(Node):
                   attribs={},
                   date_completed=None,
                   date_to_start=None,
-                  date_due=None):
+                  date_due=None,
+                  note=None):
         Node.__init__ (self, TASK,
                        name=name,
                        parent=parent,
@@ -116,6 +122,7 @@ class Task(Node):
         self.date_completed = date_completed
         self.date_to_start = date_to_start
         self.date_due = date_due
+        self.note=note
 
 class Folder(Node):
     def __init__ (self,
@@ -138,6 +145,7 @@ class Project(Node):
     date_completed = TypeOf ('date_completed', datetime)
     date_to_start = TypeOf ('date_to_start', datetime)
     date_due = TypeOf ('date_due', datetime)
+    note = TypeOf ('note', Note)
     def __init__ (self,
                   name=None,
                   parent=None,
@@ -149,7 +157,8 @@ class Project(Node):
                   date_completed=None,
                   date_to_start=None,
                   date_due=None,
-                  context=None):
+                  context=None,
+                  note=None):
         Node.__init__ (self, PROJECT,
                        name=name,
                        parent=parent,
@@ -162,6 +171,7 @@ class Project(Node):
         self.date_completed = date_completed
         self.date_to_start = date_to_start
         self.date_due = date_due
+        self.note = note
     
 class Visitor(object):
     project_mode = TypeOf ('flagged', bool)

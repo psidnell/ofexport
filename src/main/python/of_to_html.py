@@ -15,10 +15,17 @@ limitations under the License.
 '''
 
 from fmt_template import Formatter
+from treemodel import Note
 
 def escape (val):
     return val.replace('"','&quot;').replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
 
+class EscapedNote (Note):
+    def __init__ (self, lines):
+        self.lines = [escape (line) for line in lines]
+    def get_note_lines (self):
+        return self.lines
+    
 class PrintHtmlVisitor (Formatter):
 
     def __init__ (self, out, template):
@@ -31,6 +38,7 @@ class PrintHtmlVisitor (Formatter):
                       'project'        : lambda x: escape(''.join (x.name.split ())),
                       'date_to_start'  : lambda x: x.strftime(template.date_format),
                       'date_due'       : lambda x: x.strftime('%Y-%m-%d'),
-                      'date_completed' : lambda x: x.strftime('%Y-%m-%d')
+                      'date_completed' : lambda x: x.strftime('%Y-%m-%d'),
+                      'note'           : lambda x : EscapedNote (x.get_note_lines ())
                       }
         Formatter.__init__(self, out, template, attrib_conversions = attrib_conversions)

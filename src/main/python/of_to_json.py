@@ -17,7 +17,7 @@ limitations under the License.
 import json
 import codecs
 from datetime import datetime
-from treemodel import Visitor, Context, Project, Task, Folder, CONTEXT, PROJECT, TASK, FOLDER
+from treemodel import Visitor, Context, Project, Task, Folder, Note, CONTEXT, PROJECT, TASK, FOLDER
 
 TIME_FMT = "%Y-%m-%d %H:%M:%S"
 
@@ -35,6 +35,11 @@ def load_attrib (item, attrib, attribs, convert):
     value = attribs[attrib]
     item.__dict__[attrib] = convert (value)
 
+def get_note_lines (x):
+    if x == None:
+        return None
+    return x.get_note_lines()
+
 class ConvertStructureToJsonVisitor(Visitor):
     def begin_any (self, item):
         if self.is_in_applicable_mode (item) and not 'json_data' in item.attribs:
@@ -47,6 +52,7 @@ class ConvertStructureToJsonVisitor(Visitor):
             save_attrib (item, 'date_to_start', node_json_data, lambda x: x.strftime (TIME_FMT))
             save_attrib (item, 'date_due', node_json_data, lambda x: x.strftime (TIME_FMT))
             save_attrib (item, 'flagged', node_json_data, lambda x : x)
+            save_attrib (item, 'note', node_json_data, lambda x : get_note_lines (x))
             item.attribs['json_data'] = node_json_data
     def end_task (self, item):
         self.add_children(item)
@@ -81,6 +87,12 @@ class ConvertStructureToJsonVisitor(Visitor):
                     children_json_data.append(child_json_data)
             item.attribs['json_data']['children'] = children_json_data
 
+class JSONNote (Note):
+    def __init__ (self, lines):
+        self.lines = lines
+    def get_note_lines (self):
+        return self.lines
+    
 def load_from_json (json_data, item_db):
     if 'ref' in json_data:
         item = item_db[json_data['ref']]
@@ -103,6 +115,7 @@ def load_from_json (json_data, item_db):
     load_attrib (item, 'date_to_start', json_data, lambda x: datetime.strptime (x, TIME_FMT))
     load_attrib (item, 'date_due', json_data, lambda x: datetime.strptime (x, TIME_FMT))
     load_attrib (item, 'flagged', json_data, lambda x: x)
+    load_attrib (item, 'note', json_data, lambda x: JSONNote (x))
     
     for child_data in json_data['children']:
         child = load_from_json (child_data, item_db)

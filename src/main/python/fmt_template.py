@@ -57,7 +57,7 @@ class Formatter(Visitor):
                       'project'        : lambda x: x.name,
                       'date_to_start'  : lambda x: x.strftime(template.date_format),
                       'date_due'       : lambda x: x.strftime(template.date_format),
-                      'date_completed' : lambda x: x.strftime(template.date_format)
+                      'date_completed' : lambda x: x.strftime(template.date_format),
                       }
         
         self.template = template
@@ -85,6 +85,7 @@ class Formatter(Visitor):
         line = format_item (project, self.template, 'ProjectStart', self.attrib_conversions, self.extra_attribs)
         if line != None:
             print >>self.out, line
+            self.handle_note (project)
         self.depth+=1
         self.traversal_depth+=1
     def end_project (self, project):
@@ -100,10 +101,12 @@ class Formatter(Visitor):
             line = format_item (task, self.template, 'TaskStart', self.attrib_conversions, self.extra_attribs)
             if line != None:
                 print >>self.out, line
+                self.handle_note (task)
         else:
             line = format_item (task, self.template, 'TaskGroupStart', self.attrib_conversions, self.extra_attribs)
             if line != None:
                 print >>self.out, line
+                self.handle_note (task)
         self.depth+=1
         self.traversal_depth+=1
     def end_task (self, task):
@@ -137,6 +140,11 @@ class Formatter(Visitor):
     def update_extra_attribs (self, item, link_type):
         self.extra_attribs['depth'] = str (self.traversal_depth)
         self.extra_attribs['indent'] = self.template.indent * (self.depth)
+    def handle_note (self, item):
+        if item.note != None and 'NoteLine' in self.template.nodes:
+            for line in item.note.get_note_lines ():
+                self.extra_attribs['note_line'] = line
+                print >>self.out, format_item (item, self.template, 'NoteLine', self.attrib_conversions, self.extra_attribs)
         
 def build_attrib_values (item, attrib_conversions):
     attrib_values = {}

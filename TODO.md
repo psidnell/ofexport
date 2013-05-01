@@ -1,39 +1,55 @@
 # ofexport Todo
 
-- V2.0.0
-    - release
+- 2.1.1 - Extracting Note Data
+    - Taskpaper template
+    - HTML template
+    - Markdown template
+    - Text Template
+    - OPML template
+    - make safe unicode fn a util method
+    - notes in the json
+    - tests
 - Backlog
-    - Install it myself separately from my dev environment
-    - Update the paths accordingly
-    - look for OFEXPORT_HOME in the environment first
-    - Need more than twe levels of debug
+    - Database
+        - What about task availability? Where is it stored?
+        - Try ofexport with OF 2
+        - Where are inbox items stored in in the OF DB?
+            Can I catch them with "No Context"
+        - Can I detect a if a project/context is paused?
+    - Attributes
+        - "type" should be a template variable
+        - $date and $time variables in templates
+        - Add item depth as filterable parameter
+    - Debug
         - Keep -v and -Vn, 0=error, 1=debug, 2=trace
         - Add logging to more modules
+    - Templates
+        - Have a default template in code such that an empty template file still works
+        - Put file extension associations in the templates
     - Bug: unexpected arguments error prints whole line, not just bad arg
-    - Have a default template in code such that an empty template file still works
-    - "type" should be a template variable
-    - Add "natural" sort - i.e. sort by the order from the OF DB (this is done initially already)
-    - $date and $time variables in templates
-    - Write up geektool integration - create section on integration with other tools - by objective e.g. tasks on the desktop, add to features - SCREENSHOT
-    - What about task availability? Where is it stored?
-    - Use stdout if no file specified with -o
-    - Assertions to prevent mis-wiring of type hierarchies
-    - More general config - e.g. global date format?
-    - Select input database location - necessary for OmniFocus 2 alpha testing
-    - A filter that prepends type to items - for debugging
-    - Scan for #xxx in the text and add tp tag?
-    - Put file extension associations in the templates
-    - test all the assertions properly with unit tests (done most of them)
-    - Document How I use it
-    - Try ofexport with OF 2
-    - Where are inbox items stored in in the OF DB?
-    - Filter to merge projects folders etc if they have same name?
-    - Allow +-3d, 2w etc?
-    - Dump OF schema programatically
-    - Extract note text (even possible?) attachments and unicode issues…
-    - Create a taggable dump of projects as files with links to corresponing Omnifocus entities - for hazel and openmeta scripts
-    - Read other file types such as Taskpaper/OPML (done json)
-    - Resolve utf8/ascii issues - not sure what's going on - redirecting stdout "changes things" as does invocation from applescript?!?!?!
-    - Can I detect a if a project/context is paused?
-    - Add item depth as filterable parameter
-    - document any new filter variables
+    - Sorting
+        - Add "natural" sort - i.e. sort by the order from the OF DB (this is done initially already)
+    - Documentation
+        - Write up geektool integration - create section on integration with other tools - by objective e.g. tasks on the desktop, add to features - SCREENSHOT
+        - Document How I use it
+        - document any new filter variables
+    - Command Line
+        - Use stdout if no file specified with -o
+        - Select input database location - necessary for OmniFocus 2 alpha testing
+    - Architecture
+        - Assertions to prevent mis-wiring of type hierarchies
+        - More general config - e.g. global date format?
+        - A filter that prepends type to items - for debugging
+        - Scan for #xxx in the text and add tp tag?
+        - Filter to merge projects folders etc if they have same name?
+        - Allow +-3d, 2w etc?
+        - Dump OF schema programatically
+        - Create a taggable dump of projects as files with links to corresponing Omnifocus entities - for hazel and openmeta scripts
+            file format: fld-fld-…-proj
+        - Read other file types such as Taskpaper/OPML (done json)
+        - Resolve utf8/ascii issues - not sure what's going on - redirecting stdout "changes things" as does invocation from applescript?!?!?!
+        - look for OFEXPORT_HOME in the environment first
+    - Testing
+        - test all the assertions properly with unit tests (done most of them)
+        - Install it myself separately from my dev environment
+        - Update the paths accordingly

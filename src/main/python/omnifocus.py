@@ -14,11 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-from treemodel import PROJECT, Project, Node, Task, Context, Folder, sort
+from treemodel import PROJECT, Project, Node, Task, Context, Folder, Note, sort
 import sqlite3
 from os import environ, path
 from datetime import datetime
 from typeof import TypeOf
+from xml.dom.minidom import parse, parseString
+
 '''
 A library for loading a data model from the Omnifocus SQLite database.
 
@@ -79,6 +81,36 @@ CREATE TABLE Perspective (persistentIdentifier text NOT NULL PRIMARY KEY, creati
 
 THIRTY_ONE_YEARS = 60 * 60 * 24 * 365 * 31 + 60 * 60 * 24 * 8
 
+class OFNote (Note):
+    def __init__ (self, noteXMLData):
+        self.noteXMLData = noteXMLData
+    def get_note_lines (self):
+        # Currently getting this on demand because formatting it
+        # for the whole DB is sloooooow
+        dom = parseString(self.noteXMLData)
+        #print dom.toprettyxml ()
+        lines = []
+        for para in  dom.getElementsByTagName("p"):
+            line = []
+            for lit in  para.getElementsByTagName("lit"):
+                nodeValue = lit.firstChild.nodeValue
+                if nodeValue != None:
+                    text = self.fix_dodgy_chars(nodeValue)
+                    line.append(text)
+            lines.append (u''.join(line))
+        return lines
+    def fix_dodgy_chars (self, text):
+        try:
+            return unicode (text)
+        except:
+            buf = []
+            for c in text:
+                try:
+                    buf.append(unicode(c))
+                except:
+                    buf.append('?')
+            return u''.join(buf)
+
 def datetimeFromAttrib (ofattribs, name):
     val = ofattribs[name]
     if val == None:
@@ -116,6 +148,9 @@ class OFTask(OFNodeMixin, Task):
         self.ofattribs = ofattribs
         if 'persistentIdentifier' in ofattribs:
             self.link = 'omnifocus:///task/' + ofattribs['persistentIdentifier']
+        noteXMLData = ofattribs['noteXMLData']
+        if noteXMLData != None:
+            self.note = OFNote (noteXMLData)
     
 class OFFolder(OFNodeMixin, Folder):
     TABLE='folder'

@@ -9,7 +9,8 @@
         "TaskGroupStart": "$indent<li class=\"TaskGroup\"><a href=\"$link\">$name</a><span class=\"Attrib\">$flagged$date_to_start$date_due$date_completed$context$project</span></li><ul>", 
         "ContextStart": "$indent<H$depth class=\"Context\"><a href=\"$link\">$name</a><H$depth>",
         "ProjectEnd": "$indent</ul>",
-        "TaskGroupEnd": "$indent</ul>"
+        "TaskGroupEnd": "$indent</ul>",
+        "NoteLine": "$indent$note_line<br>"
     }, 
     "NodeAttributeDefaults": {
         "date_to_start": "", 

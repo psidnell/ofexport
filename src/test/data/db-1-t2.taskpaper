@@ -4,4 +4,6 @@ Test Folder:
 		omnifocus:///folder/msGNrO_ZBdL
 		F1 Project 1: @start(2013-04-22) @due(2013-04-23) @context(TestContext)
 			omnifocus:///task/d39BskyduPI
+			Note line 1.
+			Note line 2.
 			- task F1 P1 2  @context(SubContext2)

@@ -15,6 +15,7 @@ limitations under the License.
 '''
 
 from fmt_template import Formatter
+from treemodel import PROJECT
 
 class PrintMarkdownVisitor(Formatter):
     def __init__ (self, out, template):
@@ -62,3 +63,8 @@ class PrintMarkdownVisitor(Formatter):
     def end_folder (self, folder):
         self.header_depth-=1
         Formatter.end_folder(self, folder)
+    def handle_note (self, item):
+        if item.note != None and 'NoteLine' in self.template.nodes:
+            if item.type == PROJECT:
+                print >>self.out
+            Formatter.handle_note (self, item)

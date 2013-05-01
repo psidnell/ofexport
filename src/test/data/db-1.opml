@@ -7,6 +7,8 @@
     <outline text="Test Folder">
       <outline text="Sub Folder 1">
         <outline text="F1 Project 1" completed="">
+        <outline text="Note line 1."/>
+        <outline text="Note line 2."/>
           <outline text="parent task F1 P1 1" completed="">
             <outline text="sub task with a colon:" completed="">
             </outline>
@@ -16,6 +18,8 @@
         </outline>
         <outline text="F1 Project 2" completed="">
           <outline text="task F1 P2 1" completed="">
+          <outline text="Note line 1."/>
+          <outline text="Note line 2."/>
           </outline>
           <outline text="task F1 P2 2" completed="">
           </outline>
