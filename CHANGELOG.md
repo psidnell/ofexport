@@ -5,7 +5,7 @@
 - New expression parsing engine for complex queries.
 - Thumbnails in the documentation.
 - Added dateFormat to templates.
-- Bugfixes
+- Bugfixes.
 
 ## 1.1.0 (2013-04-21)
 
