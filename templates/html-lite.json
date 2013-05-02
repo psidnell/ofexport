@@ -1,5 +1,6 @@
 {
     "indent": 2,
+    "dateFormat": "%Y-%m-%d",
     "depth" : 1, 
     "Nodes": {
         "ProjectStart": "$indent<H$depth class=\"Project\"><a href=\"$link\">$name</a></H$depth><ul>", 
@@ -18,7 +19,8 @@
         "name": "", 
         "project": "", 
         "context": "", 
-        "flagged": ""
+        "flagged": "",
+        "note": ""
     }, 
     "indentString": "  ", 
     "NodeAttributes": {
@@ -29,7 +31,8 @@
         "name": "$value", 
         "project": " <span class=\"AProject\">$value</span>", 
         "context": " <span class=\"AContext\">$value<span>", 
-        "flagged": " <span class=\"AFlagged\">FLAGGED</span>"
+        "flagged": " <span class=\"AFlagged\">FLAGGED</span>",
+        "note": ""
     },
     "preambleFile":"html-start.txt",
     "postamble":"  </body>\n<html>"

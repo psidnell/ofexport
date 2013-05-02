@@ -24,7 +24,7 @@ This produces a document containing all tasks completed this week from any folde
 
 This produces the report of what I have yet to do on this project           
 
-        ofexport -o TODO.md -p='"ofexport Todo"' -f flatten -a prune -E -t done=any
+        ofexport -o TODO.md -f='"ofexport"' -f flatten -a prune -E -t done=any
 
 This produces the report of all uncompleted tasks that are flagged or due soon
 

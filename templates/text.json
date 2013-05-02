@@ -18,7 +18,8 @@
         "name": "", 
         "project": "", 
         "context": "", 
-        "flagged": ""
+        "flagged": "",
+        "note": ""
     }, 
     "indentString": "    ", 
     "NodeAttributes": {
@@ -30,5 +31,6 @@
         "project": " project:$value", 
         "context": " context:$value", 
         "flagged": " flagged"
+        "note": ""
     }
 }

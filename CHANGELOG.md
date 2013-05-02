@@ -1,5 +1,10 @@
 # Changes #
 
+## 2.0.2 (2013-05-03)
+
+- Changed OPML format so note text appears as an OmniOutliner block note, not a sequence of sub-nodes.
+- Bug fix: notes weren't being escaped in OPML or HTML leading to invalid format.
+
 ## 2.0.1 (2013-05-01)
 
 - Added notes from the OmniFocus database.

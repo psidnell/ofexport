@@ -7,33 +7,31 @@
     <outline text="No Context">
     </outline>
     <outline text="Test Context">
-      <outline text="sub task with a colon:" completed="">
+      <outline text="sub task with a colon:" completed="" _note="">
       </outline>
       <outline text="Sub Context 1">
-        <outline text="parent task F1 P1 1" completed="">
+        <outline text="parent task F1 P1 1" completed="" _note="">
         </outline>
-        <outline text="task F2 P2 1" completed="">
+        <outline text="task F2 P2 1" completed="" _note="">
         </outline>
-        <outline text="task F1 P2 1" completed="">
-        <outline text="Note line 1."/>
-        <outline text="Note line 2."/>
+        <outline text="task F1 P2 1" completed="" _note="Note line 1.&#10;Note line 2.">
         </outline>
-        <outline text="task F2 P1 1" completed="">
+        <outline text="task F2 P1 1" completed="" _note="">
         </outline>
       </outline>
       <outline text="Sub Context 2">
-        <outline text="task F1 P1 2" completed="">
+        <outline text="task F1 P1 2" completed="" _note="">
         </outline>
-        <outline text="task F1 P2 2" completed="">
+        <outline text="task F1 P2 2" completed="" _note="">
         </outline>
-        <outline text="task F2 P1 2" completed="">
+        <outline text="task F2 P1 2" completed="" _note="">
         </outline>
-        <outline text="task F2 P2 2" completed="">
+        <outline text="task F2 P2 2" completed="" _note="">
         </outline>
       </outline>
-      <outline text="I'm done!" completed="2013-04-21">
+      <outline text="I'm done!" completed="2013-04-21" _note="">
       </outline>
-      <outline text="task with no context" completed="">
+      <outline text="task with no context" completed="" _note="">
       </outline>
     </outline>
   </body>
