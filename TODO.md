@@ -1,9 +1,9 @@
 # ofexport Todo
 
+- Release V2.0.1
+    - Release
 - Backlog
     - Command Line
-        - Use stdout if no file specified with -o
-            - but what format?
         - Select input database location - necessary for OmniFocus 2 alpha testing
     - Database
         - What about task availability? Where is it stored?

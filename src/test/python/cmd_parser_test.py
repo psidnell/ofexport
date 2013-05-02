@@ -21,7 +21,6 @@ from cmd_parser import DATE_TYPE, STRING_TYPE, tokenise, read_to_end_quote, pars
 from datematch import date_range_to_str
 from visitors import Sort, Prune, Flatten, Filter
 from test_helper import catch_exception
-import logging
 
 def pretty_tokens (tokens):
     result = []
@@ -271,6 +270,14 @@ class Test_cmd_parser(unittest.TestCase):
         self.assertTrue(expr (Task(name="aabbccdd")))
         self.assertFalse(expr (Task(name="zzz")))
 
+    def test_parse_expr_accessing_missing_params (self):
+        tue = datetime.strptime('Apr 9 2013 11:33PM', '%b %d %Y %I:%M%p')
+        expr = parse_expr(tokenise ('flagged'))[0]
+        self.assertFalse(expr (Folder(name="aabbccdd")))
+        
+        expr = parse_expr(tokenise ('due=today'),now=tue)[0]
+        self.assertFalse(expr (Folder(name="aabbccdd")))
+        
     def test_bug_2013_04_24 (self):
         expr = parse_expr(tokenise ('(type="Folder") and (name!="^Misc")'))[0]
         self.assertFalse(expr (Folder(name="Miscellaneous")))
