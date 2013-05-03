@@ -35,6 +35,7 @@ class PrintTaskpaperVisitor(Formatter):
                       'project'        : lambda x: strip_brackets(''.join (x.name.split ())),
                       'date_to_start'  : lambda x: x.strftime(template.date_format),
                       'date_due'       : lambda x: x.strftime(template.date_format),
-                      'date_completed' : lambda x: x.strftime(template.date_format)
+                      'date_completed' : lambda x: x.strftime(template.date_format),
+                      'note'           : lambda x: ''.join([line+'\n' for line in x.get_note_lines ()])
                       }
         Formatter.__init__(self, out, template, attrib_conversions=attrib_conversions)

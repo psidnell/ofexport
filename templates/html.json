@@ -31,7 +31,8 @@
         "name": "$value", 
         "project": " <span class=\"AProject\">$value</span>", 
         "context": " <span class=\"AContext\">$value<span>", 
-        "flagged": " <span class=\"AFlagged\">FLAGGED</span>"
+        "flagged": " <span class=\"AFlagged\">FLAGGED</span>",
+        "note": "note"
     },
     "preambleFile":"html-start.txt",
     "postamble":"  </body>\n<html>"

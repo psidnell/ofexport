@@ -58,6 +58,7 @@ class Formatter(Visitor):
                       'date_to_start'  : lambda x: x.strftime(template.date_format),
                       'date_due'       : lambda x: x.strftime(template.date_format),
                       'date_completed' : lambda x: x.strftime(template.date_format),
+                      'note'           : lambda x: ''.join([line+'\n' for line in x.get_note_lines ()])
                       }
         
         self.template = template

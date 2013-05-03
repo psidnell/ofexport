@@ -58,6 +58,25 @@ FMT=taskpaper
 ofexport --log ofexport=ERROR -i src/test/data/db-2.json -o target/db-2-C.$FMT
 diff src/test/data/db-2-C.$FMT target/db-2-C.$FMT
 
+################
+echo FORMAT TESTS - extra templates
+################
+
+FMT=taskpaper
+################
+echo -- $FMT
+################
+#ofexport --log ofexport=ERROR -i src/test/data/db-1.json -T taskpaper-lite -o src/test/data/db-1-taskpaper-lite.$FMT
+ofexport --log ofexport=ERROR -i src/test/data/db-1.json -T taskpaper-lite -o target/db-1-taskpaper-lite.$FMT
+diff src/test/data/db-1-taskpaper-lite.$FMT target/db-1-taskpaper-lite.$FMT
+
+FMT=html
+################
+echo -- $FMT
+################
+#ofexport --log ofexport=ERROR -i src/test/data/db-1.json -T html-lite -o src/test/data/db-1-html-lite.$FMT
+ofexport --log ofexport=ERROR -i src/test/data/db-1.json -T html-lite -o target/db-1-html-lite.$FMT
+diff src/test/data/db-1-html-lite.$FMT target/db-1-html-lite.$FMT
 #---------------------------------------------------------------------
 
 ################
