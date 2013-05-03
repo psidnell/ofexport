@@ -88,23 +88,29 @@ CREATE TABLE Perspective (persistentIdentifier text NOT NULL PRIMARY KEY, creati
 THIRTY_ONE_YEARS = 60 * 60 * 24 * 365 * 31 + 60 * 60 * 24 * 8
 
 class OFNote (Note):
-    def __init__ (self, noteXMLData):
+    def __init__ (self, item, noteXMLData):
         self.noteXMLData = noteXMLData
+        self.item = item
+        self.lines = None
     def get_note_lines (self):
-        # Currently getting this on demand because formatting it
-        # for the whole DB is sloooooow
-        dom = parseString(self.noteXMLData)
-        #print dom.toprettyxml ()
-        lines = []
-        for para in  dom.getElementsByTagName("p"):
-            line = []
-            for lit in  para.getElementsByTagName("lit"):
-                nodeValue = lit.firstChild.nodeValue
-                if nodeValue != None:
-                    text = self.fix_dodgy_chars(nodeValue)
-                    line.append(text)
-            lines.append (u''.join(line))
-        return lines
+        if self.lines == None:
+            # Currently getting this on demand because formatting it
+            # for the whole DB is sloooooow
+            logger.debug ('%s note: parsing xml', self.item.id)
+            dom = parseString(self.noteXMLData)
+            logger.debug ('%s note: collating lines', self.item.id)
+            #print dom.toprettyxml ()
+            self.lines = []
+            for para in  dom.getElementsByTagName("p"):
+                line = []
+                for lit in  para.getElementsByTagName("lit"):
+                    nodeValue = lit.firstChild.nodeValue
+                    if nodeValue != None:
+                        text = self.fix_dodgy_chars(nodeValue)
+                        line.append(text)
+                self.lines.append (u''.join(line))
+            logger.debug ('%s note: processed', self.item.id)
+        return self.lines
     def fix_dodgy_chars (self, text):
         try:
             return unicode (text)
@@ -158,7 +164,7 @@ class OFTask(OFNodeMixin, Task):
             self.link = 'omnifocus:///task/' + ofattribs['persistentIdentifier']
         noteXMLData = ofattribs['noteXMLData']
         if noteXMLData != None:
-            self.note = OFNote (noteXMLData)
+            self.note = OFNote (self, noteXMLData)
         logger.debug ('loaded task: %s %s', self.id, self.name)
     
 class OFFolder(OFNodeMixin, Folder):

@@ -1,6 +1,12 @@
 # V2.0.3
 
+- Fix performance problem with large notes
+
+# V2.0.4
+
 - What's in the this release?
+- Stiff further performance gains to be made in template processing (cache formatted attribs)
+- store format attributes on the node
 - probe deeper into the metadata for statuses?
 - useability - any quick wins? command line shortcuts? -DF? canned filters?
 

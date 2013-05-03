@@ -1,5 +1,9 @@
 # Changes #
 
+## 2.0.3 (2013-05-03)
+
+- Fix for a nasty performance bug relating to notes
+
 ## 2.0.2 (2013-05-03)
 
 - Changed OPML format so note text appears as an OmniOutliner block note, not a sequence of sub-nodes.

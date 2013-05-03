@@ -124,14 +124,10 @@ class Test_fmt_datematch(unittest.TestCase):
         self.assertEquals ('', values['date_due'])
         self.assertEquals ('', values['project'])
         self.assertEquals ('', values['flagged'])
-        
-    def test_build_entry (self):
-        task = Task (name='My Name', flagged=True, date_completed=datetime.strptime('2015-02-03', '%Y-%m-%d'))
-        line = build_entry (task, TAGS_TEMPLATE, ATTRIB_CONVERSIONS, ATTRIB_DEFAULTS, ATTRIB_TEMPLATES)
-        self.assertEquals(" @flagged @done(2015-02-03)", line)
     
     def test_format_item (self):
         task = Task (name='My Name', flagged=True, date_completed=datetime.strptime('2015-02-03', '%Y-%m-%d'))
         template = FmtTemplate(DEFAULT_TEMPLATE)
-        line = format_item (task, template, 'TaskStart', ATTRIB_CONVERSIONS)
+        attribs = build_template_substitutions (task, ATTRIB_CONVERSIONS, ATTRIB_DEFAULTS, ATTRIB_TEMPLATES)
+        line = format_item (template, 'TaskStart', attribs)
         self.assertEquals ('T My Name @flagged @done(2015-02-03)', line)

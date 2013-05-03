@@ -17,6 +17,12 @@ import os
 from string import Template
 from treemodel import Visitor, traverse_list
 import codecs
+import logging
+import sys
+
+logging.basicConfig(format='%(asctime)-15s %(name)s %(levelname)s %(message)s', stream=sys.stdout)
+logger = logging.getLogger(__name__)
+logger.setLevel(level=logging.ERROR)
 
 def load_resource (template_dir, name):
     instream=codecs.open(template_dir + name, 'r', 'utf-8')
@@ -66,10 +72,9 @@ class Formatter(Visitor):
         self.traversal_depth = self.template.depth_start
         self.out = out
         self.attrib_conversions = attrib_conversions
-        self.extra_attribs = {}
     def begin_folder (self, folder):
-        self.update_extra_attribs(folder, 'folder')
-        line = format_item (folder, self.template, 'FolderStart', self.attrib_conversions, self.extra_attribs)
+        self.update_attribs(folder, 'folder')
+        line = format_item (self.template, 'FolderStart', folder.attribs['attrib_cache'])
         if line != None:
             print >>self.out, line
         self.depth+=1
@@ -77,13 +82,13 @@ class Formatter(Visitor):
     def end_folder (self, folder):
         self.depth-=1
         self.traversal_depth-=1
-        self.update_extra_attribs(folder, 'folder')
-        line = format_item (folder, self.template, 'FolderEnd', self.attrib_conversions, self.extra_attribs)
+        self.update_attribs(folder, 'folder')
+        line = format_item (self.template, 'FolderEnd', folder.attribs['attrib_cache'])
         if line != None:
             print >>self.out, line
     def begin_project (self, project):
-        self.update_extra_attribs(project, 'task')
-        line = format_item (project, self.template, 'ProjectStart', self.attrib_conversions, self.extra_attribs)
+        self.update_attribs(project, 'task')
+        line = format_item (self.template, 'ProjectStart', project.attribs['attrib_cache'])
         if line != None:
             print >>self.out, line
             self.handle_note (project)
@@ -92,19 +97,19 @@ class Formatter(Visitor):
     def end_project (self, project):
         self.depth-=1
         self.traversal_depth-=1
-        self.update_extra_attribs(project, 'task')
-        line = format_item (project, self.template, 'ProjectEnd', self.attrib_conversions, self.extra_attribs)
+        self.update_attribs(project, 'task')
+        line = format_item (self.template, 'ProjectEnd', project.attribs['attrib_cache'])
         if line != None:
             print >>self.out, line
     def begin_task (self, task):
-        self.update_extra_attribs(task, 'task')
+        self.update_attribs(task, 'task')
         if self.is_empty (task) or self.project_mode == False:
-            line = format_item (task, self.template, 'TaskStart', self.attrib_conversions, self.extra_attribs)
+            line = format_item (self.template, 'TaskStart', task.attribs['attrib_cache'])
             if line != None:
                 print >>self.out, line
                 self.handle_note (task)
         else:
-            line = format_item (task, self.template, 'TaskGroupStart', self.attrib_conversions, self.extra_attribs)
+            line = format_item (self.template, 'TaskGroupStart', task.attribs['attrib_cache'])
             if line != None:
                 print >>self.out, line
                 self.handle_note (task)
@@ -113,18 +118,18 @@ class Formatter(Visitor):
     def end_task (self, task):
         self.depth-=1
         self.traversal_depth-=1
-        self.update_extra_attribs(task, 'task')
+        self.update_attribs(task, 'task')
         if self.is_empty (task) or self.project_mode == False:
-            line = format_item (task, self.template, 'TaskEnd', self.attrib_conversions, self.extra_attribs)
+            line = format_item (self.template, 'TaskEnd', task.attribs['attrib_cache'])
             if line != None:
                 print >>self.out, line
         else:
-            line = format_item (task, self.template, 'TaskGroupEnd', self.attrib_conversions, self.extra_attribs)
+            line = format_item (self.template, 'TaskGroupEnd', task.attribs['attrib_cache'])
             if line != None:
                 print >>self.out, line
     def begin_context (self, context):
-        self.update_extra_attribs(context, 'context')
-        line = format_item (context, self.template, 'ContextStart', self.attrib_conversions, self.extra_attribs)
+        self.update_attribs(context, 'context')
+        line = format_item (self.template, 'ContextStart', context.attribs['attrib_cache'])
         if line != None:
             print >>self.out, line
         self.depth+=1
@@ -132,22 +137,28 @@ class Formatter(Visitor):
     def end_context (self, context):
         self.depth-=1
         self.traversal_depth-=1
-        self.update_extra_attribs(context, 'context')
-        line = format_item (context, self.template, 'ContextEnd', self.attrib_conversions, self.extra_attribs)
+        self.update_attribs(context, 'context')
+        line = format_item (self.template, 'ContextEnd', context.attribs['attrib_cache'])
         if line != None:
             print >>self.out, line
+    def end_any (self, item):
+        del item.attribs['attrib_cache']
     def is_empty (self, item):
         return len ([x for x in item.children if x.marked]) == 0
-    def update_extra_attribs (self, item, link_type):
-        self.extra_attribs['depth'] = str (self.traversal_depth)
-        self.extra_attribs['indent'] = self.template.indent * (self.depth)
     def handle_note (self, item):
         if item.note != None and 'NoteLine' in self.template.nodes:
             for line in item.note.get_note_lines ():
-                self.extra_attribs['note_line'] = line
-                print >>self.out, format_item (item, self.template, 'NoteLine', self.attrib_conversions, self.extra_attribs)
+                item.attribs['attrib_cache']['note_line'] = line
+                print >>self.out, format_item (self.template, 'NoteLine', item.attribs['attrib_cache'])
+    def update_attribs (self, item, link_type):
+        if not 'attrib_cache' in item.attribs:
+            attribs = build_template_substitutions (item, self.attrib_conversions, self.template.node_attribute_defaults, self.template.node_attributes)
+            item.attribs['attrib_cache'] = attribs
+            attribs['depth'] = str (self.traversal_depth)
+            attribs['indent'] = self.template.indent * (self.depth)
         
 def build_attrib_values (item, attrib_conversions):
+    logger.debug ('building attribs for: %s', item.id)
     attrib_values = {}
     for name in item.__dict__.keys():
         if name in attrib_conversions:
@@ -170,14 +181,12 @@ def build_template_substitutions (item, attrib_conversions, attrib_defaults, att
                 substitutions[tpl_key] = attrib_template.safe_substitute (value=value)
     return substitutions
 
-def build_entry (item, line_template, attrib_conversions, attrib_defaults, attrib_templates, extra_attribs = {}):
-    item_attribs = build_template_substitutions (item, attrib_conversions, attrib_defaults, attrib_templates)
-    item_attribs.update (extra_attribs)
-    return line_template.safe_substitute(item_attribs)
+def build_entry (line_template, attributes):
+    return line_template.safe_substitute(attributes)
 
-def format_item (item, template, node_type, attrib_conversions, extra_attribs = {}):
+def format_item (template, node_type, attributes):
     if node_type in template.nodes:
-        return build_entry (item, template.nodes[node_type], attrib_conversions, template.node_attribute_defaults, template.node_attributes, extra_attribs)
+        return build_entry (template.nodes[node_type], attributes)
     return None
 
 def format_document (root, formatter, project_mode):
