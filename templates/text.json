@@ -30,7 +30,7 @@
         "name": "$value", 
         "project": " project:$value", 
         "context": " context:$value", 
-        "flagged": " flagged"
+        "flagged": " flagged",
         "note": ""
     }
 }
