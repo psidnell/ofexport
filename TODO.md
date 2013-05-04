@@ -1,6 +1,7 @@
 # V2.0.3
 
-- Fix performance problem with large notes
+- iCal format?
+- I don't seem to be testiing text
 
 # V2.0.4
 

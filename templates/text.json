@@ -4,11 +4,11 @@
     "depth" : 0, 
     "Nodes": {
         "ProjectStart": "${indent}Project: $name $flagged$date_to_start$date_due$date_completed$context$project", 
-        "FolderStart": "${indent}Folder $name", 
-        "TaskStart": "${indent}Task $name $flagged$date_to_start$date_due$date_completed$context$project", 
-        "TaskGroupStart": "${indent}TaskGroup $name $flagged$date_to_start$date_due$date_completed$context$project", 
-        "ContextStart": "${indent}Context $name",
-        "NoteLine": "$indent\t$note_line"
+        "FolderStart": "${indent}Folder: $name", 
+        "TaskStart": "${indent}Task: $name $flagged$date_to_start$date_due$date_completed$context$project", 
+        "TaskGroupStart": "${indent}TaskGroup: $name $flagged$date_to_start$date_due$date_completed$context$project", 
+        "ContextStart": "${indent}Context: $name",
+        "NoteLine": "$indent\tNote: $note_line"
     }, 
     "NodeAttributeDefaults": {
         "date_to_start": "", 
