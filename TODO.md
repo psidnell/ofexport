@@ -1,11 +1,10 @@
-# V2.0.3
+# V2.1.0
 
-- iCal format?
-- I don't seem to be testiing text
+- Release
 
-# V2.0.4
+# V2.1.1
 
-- What's in the this release?
+- What to put in this release?
 - Stiff further performance gains to be made in template processing (cache formatted attribs)
 - store format attributes on the node
 - probe deeper into the metadata for statuses?

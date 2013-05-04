@@ -64,7 +64,7 @@ class Formatter(Visitor):
                       'date_to_start'  : lambda x: x.strftime(template.date_format),
                       'date_due'       : lambda x: x.strftime(template.date_format),
                       'date_completed' : lambda x: x.strftime(template.date_format),
-                      'note'           : lambda x: ''.join([line+'\n' for line in x.get_note_lines ()])
+                      'note'           : lambda x: x.get_note () + '\n'
                       }
         
         self.template = template
@@ -156,6 +156,9 @@ class Formatter(Visitor):
             item.attribs['attrib_cache'] = attribs
             attribs['depth'] = str (self.traversal_depth)
             attribs['indent'] = self.template.indent * (self.depth)
+            self.add_extra_template_attribs(item, attribs)
+    def add_extra_template_attribs (self, item, attribs):
+        pass
         
 def build_attrib_values (item, attrib_conversions):
     logger.debug ('building attribs for: %s', item.id)

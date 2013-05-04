@@ -39,6 +39,7 @@ There's a [list of usage examples here](documentation/examples.md) if you're not
 - Backing up the OmniFocus database to a form searchable by other tools.
 - Automatically creating reports on demand with Hazel whenever OmniFocus writes its database.
 - Display todays tasks on the desktop with GeekTool.
+- Adding selected tasks to your calendar.
 
 ![Rendered on the Desktop (using GeekTool)](documentation/GeekToolScreenGrab-thumb.jpg)
 
@@ -60,6 +61,7 @@ TaskPaper Document
 - Markdown/FoldingText
 - OPML (Can be read by OmniOutliner, various MindMap tools)
 - HTML
+- ICS (Can be subscribed to via the Calendar app)
 - Modify the existing format templates or create new ones.
 
 **Filter what gets exported:**
@@ -141,7 +143,8 @@ you'll get a text file. By changing the suffix you'll get different formats:
 - **FoldingText:** .ft or .foldingtext (same as Markdown)
 - **TaskPaper:** .tp or .taskpaper
 - **OPML:** .opml
-- **HTML:** .html or .htm			 
+- **HTML:** .html or .htm		
+- **Calendar:** .ics	 
 
 ### Project or Context Mode ###
 
@@ -306,6 +309,7 @@ There are several different attributes, each of which may have alternatives for 
 - **done** - alternatives: end, ended, complete, completed, finish, finished, completion
 - **due** - alternatives: deadline  
 - **flag** - alternatives:  flagged
+- **note**
 
 #### Templates - a Brief Overview####
 
@@ -356,6 +360,23 @@ For example, this is the current text template:
 * **preambleFile/postambleFile**: A file to include at the start/end of the document. This is useful for including things like an HTML header that incorporates a sizeable style sheet.
 
 Browsing the existing templates, making copies and experimenting is probably the best way to start - but beware: json is an unforgiving format and errors that result from a missing  coma or quote are "not towards the helpful end of the spectrum".
+
+### Calendar Export
+
+When an ics file is exported then any Project/Task items in the report (with limitations) be included in the calendar file. The format of an entry in an ics file demands that an item has a start and end time whereas an OmniFocus task does not have this restriction, therefore there are some simple rules that ofexport uses to satisfy this constraint:
+
+- If an item has a start and due time, then these are used as-is.
+- If an item has only a start or a due then this one date is used for both.
+- If an item has neither a start or a due then it will not appear in the calendar.
+
+In addition there is some control that can be exerted over how an item is exported. If certain text appears on a line in the OmniFocus note then this modifies how the item will appear in the calendar. The **%of cal ...** string is used for this purpose - the options are:
+
+- **%of cal onstart** The item will appear at the OmniFocus start time in the exported calendar.
+- **%of cal ondue** The item will appear at the OmniFocus due time in the exported calendar.
+- **%of cal allday** The item will appear as an all day event from it's start day to it's due day.
+- **%of cal noalarm** The item will not have an associated alarm.
+
+Note: all items have an alarm set at the start time by default, but these can be stripped when subscribing with the Calendar app. The Calendar app can only subscribe to calendar files available via an http url. Services like Dropbox make the publication of individual files fairly straightforward. Once the calendar is published the Calendar app can be used to subscribe to it and share it across all your associated devices.
 
 ### Expression Syntax
 

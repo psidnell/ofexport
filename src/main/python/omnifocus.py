@@ -91,6 +91,7 @@ class OFNote (Note):
     def __init__ (self, item, noteXMLData):
         self.noteXMLData = noteXMLData
         self.item = item
+        self.text = None
         self.lines = None
     def get_note_lines (self):
         if self.lines == None:
@@ -111,6 +112,10 @@ class OFNote (Note):
                 self.lines.append (u''.join(line))
             logger.debug ('%s note: processed', self.item.id)
         return self.lines
+    def get_note (self):
+        if self.text == None:
+            self.text = '\n'.join (self.get_note_lines())
+        return self.text
     def fix_dodgy_chars (self, text):
         try:
             return unicode (text)

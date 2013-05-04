@@ -26,7 +26,7 @@ diff src/test/data/help.txt target/help.txt
 echo FORMAT TESTS - Project
 ################
 
-for FMT in taskpaper md html opml ft json text; do
+for FMT in taskpaper md html opml ft json text ics; do
 
     ################
     echo -- $FMT

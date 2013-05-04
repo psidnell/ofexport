@@ -90,8 +90,11 @@ class ConvertStructureToJsonVisitor(Visitor):
 class JSONNote (Note):
     def __init__ (self, lines):
         self.lines = lines
+        self.note = '\n'.join(lines)
     def get_note_lines (self):
         return self.lines
+    def get_note (self):
+        return self.note
     
 def load_from_json (json_data, item_db):
     if 'ref' in json_data:

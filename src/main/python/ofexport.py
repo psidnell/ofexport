@@ -27,6 +27,7 @@ from of_to_text import PrintTextVisitor
 from of_to_md import PrintMarkdownVisitor
 from of_to_opml import PrintOpmlVisitor
 from of_to_html import PrintHtmlVisitor
+from of_to_ics import PrintCalendarVisitor
 from of_to_json import ConvertStructureToJsonVisitor, read_json
 from help import print_help, SHORT_OPTS, LONG_OPTS
 from fmt_template import FmtTemplate, format_document
@@ -235,6 +236,10 @@ if __name__ == "__main__":
     elif fmt in ('html', 'htm'):
         template = template if template != None else load_template (template_dir, 'html')
         visitor = PrintHtmlVisitor (out, template)
+        format_document (subject, visitor, project_mode)
+    elif fmt in ('ics'):
+        template = template if template != None else load_template (template_dir, 'ics')
+        visitor = PrintCalendarVisitor (out, template)
         format_document (subject, visitor, project_mode)
     elif fmt == 'json':
         # json has intrinsic formatting - no template required

@@ -1,0 +1,39 @@
+{
+    "indent": 0,
+    "dateFormat": "%Y%m%d", 
+    "depth" : 0, 
+    "Nodes": {
+        "ProjectStart":   "BEGIN:VEVENT\nDTSTART:$date_to_start\nDTEND:$date_due\nDTSTAMP:$date_due\nSUMMARY:$name\nDESCRIPTION:$link\nUID:$id\n${alarm}END:VEVENT",
+        "TaskGroupStart": "BEGIN:VEVENT\nDTSTART:$date_to_start\nDTEND:$date_due\nDTSTAMP:$date_due\nSUMMARY:$name\nDESCRIPTION:$link\nUID:$id\n${alarm}END:VEVENT",
+        "TaskStart":      "BEGIN:VEVENT\nDTSTART:$date_to_start\nDTEND:$date_due\nDTSTAMP:$date_due\nSUMMARY:$name\nDESCRIPTION:$link\nUID:$id\n${alarm}END:VEVENT"
+    }, 
+    "NodeAttributeDefaults": {
+        "date_to_start": "", 
+        "date_due": "", 
+        "date_completed": "", 
+        "link" : "",
+        "name": "", 
+        "project": "", 
+        "context": "", 
+        "flagged": "",
+        "note": "",
+        "id": "",
+        "alarm": ""
+    }, 
+    "indentString": "    ", 
+    "NodeAttributes": {
+        "date_to_start":"$value", 
+        "date_due": "$value", 
+        "date_completed": " done:$value", 
+        "link": "$value", 
+        "name": "$value", 
+        "project": " project:$value", 
+        "context": " context:$value", 
+        "flagged": " flagged",
+        "note": "",
+        "id":"$value",
+        "alarm":"$value"
+    },
+    "preamble":"BEGIN:VCALENDAR\nVERSION:2.0\nX-WR-CALNAME:OmniFocus\nPRODID:-//ofexport//ofexport//EN\nMETHOD:PUBLISH\nCALSCALE:GREGORIAN",
+    "postamble":"END:VCALENDAR"
+}

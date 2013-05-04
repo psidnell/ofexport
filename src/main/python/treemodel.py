@@ -33,6 +33,8 @@ FOLDER = 'Folder'
 class Note:
     def get_note_lines (self):
         assert False, "not implemented"
+    def get_note (self):
+        assert False, "not implemented"
 
 class NodeFwdDecl (object):
     # How to do forward class declarations in python?

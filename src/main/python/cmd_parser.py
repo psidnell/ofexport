@@ -15,7 +15,7 @@ limitations under the License.
 '''
 
 import re
-from treemodel import TASK, PROJECT, CONTEXT, FOLDER
+from treemodel import TASK, PROJECT, CONTEXT, FOLDER, Note
 from datetime import datetime
 from datematch import process_date_specifier, match_date_against_range, date_range_to_str
 import sys
@@ -41,6 +41,7 @@ COMPLETED_ALIASES = ['date_completed', 'done', 'end', 'ended', 'complete', 'comp
 DUE_ALIASES = ['date_due', 'due', 'deadline']
 FLAGGED_ALIASES = ['flagged', 'flag']
 TYPE_ALIASES = ['type']
+NOTE_ALIASES = ['note']
 
 FLATTEN_ALIASES = ['flat', 'flatten']
 PRUNE_ALIASES = ['prune']
@@ -55,6 +56,7 @@ def build_alias_lookups ():
     result.update (mk_map (DUE_ALIASES))
     result.update (mk_map (FLAGGED_ALIASES))
     result.update (mk_map (TYPE_ALIASES))
+    result.update (mk_map (NOTE_ALIASES))
     return result
 
 def build_date_alias_lookups (): 
@@ -70,6 +72,7 @@ def build_string_alias_lookups ():
     result = {}
     result.update (mk_map (NAME_ALIASES))
     result.update (mk_map (TYPE_ALIASES))
+    result.update (mk_map (NOTE_ALIASES))
     return result
     
 ALIAS_LOOKUPS = build_alias_lookups ()
@@ -266,6 +269,8 @@ def ne_fn (lhs, rhs):
 def adapt (x):
     if type (x) == str:
         return unicode (x)
+    if isinstance (x,Note):
+        return x.get_note()
     return x
 
 def access_field (x, field):

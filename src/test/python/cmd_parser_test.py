@@ -17,10 +17,19 @@ limitations under the License.
 import unittest
 from datetime import datetime
 from treemodel import Task, Project, Folder
-from cmd_parser import DATE_TYPE, STRING_TYPE, tokenise, read_to_end_quote, parse_string, parse_expr, make_command_filter, make_expr_filter, ALIAS_LOOKUPS
+from cmd_parser import DATE_TYPE, STRING_TYPE, Note, tokenise, read_to_end_quote, parse_string, parse_expr, make_command_filter, make_expr_filter, ALIAS_LOOKUPS
 from datematch import date_range_to_str
 from visitors import Sort, Prune, Flatten, Filter
 from test_helper import catch_exception
+
+class TestNote (Note):
+    def __init__ (self, text):
+        self.text = text
+        self.lines = text.split('\n')
+    def get_note (self):
+        return self.text
+    def get_note_lines (self):
+        return self.lines
 
 def pretty_tokens (tokens):
     result = []
@@ -338,6 +347,13 @@ class Test_cmd_parser(unittest.TestCase):
         expr = parse_expr(tokenise ('due = any'))[0]
         self.assertFalse (expr(Task(name="")))
         self.assertTrue (expr(Task(name="", date_due=tue)))
+        
+    def test_parse_expr_note_filter(self):
+        expr = parse_expr(tokenise ('note=123'))[0]
+        self.assertTrue(expr (Task(note=TestNote("aaaa123bbb\nccc456ddd"))))
+        self.assertTrue(expr (Task(note=TestNote("aaaazzzbbb\nccc123ddd"))))
+        self.assertFalse(expr (Task(note=TestNote("z\y\z"))))
+        self.assertFalse(expr (Task()))
         
     def test_make_command_filter (self):
         self.assertEquals (None, make_command_filter ("nonsense"))

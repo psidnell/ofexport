@@ -1,5 +1,10 @@
 # Changes #
 
+## 2.1.0 (2013-05-05)
+
+- Added Calendar (ics) export.
+- Allowed filtering on note text.
+
 ## 2.0.3 (2013-05-03)
 
 - Fix for a nasty performance bug relating to notes

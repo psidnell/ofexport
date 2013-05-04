@@ -17,7 +17,7 @@ limitations under the License.
 import unittest
 from treemodel import Task
 from datetime import datetime
-from fmt_template import FmtTemplate, format_item, build_attrib_values, build_template_substitutions, build_entry
+from fmt_template import FmtTemplate, format_item, build_attrib_values, build_template_substitutions
 from string import Template
 
 TAGS_TEMPLATE = Template ('$flagged$date_to_start$date_due$date_completed$context$project')
