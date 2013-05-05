@@ -33,14 +33,19 @@ diff target/ex4-worms-or-ham-today.taskpaper src/test/data/ex4-worms-or-ham-toda
         ofexport -f=Worms -a flatten -a prune -o target/ex5-work-this-week-flat.taskpaper --debug now=2013-04-29
 diff target/ex5-work-this-week-flat.taskpaper src/test/data/ex5-work-this-week-flat.taskpaper
 
-#This produces the report of what I have yet to do on this project           
+#This produces the report of what I have yet to do on this project:        
 
         ofexport -o TODO.md -f='"ofexport"' -f flatten -a prune -E -t done=any
 
-#This produces the report of all uncompleted tasks that are flagged or due soon
+#This produces the report of all uncompleted tasks that are flagged or due soon:
 
         ofexport -E -a done=any -I -t "flagged or (due='to tomorrow')" -o target/ex8-due-or-flagged.taskpaper --debug now=2013-04-29 -i src/test/data/db-5.json
 diff target/ex8-due-or-flagged.taskpaper src/test/data/ex8-due-or-flagged.taskpaper
+
+#This produces a calendar file containing any items with start/due dates:
+
+        ofexport -o target/ex9.ics --debug now=2013-04-29 -i src/test/data/db-5.json
+diff target/ex9.ics src/test/data/ex9.ics
 
 cat build-scripts/examples | egrep -v -e '^cat|^diff|^#C|^#!' -e '^set' | sed -e 's/^#//' -e 's/--debug.*//' -e 's/target/\/tmp/' > documentation/examples.md
 

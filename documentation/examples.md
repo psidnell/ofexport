@@ -22,12 +22,16 @@ This produces a document containing all tasks completed this week from any folde
     
         ofexport -f=Worms -a flatten -a prune -o /tmp/ex5-work-this-week-flat.taskpaper 
 
-This produces the report of what I have yet to do on this project           
+This produces the report of what I have yet to do on this project:        
 
         ofexport -o TODO.md -f='"ofexport"' -f flatten -a prune -E -t done=any
 
-This produces the report of all uncompleted tasks that are flagged or due soon
+This produces the report of all uncompleted tasks that are flagged or due soon:
 
         ofexport -E -a done=any -I -t "flagged or (due='to tomorrow')" -o /tmp/ex8-due-or-flagged.taskpaper 
+
+This produces a calendar file containing any items with start/due dates:
+
+        ofexport -o /tmp/ex9.ics 
 
 
