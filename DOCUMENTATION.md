@@ -1,5 +1,9 @@
 # ofexport #
 
+Export specific items from OmniFocus and do… stuff.
+
+![What you can do](documentation/diagram/Diagram.png)
+
 - [Changelog](https://github.com/psidnell/ofexport/blob/master/CHANGELOG.md)
 
 Avenues for help/abuse:
@@ -22,6 +26,7 @@ Related Applications:
 ## Overview:
 
 **ofexport** is a command line utility that reads and exports the task database from the OmniFocus application.
+
 
 For example:
 
@@ -52,6 +57,11 @@ Web Page
 ![TaskPaper Document](documentation/TaskPaper-thumb.jpg)
 
 TaskPaper Document
+
+![Calendar](documentation/cal.png)
+
+Calendar
+
 ### Features
 
 **Export to a number of text based file formats:**
