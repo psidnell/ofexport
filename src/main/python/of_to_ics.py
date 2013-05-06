@@ -17,6 +17,12 @@ limitations under the License.
 from datetime import datetime, timedelta
 from fmt_template import Formatter
 import time
+import logging
+import sys
+
+logging.basicConfig(format='%(asctime)-15s %(name)s %(levelname)s %(message)s', stream=sys.stdout)
+logger = logging.getLogger(__name__)
+logger.setLevel(level=logging.ERROR)
 
 DATE_FORMAT_LONG = "%Y%m%dT%H%M00Z"
 DATE_FORMAT_SHORT = "%Y%m%d"
@@ -34,7 +40,7 @@ class PrintCalendarVisitor(Formatter):
                       'date_to_start'  : lambda x: format_date(self.current_item,x, False),
                       'date_due'       : lambda x: format_date(self.current_item, x, True),
                       'date_completed' : lambda x: x.strftime(DATE_FORMAT_LONG),
-                      'note'           : lambda x: ''.join([line+'\n' for line in x.get_note_lines ()])
+                      'note'           : lambda x: '\\r'.join(x.get_note_lines ())
                       }
         Formatter.__init__(self, out, template, attrib_conversions = attrib_conversions)
     def begin_any (self, item):
@@ -86,14 +92,38 @@ def load_note_attribs (item):
                 bits = line.split()
                 if len(bits) >= 3 and bits[1] == 'cal':
                     for flag in bits[2:]:
-                        item.attribs[flag] = True
+                        bits2 = flag.split('=')
+                        if len(bits2) == 2:
+                            item.attribs[bits2[0]] = bits2[1]
+                        else:
+                            item.attribs[flag] = True
+        if 'onstart' in item.attribs:
+            item.date_due = item.date_to_start
+        if 'ondue' in item.attribs:
+            item.date_to_start = item.date_due
+        try:
+            if 'start' in item.attribs:
+                bits = item.attribs['start'].split(':')
+                the_date = item.date_to_start
+                if len(bits) == 2:
+                    item.date_to_start = datetime (the_date.year, the_date.month, the_date.day, int(bits[0]), int(bits[1]), 0, 0, the_date.tzinfo)
+                else:
+                    logger.error ("problem parsing cal directives in %s %s", item.id, item.name)
+            if 'due' in item.attribs:
+                bits = item.attribs['due'].split(':')
+                the_date = item.date_due
+                if len(bits) == 2:
+                    item.date_due = datetime (the_date.year, the_date.month, the_date.day, int(bits[0]), int(bits[1]), 0, 0, the_date.tzinfo)
+                else:
+                    logger.error ("problem parsing cal directives in %s %s", item.id, item.name)
+        except Exception as e:
+            logger.error (e.message)
+            logger.error ("problem parsing cal directives in %s %s", item.id, item.name)
+        if item.date_to_start > item.date_due:
+            logger.error ("problem parsing cal directives in %s %s", item.id, item.name)
+            item.date_to_start = item.date_due
                     
 def format_date (item, the_date, is_due_date):
-    if 'onstart' in item.attribs:
-        the_date = item.date_to_start
-    elif 'ondue' in item.attribs:
-        the_date = item.date_due
-    the_date = utc (the_date)
     if 'allday' in item.attribs:
         # Make all day - must have no hms in format
         #DTSTART;VALUE=DATE:20020923
@@ -101,7 +131,10 @@ def format_date (item, the_date, is_due_date):
         the_date = datetime (the_date.year, the_date.month, the_date.day, 0, 0, 0)
         if is_due_date:
             the_date = the_date + timedelta (days=1)
-        return the_date.strftime(DATE_FORMAT_SHORT)
+        # NO UTC CONVERSION - it happens on the day we asked for - no adjustment required
+        return the_date.strftime(DATE_FORMAT_SHORT) 
+    
+    the_date = utc (the_date)   
     return the_date.strftime(DATE_FORMAT_LONG)
 
 def utc (the_date):

@@ -385,6 +385,12 @@ In addition there is some control that can be exerted over how an item is export
 - **%of cal ondue** The item will appear at the OmniFocus due time in the exported calendar.
 - **%of cal allday** The item will appear as an all day event from it's start day to it's due day.
 - **%of cal noalarm** The item will not have an associated alarm.
+- **%of cal start=HH:MM** The item will appear in the calendar starting at HH:MM (24hr format).
+- **%of cal due=HH:MM** The item will appear in the calendar finishing at HH:MM (24hr format).
+
+It's possible to combine this into a single line:
+
+        %of cal start=11:00 due=14:00 noalarm
 
 Note: all items have an alarm set at the start time by default, but these can be stripped when subscribing with the Calendar app. The Calendar app can only subscribe to calendar files available via an http url. Services like Dropbox make the publication of individual files fairly straightforward. Once the calendar is published the Calendar app can be used to subscribe to it and share it across all your associated devices.
 

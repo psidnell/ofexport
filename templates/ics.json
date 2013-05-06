@@ -3,9 +3,9 @@
     "dateFormat": "%Y%m%d", 
     "depth" : 0, 
     "Nodes": {
-        "ProjectStart":   "BEGIN:VEVENT\nDTSTART:$date_to_start\nDTEND:$date_due\nDTSTAMP:$date_due\nSUMMARY:$name\nDESCRIPTION:$link\nUID:$id\n${alarm}END:VEVENT",
-        "TaskGroupStart": "BEGIN:VEVENT\nDTSTART:$date_to_start\nDTEND:$date_due\nDTSTAMP:$date_due\nSUMMARY:$name\nDESCRIPTION:$link\nUID:$id\n${alarm}END:VEVENT",
-        "TaskStart":      "BEGIN:VEVENT\nDTSTART:$date_to_start\nDTEND:$date_due\nDTSTAMP:$date_due\nSUMMARY:$name\nDESCRIPTION:$link\nUID:$id\n${alarm}END:VEVENT"
+        "ProjectStart":   "BEGIN:VEVENT\nDTSTART:$date_to_start\nDTEND:$date_due\nDTSTAMP:$date_due\nSUMMARY:$name\nURL:$link\nUID:$id\nDESCRIPTION:\n${alarm}END:VEVENT",
+        "TaskGroupStart": "BEGIN:VEVENT\nDTSTART:$date_to_start\nDTEND:$date_due\nDTSTAMP:$date_due\nSUMMARY:$name\nURL:$link\nUID:$id\nDESCRIPTION:\n${alarm}END:VEVENT",
+        "TaskStart":      "BEGIN:VEVENT\nDTSTART:$date_to_start\nDTEND:$date_due\nDTSTAMP:$date_due\nSUMMARY:$name\nURL:$link\nUID:$id\nDESCRIPTION:\n${alarm}END:VEVENT"
     }, 
     "NodeAttributeDefaults": {
         "date_to_start": "", 

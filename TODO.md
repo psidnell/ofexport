@@ -1,14 +1,25 @@
 # V2.1.0
 
-- Release
-
 # V2.1.1
 
-- What to put in this release?
+- Calendar tweaks
+    - Notes in calendar - DESCRIPTION \r??? 75octets
+    - Think: calendar items - start, due and dates?
+        Suppose I have a meeting from 5-6
+        I want to do prep from 4.30
+        I want to see that I have a meeting
+        
+        OF task should have start of 00:00 so I can see it
+        Want OF alarm at start of prep time
+        
+- What else to put in this release?
 - Stiff further performance gains to be made in template processing (cache formatted attribs)
 - store format attributes on the node
 - probe deeper into the metadata for statuses?
 - useability - any quick wins? command line shortcuts? -DF? canned filters?
+- Diagram of what happens
+- More calendar control?
+- Can I determine next/available?
 
 # Backlog
 

@@ -1,5 +1,11 @@
 # Changes #
 
+## 2.1.1 (2013-05-08)
+
+- Added ability to set the start/due time of a calendar entry separately from OF start/due.
+- Bug fix to calendar allday feature where UTC adjustment could push calendar entry to wrong day.
+- Improved ics formatting so OmniFocus link in URL field rather than DESCRIPTION - making it clickable.
+
 ## 2.1.0 (2013-05-05)
 
 - Added Calendar (ics) export.

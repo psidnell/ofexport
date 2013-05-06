@@ -82,6 +82,20 @@ class Test_fmt_datematch(unittest.TestCase):
         self.assertEquals (True, task.attribs['zzz'])
         self.assertEqual (n_attribs_before + 3, len (task.attribs))
         
+    def test_load_note_start_attrib (self):
+        the_date = dateutil.parser.parse('Wed, 27 Oct 2010 22:17:00 BST')
+        task = Task (date_to_start=the_date, date_due=the_date, note=TestNote("%of cal start=18:12"))
+        load_note_attribs (task)
+        self.assertEqual ("2010.10.27 18:12", task.date_to_start.strftime ('%Y.%m.%d %H:%M'))
+        self.assertEqual ("2010.10.27 22:17", task.date_due.strftime ('%Y.%m.%d %H:%M'))
+        
+    def test_load_note_due_attrib (self):
+        the_date = dateutil.parser.parse('Wed, 27 Oct 2010 22:17:00 BST')
+        task = Task (date_to_start=the_date, date_due=the_date, note=TestNote("%of cal due=23:12"))
+        load_note_attribs (task)
+        self.assertEqual ("2010.10.27 22:17", task.date_to_start.strftime ('%Y.%m.%d %H:%M'))
+        self.assertEqual ("2010.10.27 23:12", task.date_due.strftime ('%Y.%m.%d %H:%M'))
+        
     def test_utc (self):
         the_date = dateutil.parser.parse('Wed, 27 Oct 2010 22:17:00 BST')
         self.assertEquals ("2010.10.27 22:17 BST", the_date.strftime ('%Y.%m.%d %H:%M %Z'))
@@ -100,16 +114,20 @@ class Test_fmt_datematch(unittest.TestCase):
         self.assertEquals ("20101028T211700Z", format_date (task, task.date_due, True))
         
         task = Task (date_to_start=wed, date_due=thu)
-        task.attribs["onstart"] = True
-        self.assertEquals ("20101027T211700Z", format_date (task, task.date_to_start, False))
-        self.assertEquals ("20101027T211700Z", format_date (task, task.date_due, True))
+        task.attribs["allday"] = True
+        self.assertEquals ("20101027", format_date (task, task.date_to_start, False))
+        self.assertEquals ("20101029", format_date (task, task.date_due, True))
         
-        task = Task (date_to_start=wed, date_due=thu)
-        task.attribs["ondue"] = True
-        self.assertEquals ("20101028T211700Z", format_date (task, task.date_to_start, False))
-        self.assertEquals ("20101028T211700Z", format_date (task, task.date_due, True))
+        wed1 = dateutil.parser.parse('Wed, 27 Oct 2010 00:00:00 BST')
+        wed2 = dateutil.parser.parse('Wed, 27 Oct 2010 23:59:59 BST')
+        task = Task (date_to_start=wed1, date_due=wed2)
+        task.attribs["allday"] = True
+        self.assertEquals ("20101027", format_date (task, task.date_to_start, False))
+        self.assertEquals ("20101028", format_date (task, task.date_due, True))
         
-        task = Task (date_to_start=wed, date_due=thu)
+        wed1 = dateutil.parser.parse('Wed, 27 Oct 2010 00:00:00 BST')
+        wed2 = dateutil.parser.parse('Wed, 28 Oct 2010 00:00:00 BST')
+        task = Task (date_to_start=wed1, date_due=wed2)
         task.attribs["allday"] = True
         self.assertEquals ("20101027", format_date (task, task.date_to_start, False))
         self.assertEquals ("20101029", format_date (task, task.date_due, True))

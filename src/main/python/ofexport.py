@@ -46,7 +46,8 @@ LOGGER_NAMES = [
                 'datematch',
                 'treemodel',
                 'omnifocus',
-                'fmt_template']
+                'fmt_template',
+                'of_to_ics']
 
 class SummaryVisitor (Visitor):
     def __init__ (self):
