@@ -1,6 +1,6 @@
 # ofexport #
 
-Export specific items from OmniFocus and do… stuff.
+Export specific items from OmniFocus and do... stuff.
 
 ![What you can do](documentation/diagram/Diagram.png)
 
