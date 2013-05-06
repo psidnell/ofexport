@@ -177,7 +177,7 @@ We'll be referring to the following structure:
                 Task: Send receipts
                 Task: Purge junk
  
-#### Include Mode
+#### Including
 
 For example: **-I -t=Work** - include any task with "Work" in it's text.
 
@@ -206,7 +206,7 @@ If you ran a filter searching for "Cat" you'd get:
                 Task: Feed the cat junk
                 Task: Train Tiddles to juggle
  
-#### Exclude Filters ####
+#### Excluding ####
 
 For example: **-E -t=junk** - exclude any task with "junk" in it's text.
 
@@ -229,7 +229,7 @@ If you ran an exclude filter searching for ''Cat" you'd get:
                 Task: Send receipts
                 Task: Purge junk
 
-#### Sorting Filters
+#### Sorting
 
 To sort items its possible to use a sort filter e.g. **-p "sort due"** which will sort the contents of all projects by their due date  (if they have one), or **-p "sort text"** which sorts alphabetically.
 
@@ -237,13 +237,13 @@ The directive **-p sort** has the same effect as **-p sort text**.
 
 Note that when we sort any type, it's the direct descendants of any nodes of that type that get sorted, so if you sorted Folders alphabetically with **-f sort**, it's the folders/projects within them that get sorted.
 
-#### Pruning Filters ####
+#### Pruning ####
 
 You might run a filter that eliminates a lot of tasks and leaves a lot of empty projects or folders in your report. If you don't want to see these then use the prune option.
 
 It's possible to run a pruning filter: e.g. **-a prune** that can remove any folders, projects or contexts that have no tasks within them.
 
-#### Flattening Filters
+#### Flattening
 
 If the report is flattened e.g. with **-a flatten** then all sub-folders, sub-context, sub-tasks are pulled up to to their parents level leaving a more readable document with a flattened hierarchy. Using the flatten filter on all node types will result in a document that simply has projects/contexts with a single level of tasks beneath.
 
@@ -283,7 +283,7 @@ If you need need to search for a quote you'll need some horrific expression like
 
 **-a 'name="\""'** 
 
-#### Filtering on Dates
+#### Filtering with Dates
 
 For example **-t due=today** or **-t 'start="next week"'**
 
