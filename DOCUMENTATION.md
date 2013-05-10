@@ -110,7 +110,15 @@ I plan to upgrade to OmniFocus 2 when it's ready and hope to ensure compatibilit
 - If Omni change the format of their database in a future update then **ofexport** will need to be fixed.
 - This program reads your OmniFocus database file directly. While it should be impossible (as written) for it to modify or delete that database, set fire to your Mac, empty your bank accounts or knock the earth out of orbit - bugs happen. But you obviously have backups - right?  
 
-## Download/Installation:
+## Pre-requisites
+
+- This code was written on Mountain Lion (10.8) which ships with python 2.7.2.
+- It may work on Lion (10.7) which ships with python 2.7.1 but I haven't had the chance to test it (let me know if there are problems). 
+- It definitely wont't on versions of python that ship with Snow Leopard (2.6.1).
+- However it's possible upgrade to newer versions of python [here](http://www.python.org/download/releases/).
+- I've tested ofexport against OmniFocus 1.10.4.
+
+## Download/Installation
 
 This pre-supposes a certain familiarity with the command line.
 
