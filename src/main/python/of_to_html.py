@@ -29,6 +29,7 @@ class PrintHtmlVisitor (Formatter):
                       'id'             : lambda x: escape(x),
                       'name'           : lambda x: escape(x),
                       'link'           : lambda x: x,
+                      'status'         : lambda x: x,
                       'flagged'        : lambda x: str(x) if x else None,
                       'context'        : lambda x: escape(''.join (x.name.split ())),
                       'project'        : lambda x: escape(''.join (x.name.split ())),

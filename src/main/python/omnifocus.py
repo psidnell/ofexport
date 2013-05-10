@@ -141,16 +141,16 @@ class OFNodeMixin (object):
     
 class OFContext(OFNodeMixin, Context):
     TABLE='context'
-    COLUMNS=['persistentIdentifier', 'name', 'parent', 'childrenCount', 'rank']
+    COLUMNS=['persistentIdentifier', 'name', 'parent', 'childrenCount', 'rank', 'allowsNextAction']
     def __init__(self, ofattribs):
         Context.__init__(self,
                          name=ofattribs['name'])
         self.ofattribs = ofattribs
         if 'persistentIdentifier' in ofattribs:
             self.link = 'omnifocus:///context/' + ofattribs['persistentIdentifier']
+        self.status = u'inactive' if 'allowsNextAction' in ofattribs and ofattribs['allowsNextAction'] == 0 else u'active'
         logger.debug ('loaded context: %s %s', self.id, self.name)
 
-            
 class OFTask(OFNodeMixin, Task):
     TABLE='task'
     COLUMNS=['persistentIdentifier', 'name', 'dateDue', 'dateCompleted','dateToStart', 'dateDue', 
@@ -185,10 +185,12 @@ class OFFolder(OFNodeMixin, Folder):
         
 class ProjectInfo(Node):
     TABLE='projectinfo'
-    COLUMNS=['pk', 'folder']
+    COLUMNS=['pk', 'folder', 'status']
+    status = TypeOf ('status', unicode)
     def __init__(self, ofattribs):
         Node.__init__(self,"ProjectInfo")
         self.ofattribs = ofattribs
+        self.status = ofattribs['status']
 
 class OFProject(OFNodeMixin, Project):
     folder = TypeOf ('folder', Folder)
@@ -229,6 +231,7 @@ def transmute_projects (project_infos, tasks):
             project_info.project = project
             project.type = PROJECT
             project.project_info = project_info
+            project.status = project_info.status
     return projects
 
 def wire_projects_and_folders (projects, folders):
@@ -326,7 +329,7 @@ def build_model (db):
     for child in roots_projects_and_folders:
         root_folder.add_child(child)
         
-    root_context = Context (name='')
+    root_context = Context (name='', status='active')
     for child in root_contexts:
         root_context.add_child(child)
         

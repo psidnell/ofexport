@@ -264,6 +264,11 @@ class Test_cmd_parser(unittest.TestCase):
         self.assertTrue(expr (Task(flagged=True)))
         self.assertFalse(expr (Project(flagged=True)))
         
+    def test_parse_expr_status(self):
+        expr = parse_expr(tokenise ('status="done"'))[0]
+        self.assertTrue(expr (Project(status="done")))
+        self.assertFalse(expr (Project(status="active")))
+        
     def test_parse_expr_quoted_string_literal(self):
         expr = parse_expr(tokenise ('name="aabbccdd"'))[0]
         self.assertTrue(expr (Task(name="aabbccdd")))

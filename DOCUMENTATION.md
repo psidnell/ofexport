@@ -321,13 +321,14 @@ A range of dates can be expressed as:
 
 There are several different attributes, each of which may have alternatives for convenience:
 
-- **type** - must be one of Project, Context, Task, Folder
-- **title** - alternatives: text, name
-- **start** - alternatives: started, begin, began
-- **done** - alternatives: end, ended, complete, completed, finish, finished, completion
-- **due** - alternatives: deadline  
-- **flag** - alternatives:  flagged
-- **note**
+- **type** - must be one of *Project*, *Context*, *Task*, *Folder*.
+- **title** - alternatives: text, name.
+- **start** - alternatives: started, begin, began.
+- **done** - alternatives: end, ended, complete, completed, finish, finished, completion.
+- **due** - alternatives: deadline.
+- **flag** - alternatives: flagged.
+- **status** - The status of a project/context, must be one of *active*, *inactive*, *done* (*done* only applies to projects).
+- **note** - the text of the attached note.
 
 #### Templates - a Brief Overview####
 

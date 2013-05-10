@@ -76,11 +76,14 @@ class Node (NodeFwdDecl):
         return self.name
 
 class Context(Node):
+    status = TypeOf ('status', unicode)
+    
     def __init__ (self,
                   name=None,
                   parent=None,
                   marked=True,
                   link=None,
+                  status=None,
                   children=[],
                   attribs = {}):
         Node.__init__ (self, CONTEXT,
@@ -90,6 +93,7 @@ class Context(Node):
                        link=link,
                        children=children,
                        attribs=attribs)
+        status = unicode (status)
     def add_child (self, child):
         self.children.append(child)
         if child.type != CONTEXT:
@@ -154,6 +158,7 @@ class Project(Node):
     date_to_start = TypeOf ('date_to_start', datetime)
     date_due = TypeOf ('date_due', datetime)
     note = TypeOf ('note', Note)
+    status = TypeOf ('status', unicode)
     def __init__ (self,
                   name=None,
                   parent=None,
@@ -166,7 +171,8 @@ class Project(Node):
                   date_to_start=None,
                   date_due=None,
                   context=None,
-                  note=None):
+                  note=None,
+                  status=None):
         Node.__init__ (self, PROJECT,
                        name=name,
                        parent=parent,
@@ -180,6 +186,7 @@ class Project(Node):
         self.date_to_start = date_to_start
         self.date_due = date_due
         self.note = note
+        self.status = unicode(status)
     
 class Visitor(object):
     project_mode = TypeOf ('flagged', bool)

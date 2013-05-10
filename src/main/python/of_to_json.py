@@ -46,6 +46,7 @@ class ConvertStructureToJsonVisitor(Visitor):
             node_json_data =  {}
             save_attrib (item, 'id', node_json_data, lambda x : x)
             save_attrib (item, 'link', node_json_data, lambda x : x)
+            save_attrib (item, 'status', node_json_data, lambda x : x)
             save_attrib (item, 'name', node_json_data, lambda x : x)
             save_attrib (item, 'type', node_json_data, lambda x : x)
             save_attrib (item, 'date_completed', node_json_data, lambda x: x.strftime (TIME_FMT))
@@ -113,6 +114,7 @@ def load_from_json (json_data, item_db):
         item = Project ()
     load_attrib (item, 'id', json_data, lambda x: x)
     load_attrib (item, 'link', json_data, lambda x: x)
+    load_attrib (item, 'status', json_data, lambda x: x)
     load_attrib (item, 'name', json_data, lambda x: x)
     load_attrib (item, 'date_completed', json_data, lambda x: datetime.strptime (x, TIME_FMT))
     load_attrib (item, 'date_to_start', json_data, lambda x: datetime.strptime (x, TIME_FMT))

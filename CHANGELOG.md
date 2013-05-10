@@ -1,5 +1,9 @@
 # Changes #
 
+## 2.1.2 (2013-05-10)
+
+- Added status of a project/context as a field that can be filtered on or used in a template.
+
 ## 2.1.1 (2013-05-08)
 
 - Added ability to set the start/due time of a calendar entry separately from OF start/due.

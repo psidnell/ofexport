@@ -43,6 +43,7 @@
                   "Note line 1.", 
                   "Note line 2."
                 ], 
+                "status": "active", 
                 "type": "Project"
               }, 
               {
@@ -72,6 +73,7 @@
                 "id": "499d8f28-aa62-11e2-9f24-a820662fff7a", 
                 "link": "omnifocus:///task/i0LhrVuFaPc", 
                 "name": "F1 Project 2", 
+                "status": "active", 
                 "type": "Project"
               }
             ], 
@@ -114,6 +116,7 @@
                 "id": "499d8d40-aa62-11e2-8f92-a820662fff7a", 
                 "link": "omnifocus:///task/pLoziQtuwYD", 
                 "name": "F2 Project 1", 
+                "status": "active", 
                 "type": "Project"
               }, 
               {
@@ -148,6 +151,7 @@
                 "id": "499d9178-aa62-11e2-aa7e-a820662fff7a", 
                 "link": "omnifocus:///task/fYuqelo7INX", 
                 "name": "F2 Project 2", 
+                "status": "active", 
                 "type": "Project"
               }
             ], 
@@ -173,6 +177,7 @@
         "children": [], 
         "id": "4975d62e-aa62-11e2-ae31-a820662fff7a", 
         "name": "No Context", 
+        "status": "active", 
         "type": "Context"
       }, 
       {
@@ -211,6 +216,7 @@
             "id": "4975cb4a-aa62-11e2-883c-a820662fff7a", 
             "link": "omnifocus:///context/aCWpXEa6Xgx", 
             "name": "Sub Context 1", 
+            "status": "active", 
             "type": "Context"
           }, 
           {
@@ -243,6 +249,7 @@
             "id": "4975ccba-aa62-11e2-ae48-a820662fff7a", 
             "link": "omnifocus:///context/gOdcF2qsrrV", 
             "name": "Sub Context 2", 
+            "status": "active", 
             "type": "Context"
           }, 
           {
@@ -257,11 +264,13 @@
         "id": "4975c9ae-aa62-11e2-ab55-a820662fff7a", 
         "link": "omnifocus:///context/ptrX-c-R6_X", 
         "name": "Test Context", 
+        "status": "active", 
         "type": "Context"
       }
     ], 
     "id": "49b54817-aa62-11e2-9fa6-a820662fff7a", 
     "name": "", 
+    "status": "active", 
     "type": "Context"
   }
 ]

@@ -34,6 +34,7 @@ class PrintCalendarVisitor(Formatter):
                       'id'             : lambda x: x,
                       'name'           : lambda x: x,
                       'link'           : lambda x: x,
+                      'status'         : lambda x: x,
                       'flagged'        : lambda x: str(x) if x else None,
                       'context'        : lambda x: x.name,
                       'project'        : lambda x: x.name,

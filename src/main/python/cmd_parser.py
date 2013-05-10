@@ -42,6 +42,7 @@ DUE_ALIASES = ['date_due', 'due', 'deadline']
 FLAGGED_ALIASES = ['flagged', 'flag']
 TYPE_ALIASES = ['type']
 NOTE_ALIASES = ['note']
+STATUS_ALIASES = ['status']
 
 FLATTEN_ALIASES = ['flat', 'flatten']
 PRUNE_ALIASES = ['prune']
@@ -57,6 +58,7 @@ def build_alias_lookups ():
     result.update (mk_map (FLAGGED_ALIASES))
     result.update (mk_map (TYPE_ALIASES))
     result.update (mk_map (NOTE_ALIASES))
+    result.update (mk_map (STATUS_ALIASES))
     return result
 
 def build_date_alias_lookups (): 
@@ -73,6 +75,7 @@ def build_string_alias_lookups ():
     result.update (mk_map (NAME_ALIASES))
     result.update (mk_map (TYPE_ALIASES))
     result.update (mk_map (NOTE_ALIASES))
+    result.update (mk_map (STATUS_ALIASES))
     return result
     
 ALIAS_LOOKUPS = build_alias_lookups ()

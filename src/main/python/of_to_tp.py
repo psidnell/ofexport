@@ -30,6 +30,7 @@ class PrintTaskpaperVisitor(Formatter):
         attrib_conversions = {
                       'name'           : lambda x: remove_trailing_colon(x),
                       'link'           : lambda x: x,
+                      'status'         : lambda x: x,
                       'flagged'        : lambda x: str(x) if x else None,
                       'context'        : lambda x: strip_brackets(''.join (x.name.split ())),
                       'project'        : lambda x: strip_brackets(''.join (x.name.split ())),
