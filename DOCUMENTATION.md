@@ -327,6 +327,7 @@ There are several different attributes, each of which may have alternatives for 
 - **done** - alternatives: end, ended, complete, completed, finish, finished, completion.
 - **due** - alternatives: deadline.
 - **flag** - alternatives: flagged.
+- **next** - true for a task if it's the next task in it's project.
 - **status** - The status of a project/context, must be one of *active*, *inactive*, *dropped*, *done* (*done/dropped* only apply to projects).
 - **note** - the text of the attached note.
 

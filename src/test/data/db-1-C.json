@@ -15,6 +15,7 @@
                         "id": "499f4857-aa62-11e2-a22e-a820662fff7a", 
                         "link": "omnifocus:///task/jz9EddS7jms", 
                         "name": "sub task with a colon:", 
+                        "next": false, 
                         "type": "Task"
                       }
                     ], 
@@ -22,6 +23,7 @@
                     "id": "499d9375-aa62-11e2-9bce-a820662fff7a", 
                     "link": "omnifocus:///task/g-C75ZW6Dta", 
                     "name": "parent task F1 P1 1", 
+                    "next": false, 
                     "type": "Task"
                   }, 
                   {
@@ -30,6 +32,7 @@
                     "id": "499d9561-aa62-11e2-ad46-a820662fff7a", 
                     "link": "omnifocus:///task/iocL5D8sp9t", 
                     "name": "task F1 P1 2", 
+                    "next": false, 
                     "type": "Task"
                   }
                 ], 
@@ -54,6 +57,7 @@
                     "id": "499d998f-aa62-11e2-a0ae-a820662fff7a", 
                     "link": "omnifocus:///task/pjLhUi9hY4F", 
                     "name": "task F1 P2 1", 
+                    "next": false, 
                     "note": [
                       "Note line 1.", 
                       "Note line 2."
@@ -66,6 +70,7 @@
                     "id": "499d9799-aa62-11e2-953d-a820662fff7a", 
                     "link": "omnifocus:///task/cwu9KI3ExT4", 
                     "name": "task F1 P2 2", 
+                    "next": false, 
                     "type": "Task"
                   }
                 ], 
@@ -92,6 +97,7 @@
                     "id": "499d9db0-aa62-11e2-af3c-a820662fff7a", 
                     "link": "omnifocus:///task/f7mZLSU4QOU", 
                     "name": "task F2 P1 1", 
+                    "next": false, 
                     "type": "Task"
                   }, 
                   {
@@ -100,6 +106,7 @@
                     "id": "499d9b6e-aa62-11e2-b79b-a820662fff7a", 
                     "link": "omnifocus:///task/m9oAhuk9t8H", 
                     "name": "task F2 P1 2", 
+                    "next": false, 
                     "type": "Task"
                   }, 
                   {
@@ -109,6 +116,7 @@
                     "id": "49a3dbd1-aa62-11e2-b1e6-a820662fff7a", 
                     "link": "omnifocus:///task/apOjWsczlmt", 
                     "name": "I'm done!", 
+                    "next": false, 
                     "type": "Task"
                   }
                 ], 
@@ -127,6 +135,7 @@
                     "id": "499d9f91-aa62-11e2-a671-a820662fff7a", 
                     "link": "omnifocus:///task/hM-7-DNoKlG", 
                     "name": "task F2 P2 1", 
+                    "next": false, 
                     "type": "Task"
                   }, 
                   {
@@ -135,6 +144,7 @@
                     "id": "499da170-aa62-11e2-8bda-a820662fff7a", 
                     "link": "omnifocus:///task/dr-bNUgL_GO", 
                     "name": "task F2 P2 2", 
+                    "next": false, 
                     "type": "Task"
                   }, 
                   {
@@ -143,6 +153,7 @@
                     "id": "499fff8a-aa62-11e2-86f7-a820662fff7a", 
                     "link": "omnifocus:///task/gW-CqFz0ZfL", 
                     "name": "task with no context", 
+                    "next": false, 
                     "type": "Task"
                   }
                 ], 

@@ -185,12 +185,14 @@ class OFFolder(OFNodeMixin, Folder):
         
 class ProjectInfo(Node):
     TABLE='projectinfo'
-    COLUMNS=['pk', 'folder', 'status']
+    COLUMNS=['pk', 'folder', 'status', 'nextTask']
     status = TypeOf ('status', unicode)
+    nextTask = TypeOf ('nextTask', str)
     def __init__(self, ofattribs):
         Node.__init__(self,"ProjectInfo")
         self.ofattribs = ofattribs
         self.status = ofattribs['status']
+        self.next_task = None if ofattribs['nextTask'] == None else str(ofattribs['nextTask'])
 
 class OFProject(OFNodeMixin, Project):
     folder = TypeOf ('folder', Folder)
@@ -234,7 +236,7 @@ def transmute_projects (project_infos, tasks):
             project.status = project_info.status
     return projects
 
-def wire_projects_and_folders (projects, folders):
+def wire_projects_and_folders (projects, folders, tasks):
     logger.debug ('wiring projects and folders')
     for project in projects.values():
         project_info = project.project_info
@@ -244,7 +246,10 @@ def wire_projects_and_folders (projects, folders):
                 logger.debug ('wiring: %s %s', project.id, project.name)
                 folder = folders[folder_ref]
                 project.folder = folder
-                folder.add_child (project)
+                folder.add_child (project)    
+        if project_info.next_task != None:
+            task = tasks[project_info.next_task]
+            task.next = True
 
 def wire_task_hierarchy (tasks):
     logger.debug ('wiring type hierarchy')
@@ -307,7 +312,7 @@ def build_model (db):
     tasks = query (conn, clazz=OFTask)
     
     projects = transmute_projects (project_infos, tasks)
-    wire_projects_and_folders(projects, folders)
+    wire_projects_and_folders(projects, folders, tasks)
     wire_task_hierarchy(tasks)
     wire_tasks_to_enclosing_projects (project_infos, tasks)
     wire_tasks_and_contexts(contexts, tasks, no_context)

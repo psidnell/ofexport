@@ -40,6 +40,7 @@ START_ALIASES = ['date_to_start', 'start', 'started', 'begin', 'began']
 COMPLETED_ALIASES = ['date_completed', 'done', 'end', 'ended', 'complete', 'completed', 'finish', 'finished', 'completion']
 DUE_ALIASES = ['date_due', 'due', 'deadline']
 FLAGGED_ALIASES = ['flagged', 'flag']
+NEXT_ALIASES = ['next', 'next']
 TYPE_ALIASES = ['type']
 NOTE_ALIASES = ['note']
 STATUS_ALIASES = ['status']
@@ -56,6 +57,7 @@ def build_alias_lookups ():
     result.update (mk_map (COMPLETED_ALIASES))
     result.update (mk_map (DUE_ALIASES))
     result.update (mk_map (FLAGGED_ALIASES))
+    result.update (mk_map (NEXT_ALIASES))
     result.update (mk_map (TYPE_ALIASES))
     result.update (mk_map (NOTE_ALIASES))
     result.update (mk_map (STATUS_ALIASES))

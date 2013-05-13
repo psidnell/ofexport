@@ -53,6 +53,7 @@ class ConvertStructureToJsonVisitor(Visitor):
             save_attrib (item, 'date_to_start', node_json_data, lambda x: x.strftime (TIME_FMT))
             save_attrib (item, 'date_due', node_json_data, lambda x: x.strftime (TIME_FMT))
             save_attrib (item, 'flagged', node_json_data, lambda x : x)
+            save_attrib (item, 'next', node_json_data, lambda x : x)
             save_attrib (item, 'note', node_json_data, lambda x : get_note_lines (x))
             item.attribs['json_data'] = node_json_data
     def end_task (self, item):
@@ -120,6 +121,7 @@ def load_from_json (json_data, item_db):
     load_attrib (item, 'date_to_start', json_data, lambda x: datetime.strptime (x, TIME_FMT))
     load_attrib (item, 'date_due', json_data, lambda x: datetime.strptime (x, TIME_FMT))
     load_attrib (item, 'flagged', json_data, lambda x: x)
+    load_attrib (item, 'next', json_data, lambda x: x)
     load_attrib (item, 'note', json_data, lambda x: JSONNote (x))
     
     for child_data in json_data['children']:

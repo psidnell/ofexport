@@ -1,5 +1,9 @@
 # Changes #
 
+## 2.1.3 (2013-05-13
+
+- Added next as a filterable attribute of tasks.
+
 ## 2.1.2 (2013-05-10)
 
 - Added status of a project/context as a field that can be filtered on or used in a template.

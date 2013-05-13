@@ -103,6 +103,7 @@ class Context(Node):
         
 class Task(Node):
     flagged = TypeOf ('flagged', bool)
+    next = TypeOf ('next', bool)
     context = TypeOf ('context', Context)
     date_completed = TypeOf ('date_completed', datetime)
     date_to_start = TypeOf ('date_to_start', datetime)
@@ -114,6 +115,7 @@ class Task(Node):
                   parent=None,
                   marked=True,
                   flagged=False,
+                  nxt=False,
                   link=None,
                   children=[],
                   context=None,
@@ -130,6 +132,7 @@ class Task(Node):
                        link=link,
                        attribs=attribs)
         self.flagged = flagged
+        self.next = nxt
         self.context = context
         self.date_completed = date_completed
         self.date_to_start = date_to_start

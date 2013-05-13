@@ -1,12 +1,11 @@
 # V2.1.0
 
-# V2.1.2
+# V2.1.4
 
 - What else to put in this release?
-- Still further performance gains to be made in template processing (cache formatted attribs)
-- probe deeper into the metadata for statuses?
 - useability - any quick wins? command line shortcuts? -DF? canned filters?
-- Can I determine next/available?
+- Can I determine availability?
+- childcount as an attribute
 
 # Backlog
 
