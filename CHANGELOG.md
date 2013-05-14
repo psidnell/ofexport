@@ -1,6 +1,10 @@
 # Changes #
 
-## 2.1.3 (2013-05-13
+## 2.1.4 (2013-05-14)
+
+- Updated the installation instructions and added **install.sh** as a post-download script.
+
+## 2.1.3 (2013-05-13)
 
 - Added next as a filterable attribute of tasks.
 

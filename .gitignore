@@ -3,3 +3,4 @@
 *.pyc
 target
 .DS_Store
+example-bashrc

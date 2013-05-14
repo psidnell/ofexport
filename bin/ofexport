@@ -3,15 +3,24 @@ set -e
 ##################################################################################
 # CHANGE "OFEXPORT_HOME" TO MATCH WHERE YOU'VE INSTALLED THE ofexport/... FOLDER #
 ##################################################################################
-export OFEXPORT_HOME=$HOME/ofexport
+
+if [ -z "$OFEXPORT_HOME" ]; then
+    echo
+    echo OOPS!
+    echo
+    echo You don\'t have an OFEXPORT_HOME environment variable set.
+    echo 
+    echo Installation instructions can be found here: 'https://github.com/psidnell/ofexport/blob/master/DOCUMENTATION.md#downloadinstallation'
+    echo
+    exit 1
+fi	
 
 if [ ! -f $OFEXPORT_HOME/src/main/python/ofexport.py ]; then
     echo
     echo OOPS!
     echo
     echo OFEXPORT_HOME=$OFEXPORT_HOME
-    echo "\"$OFEXPORT_HOME\"" does not seem to the the installation location,
-    echo re-edit \"ofexport\" and correct the value of OFEXPORT_HOME
+    echo "\"$OFEXPORT_HOME\"" does not seem to the correct installation location,
     echo
     echo Installation instructions can be found here: 'https://github.com/psidnell/ofexport/blob/master/DOCUMENTATION.md#downloadinstallation'
     echo

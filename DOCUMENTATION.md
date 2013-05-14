@@ -122,17 +122,23 @@ I plan to upgrade to OmniFocus 2 when it's ready and hope to ensure compatibilit
 
 This pre-supposes a certain familiarity with the command line.
 
-- The source is on [github](https://github.com/psidnell/ofexport).
-- Download the [zip file](https://github.com/psidnell/ofexport/archive/master.zip).
-- Double click on the zip file to unpack it.
-- Rename and move the folder to wherever you want it to live.
-- Edit the **ofexport** shell script and change the path to reflect the correct location of you chose. The script assumes you'll move/rename it to **ofexport** in your home folder.
-- From the command line set execute permission on the **ofexport** script: **chmod +x ofexport/bin/ofexport**
-- Add the installation directory to your **$PATH** in your in whatever shell you use.
-- If you're using bash this will mean adding a line like this to your **.bashrc**: **export PATH=$PATH:$HOME/ofexport/bin**
-- Then run **. ~/.bashrc** to update your PATH in your current shell - or start a new shell.
-- Run **ofexport -?** from the command line, if all is well then it should print it's help.
-- If it doesn't then all is not well and I have failed you.
+There are two ways to fetch the project:
+
+**Direct Download**
+
+1. Download the [zip file](https://github.com/psidnell/ofexport/archive/master.zip).
+2. Double click on the zip file to unpack it.
+3. Move the **ofexport** folder to wherever you want it to live.
+4. In terminal change directory to the install location.
+5. Run **bash install.sh** and follow the instructions.
+
+**Clone the git repository**
+
+1. Type **git clone https://github.com/psidnell/ofexport.git**
+2. cd into the **ofexport** folder.
+3. Run **bash install.sh** and follow the instructions.
+
+It's recommended that you re-run **bash install.sh**  after pulling updates.
 
 ## Tutorial:
 		
