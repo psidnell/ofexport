@@ -1,11 +1,22 @@
+# V2.1.4
+
+- Better installation/upgrade process
+- Release
+
 # V2.1.0
 
-# V2.1.4
+# V2.1.5
 
 - What else to put in this release?
 - useability - any quick wins? command line shortcuts? -DF? canned filters?
 - Can I determine availability?
 - childcount as an attribute
+- Tips on perspectives and casting blobs - investigate
+    forums.omnigroup.com/showthread.php?t=29538
+- Add status and next to the text template, taskpaper?
+- Create a "dump" template that dumps everything.
+- Log to DayOne? - how?
+- Check python version - abort install early if everything OK
 
 # Backlog
 

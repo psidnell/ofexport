@@ -25,32 +25,35 @@ class PrintMarkdownVisitor(Formatter):
         self.out = out
         self.last_line_was_text = False
     def begin_folder (self, folder):
-        if self.last_line_was_text:
+        is_output = 'FolderStart' in self.template.nodes
+        if self.last_line_was_text and is_output:
             print >> self.out
-        print >>self.out, ('#' * (self.header_depth+1)),
+            self.last_line_was_text = False
         Formatter.begin_folder(self, folder)
-        print >>self.out
+        if is_output:
+            print >>self.out
         self.depth = 0
         self.header_depth+=1
-        self.last_line_was_text = False
     def begin_project (self, project):
-        if self.last_line_was_text:
+        is_output = 'ProjectStart' in self.template.nodes
+        if self.last_line_was_text and is_output:
             print >> self.out
-        print >>self.out, ('#' * (self.header_depth+1)),
+            self.last_line_was_text = False
         Formatter.begin_project(self, project)
-        print >>self.out
+        if is_output:
+            print >>self.out
         self.depth = 0
         self.header_depth+=1
-        self.last_line_was_text = False
     def begin_context (self, context):
-        if self.last_line_was_text:
+        is_output = 'ContextStart' in self.template.nodes
+        if self.last_line_was_text and is_output:
             print >> self.out
-        print >>self.out, ('#' * (self.header_depth+1)),
+            self.last_line_was_text = False
         Formatter.begin_context(self, context)
-        print >>self.out
+        if is_output:
+            print >>self.out
         self.depth = 0
         self.header_depth+=1
-        self.last_line_was_text = False
     def end_task (self,task):
         Formatter.end_task(self, task)
         self.last_line_was_text = True
@@ -68,3 +71,5 @@ class PrintMarkdownVisitor(Formatter):
             if item.type == PROJECT:
                 print >>self.out
             Formatter.handle_note (self, item)
+    def add_extra_template_attribs (self, item, attribs):
+        attribs['hashes'] = '#' * (self.header_depth+1) + ' '

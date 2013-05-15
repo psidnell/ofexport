@@ -1,0 +1,32 @@
+{
+    "indent": 0,
+    "dateFormat": "%Y-%m-%d",
+    "depth": 0, 
+    "Nodes": {
+        "TaskStart": "- $name", 
+        "TaskGroupStart": "- $name"
+    }, 
+    "NodeAttributeDefaults": {
+        "date_to_start": "", 
+        "date_due": "", 
+        "date_completed": "", 
+        "link" : "",
+        "name": "", 
+        "project": "", 
+        "context": "", 
+        "flagged": "",
+        "note": ""
+    }, 
+    "indentString": "\t", 
+    "NodeAttributes": {
+        "date_to_start": " @start($value)", 
+        "date_due": " @due($value)", 
+        "date_completed": " @done($value)", 
+        "link": "$value", 
+        "name": "$value", 
+        "project": " @project($value)", 
+        "context": " @context($value)", 
+        "flagged": " @flagged",
+        "note": ""
+    }
+}

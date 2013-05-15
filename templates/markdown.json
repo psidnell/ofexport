@@ -3,9 +3,9 @@
     "dateFormat": "%Y-%m-%d",
     "depth" : 0, 
     "Nodes": {
-        "ProjectStart": "$name", 
-        "FolderStart": "$name", 
-        "ContextStart": "$name",
+        "ProjectStart": "$hashes$name", 
+        "FolderStart": "$hashes$name", 
+        "ContextStart": "$hashes$name",
         "TaskStart": "$indent- $name$date_completed", 
         "TaskGroupStart": "$indent- $name$date_completed",
         "NoteLine": "$indent    $note_line"
@@ -19,7 +19,8 @@
         "project": "", 
         "context": "", 
         "flagged": "",
-        "note": ""
+        "note": "",
+        "hashes": ""
     }, 
     "indentString": "    ", 
     "NodeAttributes": {
@@ -31,6 +32,7 @@
         "project": " project:**$value**", 
         "context": " context:**$value**", 
         "flagged": " flagged",
-        "note": ""
+        "note": "",
+        "hashes": "$value"
     }
 }

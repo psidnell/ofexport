@@ -77,6 +77,15 @@ echo -- $FMT
 #ofexport --log ofexport=ERROR -i src/test/data/db-1.json -T html-lite -o src/test/data/db-1-html-lite.$FMT
 ofexport --log ofexport=ERROR -i src/test/data/db-1.json -T html-lite -o target/db-1-html-lite.$FMT
 diff src/test/data/db-1-html-lite.$FMT target/db-1-html-lite.$FMT
+
+FMT=markdown
+################
+echo -- $FMT
+################
+#ofexport --log ofexport=ERROR -i src/test/data/db-1.json -T flat -o src/test/data/db-1-flat.$FMT
+ofexport --log ofexport=ERROR -i src/test/data/db-1.json -T flat -o target/db-1-flat.$FMT
+diff src/test/data/db-1-flat.$FMT target/db-1-flat.$FMT
+
 #---------------------------------------------------------------------
 
 ################
