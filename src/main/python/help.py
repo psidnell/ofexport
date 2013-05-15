@@ -15,7 +15,7 @@ def print_help ():
     print '  -E                 : exclude mode - the default (as opposed to include mode)'
     print '  -o file_name       : the output file name, must end in a recognised suffix - see documentation'
     print '  -i file_name       : read file_name instead of the OmniFocus database, must be in json format'
-    print '  -T - template_name : use the specified template instead of one derived from the output file extension'
+    print '  -T template_name   : use the specified template instead of one derived from the output file extension'
     print '  --open             : open the output file with the registered application (if one is installed)'
     print '  -v                 : verbose output'
     print '  -z                 : maximum diagnostics'
