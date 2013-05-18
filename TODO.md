@@ -2,12 +2,9 @@
 
 # V2.1.0
 
-# V2.1.5
+# V2.1.6
 
-- Deeper flatten? just want tasks in the output - how?
-- bug: ofexport --open -o ~/x.taskpaper -T taskpaper-lite -C --tasks -a flatten -E -t done=none -a prune -c "sort done" --log visitors=DEBUG
-    key error on rank
-- Eliminate the flat template
+- Eliminate the flat template?
 - What else to put in this release?
 - useability - any quick wins? command line shortcuts? -DF? canned filters?
 - Can I determine availability?
@@ -16,7 +13,6 @@
     forums.omnigroup.com/showthread.php?t=29538
 - Create a "dump" template that dumps everything.
 - Log to DayOne? - how?
-- Double space before date in taskpaper-lite template
 
 # Backlog
 
