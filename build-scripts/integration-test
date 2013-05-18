@@ -293,6 +293,19 @@ TEST=c4
 ofexport --log ofexport=ERROR  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -C -E -a '(type=Context) and (name="Context 2")'
 diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
 
+################
+echo -- tasks
+################
+TEST=tasks1
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper --tasks
+ofexport --log ofexport=ERROR  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper --tasks
+diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
+
+TEST=tasks2
+#ofexport --log ofexport=ERROR --open -i src/test/data/db-1.json -o src/test/data/db-1-$TEST.taskpaper -C --tasks
+ofexport --log ofexport=ERROR  -i src/test/data/db-1.json -o target/db-1-$TEST.taskpaper -C --tasks
+diff src/test/data/db-1-$TEST.taskpaper target/db-1-$TEST.taskpaper
+
 #---------------------------------------------------------------------
 
 ################

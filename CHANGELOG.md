@@ -1,5 +1,10 @@
 # Changes #
 
+## 2.1.5 (2013-05-18)
+
+- Tweaks to sort algorithm to return underlying order when selected attributes of two items are equal.
+- Added a --tasks filter to eliminate everything but tasks grouped under a single Tasks project/context.
+
 ## 2.1.4 (2013-05-14)
 
 - Updated the installation instructions and added **install.sh** as a post-download script.

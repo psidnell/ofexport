@@ -55,6 +55,7 @@ class ConvertStructureToJsonVisitor(Visitor):
             save_attrib (item, 'flagged', node_json_data, lambda x : x)
             save_attrib (item, 'next', node_json_data, lambda x : x)
             save_attrib (item, 'note', node_json_data, lambda x : get_note_lines (x))
+            save_attrib (item, 'order', node_json_data, lambda x : x)
             item.attribs['json_data'] = node_json_data
     def end_task (self, item):
         self.add_children(item)
@@ -123,6 +124,7 @@ def load_from_json (json_data, item_db):
     load_attrib (item, 'flagged', json_data, lambda x: x)
     load_attrib (item, 'next', json_data, lambda x: x)
     load_attrib (item, 'note', json_data, lambda x: JSONNote (x))
+    load_attrib (item, 'order', json_data, lambda x: x)
     
     for child_data in json_data['children']:
         child = load_from_json (child_data, item_db)

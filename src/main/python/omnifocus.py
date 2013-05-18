@@ -133,29 +133,27 @@ def datetimeFromAttrib (ofattribs, name):
     if val == None:
         return None
     return datetime.fromtimestamp(THIRTY_ONE_YEARS + val)
-
-class OFNodeMixin (object):
-    ofattribs = TypeOf ('ofattribs', dict)
-    def get_sort_key (self):
-        return int(self.ofattribs['rank'])
     
-class OFContext(OFNodeMixin, Context):
+class OFContext(Context):
     TABLE='context'
     COLUMNS=['persistentIdentifier', 'name', 'parent', 'childrenCount', 'rank', 'allowsNextAction']
+    ofattribs = TypeOf ('ofattribs', dict)
     def __init__(self, ofattribs):
         Context.__init__(self,
                          name=ofattribs['name'])
         self.ofattribs = ofattribs
+        self.order = ofattribs['rank']
         if 'persistentIdentifier' in ofattribs:
             self.link = 'omnifocus:///context/' + ofattribs['persistentIdentifier']
         self.status = u'inactive' if 'allowsNextAction' in ofattribs and ofattribs['allowsNextAction'] == 0 else u'active'
         logger.debug ('loaded context: %s %s', self.id, self.name)
 
-class OFTask(OFNodeMixin, Task):
+class OFTask(Task):
     TABLE='task'
     COLUMNS=['persistentIdentifier', 'name', 'dateDue', 'dateCompleted','dateToStart', 'dateDue', 
              'projectInfo', 'context', 'containingProjectInfo', 'childrenCount', 'parent', 'rank',
              'flagged', 'noteXMLData']    
+    ofattribs = TypeOf ('ofattribs', dict)
     def __init__(self, ofattribs):
         Task.__init__(self,
                       name=ofattribs['name'],
@@ -165,6 +163,7 @@ class OFTask(OFNodeMixin, Task):
                       flagged = bool (ofattribs['flagged']),
                       context=None)
         self.ofattribs = ofattribs
+        self.order = ofattribs['rank']
         if 'persistentIdentifier' in ofattribs:
             self.link = 'omnifocus:///task/' + ofattribs['persistentIdentifier']
         noteXMLData = ofattribs['noteXMLData']
@@ -172,13 +171,15 @@ class OFTask(OFNodeMixin, Task):
             self.note = OFNote (self, noteXMLData)
         logger.debug ('loaded task: %s %s', self.id, self.name)
     
-class OFFolder(OFNodeMixin, Folder):
+class OFFolder(Folder):
     TABLE='folder'
     COLUMNS=['persistentIdentifier', 'name', 'childrenCount', 'parent', 'rank', 'noteXMLData']
+    ofattribs = TypeOf ('ofattribs', dict)
     def __init__(self, ofattribs):
         Folder.__init__(self,
                         name=ofattribs['name'])
         self.ofattribs = ofattribs
+        self.order = ofattribs['rank']
         if 'persistentIdentifier' in ofattribs:
             self.link = 'omnifocus:///folder/' + ofattribs['persistentIdentifier']
         logger.debug ('loaded folder: %s %s', self.id, self.name)
@@ -194,7 +195,8 @@ class ProjectInfo(Node):
         self.status = ofattribs['status']
         self.next_task = None if ofattribs['nextTask'] == None else str(ofattribs['nextTask'])
 
-class OFProject(OFNodeMixin, Project):
+class OFProject(Project):
+    ofattribs = TypeOf ('ofattribs', dict)
     folder = TypeOf ('folder', Folder)
     project_info = TypeOf ('project_info', ProjectInfo)
     def __init__(self):
@@ -306,7 +308,7 @@ def only_roots (items):
 def build_model (db):
     conn = sqlite3.connect(db)
     contexts = query (conn, clazz=OFContext)
-    no_context = OFContext({'name' : 'No Context'})
+    no_context = OFContext({'name' : 'No Context', 'rank' : 0})
     project_infos = query (conn, clazz=ProjectInfo)
     folders = query (conn, clazz=OFFolder)
     tasks = query (conn, clazz=OFTask)

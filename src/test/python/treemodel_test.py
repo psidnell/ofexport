@@ -247,19 +247,6 @@ class Test_treemodel(unittest.TestCase):
         self.assertTrue(n1 in visitor.projects_ended)
         self.assertTrue(n2 in visitor.folders_ended)
         
-    def test_sort_no_key_defined (self):
-        parent = Task (name=u'p')
-        n1 = Task (name=u'n1')
-        n2 = Task (name=u'n2')
-        parent.children.append (n1)
-        parent.children.append (n2)
-        
-        try:
-            sort ([parent])
-            self.fail('exception expected')
-        except Exception as e:
-            self.assertEquals("not implemented in <class 'treemodel.Task'>", e.message)
-        
     def test_sort_order_when_sorted (self):
         parent = SortableTask (name=u'p')
         n1 = SortableTask (name=u'n1')

@@ -16,6 +16,7 @@
                         "link": "omnifocus:///task/jz9EddS7jms", 
                         "name": "sub task with a colon:", 
                         "next": false, 
+                        "order": 0, 
                         "type": "Task"
                       }
                     ], 
@@ -24,6 +25,7 @@
                     "link": "omnifocus:///task/g-C75ZW6Dta", 
                     "name": "parent task F1 P1 1", 
                     "next": false, 
+                    "order": 0, 
                     "type": "Task"
                   }, 
                   {
@@ -33,6 +35,7 @@
                     "link": "omnifocus:///task/iocL5D8sp9t", 
                     "name": "task F1 P1 2", 
                     "next": false, 
+                    "order": 0, 
                     "type": "Task"
                   }
                 ], 
@@ -46,6 +49,7 @@
                   "Note line 1.", 
                   "Note line 2."
                 ], 
+                "order": 0, 
                 "status": "active", 
                 "type": "Project"
               }, 
@@ -62,6 +66,7 @@
                       "Note line 1.", 
                       "Note line 2."
                     ], 
+                    "order": 0, 
                     "type": "Task"
                   }, 
                   {
@@ -71,6 +76,7 @@
                     "link": "omnifocus:///task/cwu9KI3ExT4", 
                     "name": "task F1 P2 2", 
                     "next": false, 
+                    "order": 0, 
                     "type": "Task"
                   }
                 ], 
@@ -78,6 +84,7 @@
                 "id": "499d8f28-aa62-11e2-9f24-a820662fff7a", 
                 "link": "omnifocus:///task/i0LhrVuFaPc", 
                 "name": "F1 Project 2", 
+                "order": 0, 
                 "status": "active", 
                 "type": "Project"
               }
@@ -85,6 +92,7 @@
             "id": "4978181c-aa62-11e2-825c-a820662fff7a", 
             "link": "omnifocus:///folder/msGNrO_ZBdL", 
             "name": "Sub Folder 1", 
+            "order": 0, 
             "type": "Folder"
           }, 
           {
@@ -98,6 +106,7 @@
                     "link": "omnifocus:///task/f7mZLSU4QOU", 
                     "name": "task F2 P1 1", 
                     "next": false, 
+                    "order": 0, 
                     "type": "Task"
                   }, 
                   {
@@ -107,6 +116,7 @@
                     "link": "omnifocus:///task/m9oAhuk9t8H", 
                     "name": "task F2 P1 2", 
                     "next": false, 
+                    "order": 0, 
                     "type": "Task"
                   }, 
                   {
@@ -117,6 +127,7 @@
                     "link": "omnifocus:///task/apOjWsczlmt", 
                     "name": "I'm done!", 
                     "next": false, 
+                    "order": 0, 
                     "type": "Task"
                   }
                 ], 
@@ -124,6 +135,7 @@
                 "id": "499d8d40-aa62-11e2-8f92-a820662fff7a", 
                 "link": "omnifocus:///task/pLoziQtuwYD", 
                 "name": "F2 Project 1", 
+                "order": 0, 
                 "status": "active", 
                 "type": "Project"
               }, 
@@ -136,6 +148,7 @@
                     "link": "omnifocus:///task/hM-7-DNoKlG", 
                     "name": "task F2 P2 1", 
                     "next": false, 
+                    "order": 0, 
                     "type": "Task"
                   }, 
                   {
@@ -145,6 +158,7 @@
                     "link": "omnifocus:///task/dr-bNUgL_GO", 
                     "name": "task F2 P2 2", 
                     "next": false, 
+                    "order": 0, 
                     "type": "Task"
                   }, 
                   {
@@ -154,6 +168,7 @@
                     "link": "omnifocus:///task/gW-CqFz0ZfL", 
                     "name": "task with no context", 
                     "next": false, 
+                    "order": 0, 
                     "type": "Task"
                   }
                 ], 
@@ -162,6 +177,7 @@
                 "id": "499d9178-aa62-11e2-aa7e-a820662fff7a", 
                 "link": "omnifocus:///task/fYuqelo7INX", 
                 "name": "F2 Project 2", 
+                "order": 0, 
                 "status": "active", 
                 "type": "Project"
               }
@@ -169,17 +185,20 @@
             "id": "497819fd-aa62-11e2-8d90-a820662fff7a", 
             "link": "omnifocus:///folder/kyyjHNCEm8v", 
             "name": "Sub Folder 2", 
+            "order": 0, 
             "type": "Folder"
           }
         ], 
         "id": "49781628-aa62-11e2-8bd7-a820662fff7a", 
         "link": "omnifocus:///folder/bQoc15uOjLQ", 
         "name": "Test Folder", 
+        "order": 0, 
         "type": "Folder"
       }
     ], 
     "id": "49b5455c-aa62-11e2-8f9c-a820662fff7a", 
     "name": "", 
+    "order": 0, 
     "type": "Folder"
   }, 
   {
@@ -188,6 +207,7 @@
         "children": [], 
         "id": "4975d62e-aa62-11e2-ae31-a820662fff7a", 
         "name": "No Context", 
+        "order": 0, 
         "status": "active", 
         "type": "Context"
       }, 
@@ -227,6 +247,7 @@
             "id": "4975cb4a-aa62-11e2-883c-a820662fff7a", 
             "link": "omnifocus:///context/aCWpXEa6Xgx", 
             "name": "Sub Context 1", 
+            "order": 0, 
             "status": "active", 
             "type": "Context"
           }, 
@@ -260,6 +281,7 @@
             "id": "4975ccba-aa62-11e2-ae48-a820662fff7a", 
             "link": "omnifocus:///context/gOdcF2qsrrV", 
             "name": "Sub Context 2", 
+            "order": 0, 
             "status": "active", 
             "type": "Context"
           }, 
@@ -275,12 +297,14 @@
         "id": "4975c9ae-aa62-11e2-ab55-a820662fff7a", 
         "link": "omnifocus:///context/ptrX-c-R6_X", 
         "name": "Test Context", 
+        "order": 0, 
         "status": "active", 
         "type": "Context"
       }
     ], 
     "id": "49b54817-aa62-11e2-9fa6-a820662fff7a", 
     "name": "", 
+    "order": 0, 
     "status": "active", 
     "type": "Context"
   }

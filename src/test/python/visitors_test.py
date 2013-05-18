@@ -17,11 +17,11 @@ limitations under the License.
 import unittest
 import re
 from treemodel import Folder, Task, Project, Context, traverse_list, traverse, PROJECT, CONTEXT, TASK, FOLDER
-from visitors import Filter
+from visitors import Filter, Sort
 
 def match_name (item, regexp):
     return re.search (regexp, item.name) != None
-
+    
 class Test_visitors(unittest.TestCase):
     
     def test_include (self):
@@ -79,6 +79,54 @@ class Test_visitors(unittest.TestCase):
         traverse (visitor, n1)
         self.assertTrue(n1.marked)
         self.assertTrue(n2.marked)
+    
+    def test_Sort_in_order (self):
+        n1 = Task (name=u'a n1')
+        n2 = Task (name=u'b n2')
+        root = Project (name=u'r')
+        root.add_child(n1)
+        root.add_child(n2)
+        
+        visitor = Sort ([PROJECT], lambda x: x.name, 'pretty')
+        traverse (visitor, root)
+        self.assertIs(root.children[0], n1)
+        self.assertIs(root.children[1], n2)
+        
+    def test_Sort_out_of__order (self):
+        n1 = Task (name=u'b n1')
+        n2 = Task (name=u'a n2')
+        root = Project (name=u'r')
+        root.add_child(n1)
+        root.add_child(n2)
+        
+        visitor = Sort ([PROJECT], lambda x: x.name, 'pretty')
+        traverse (visitor, root)
+        self.assertIs(root.children[0], n2)
+        self.assertIs(root.children[1], n1)
+        
+    def test_Sort_same_use_underlying_order_in_order (self):
+        n1 = Task (name=u'aaa', order=1)
+        n2 = Task (name=u'aaa', order=2)
+        root = Project (name=u'r')
+        root.add_child(n1)
+        root.add_child(n2)
+        
+        visitor = Sort ([PROJECT], lambda x: x.name, 'pretty')
+        traverse (visitor, root)
+        self.assertIs(root.children[0], n1)
+        self.assertIs(root.children[1], n2)
+        
+    def test_Sort_same_use_underlying_order_out_of_order (self):
+        n1 = Task (name=u'aaa', order=2)
+        n2 = Task (name=u'aaa', order=1)
+        root = Project (name=u'r')
+        root.add_child(n1)
+        root.add_child(n2)
+        
+        visitor = Sort ([PROJECT], lambda x: x.name, 'pretty')
+        traverse (visitor, root)
+        self.assertIs(root.children[0], n2)
+        self.assertIs(root.children[1], n1)
     
     def test_Scenario_1 (self):
         '''

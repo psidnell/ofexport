@@ -3,8 +3,8 @@
     "dateFormat": "%Y-%m-%d",
     "depth": 0, 
     "Nodes": {
-        "TaskStart": "- $name", 
-        "TaskGroupStart": "- $name"
+        "TaskStart": "- $name$date_due", 
+        "TaskGroupStart": "- $name$date_due"
     }, 
     "NodeAttributeDefaults": {
         "date_to_start": "", 

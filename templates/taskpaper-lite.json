@@ -5,8 +5,8 @@
     "Nodes": {
         "ProjectStart": "$indent$name:", 
         "FolderStart": "$indent$name:", 
-        "ContextStart": "$indent$name:\n$indent\t$link",
-        "TaskStart": "$indent- $name $date_completed", 
+        "ContextStart": "$indent$name:",
+        "TaskStart": "$indent- $name$date_completed", 
         "TaskGroupStart": "$indent$name:$date_completed"
     }, 
     "NodeAttributeDefaults": {

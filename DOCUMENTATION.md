@@ -82,7 +82,7 @@ Calendar
 
 **Restructure the data:**
 
-- Flatten the outport document to create a simpler document (just projects containing tasks).
+- Flatten the output document to create a simpler document (just projects containing tasks).
 - Sort tasks by date or text.
 - Eliminate empty projects/folders.
 - Organise by project or context hierarchy.
@@ -260,6 +260,10 @@ It's possible to run a pruning filter: e.g. **-a prune** that can remove any fol
 #### Flattening
 
 If the report is flattened e.g. with **-a flatten** then all sub-folders, sub-context, sub-tasks are pulled up to to their parents level leaving a more readable document with a flattened hierarchy. Using the flatten filter on all node types will result in a document that simply has projects/contexts with a single level of tasks beneath.
+
+#### Just Show Me My Tasks
+
+Even more extreme than flattening is the **--tasks** filter which collects all your tasks and moves them to a single Project or Context (depending on mode) called 'Tasks'. 
 
 #### Multiple Filters
 

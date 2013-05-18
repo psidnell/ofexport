@@ -24,7 +24,8 @@ filters:
   -a,--any expr        : filter tasks, projects, contexts and folders against the expression
   -t,--task expr       : filter any task against task against the expression
   -p,--project expr    : filter any project against the expression
-  -f,--folder  expr    : filter any folder against the expression
+  -f,--folder expr     : filter any folder against the expression
   -c,--context expr    : filter any context type against the expression
+  --tasks              : filter out everything except tasks
 
   See DOCUMENTATION.md for more information

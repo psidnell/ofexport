@@ -49,12 +49,14 @@ class Node (NodeFwdDecl):
     attribs = TypeOf ('attribs', dict)
     type = TypeOf ('type', str)
     link = TypeOf ('link', unicode)
+    order = TypeOf ('order', int)
     
     def __init__ (self, nType,
                   name=None,
                   parent=None,
                   marked=True,
                   link=None,
+                  order=0,
                   children=[],
                   attribs = {}):
         self.name = strip_tabs_newlines (name)
@@ -65,13 +67,12 @@ class Node (NodeFwdDecl):
         self.type = nType
         self.link = link
         self.id = str(uuid.uuid1())
+        self.order = order
         if parent != None:
             parent.add_child (self)
     def add_child (self, child):
         self.children.append(child)
         child.parent = self
-    def get_sort_key (self):
-        raise Exception ('not implemented in ' + str (self.__class__))
     def __str__ (self):
         return self.name
 
@@ -84,6 +85,7 @@ class Context(Node):
                   marked=True,
                   link=None,
                   status=None,
+                  order=0,
                   children=[],
                   attribs = {}):
         Node.__init__ (self, CONTEXT,
@@ -91,6 +93,7 @@ class Context(Node):
                        parent=parent,
                        marked=marked,
                        link=link,
+                       order=order,
                        children=children,
                        attribs=attribs)
         status = unicode (status)
@@ -117,6 +120,7 @@ class Task(Node):
                   flagged=False,
                   nxt=False,
                   link=None,
+                  order=0,
                   children=[],
                   context=None,
                   attribs={},
@@ -130,6 +134,7 @@ class Task(Node):
                        marked=marked,
                        children=children,
                        link=link,
+                       order=order,
                        attribs=attribs)
         self.flagged = flagged
         self.next = nxt
@@ -145,6 +150,7 @@ class Folder(Node):
                   parent=None,
                   marked=True,
                   link=None,
+                  order=0,
                   children=[],
                   attribs = {}):
         Node.__init__ (self, FOLDER,
@@ -153,6 +159,7 @@ class Folder(Node):
                        marked=marked,
                        children=children,
                        link=link,
+                       order=order,
                        attribs=attribs)
 class Project(Node):
     flagged = TypeOf ('flagged', bool)
@@ -167,6 +174,7 @@ class Project(Node):
                   parent=None,
                   marked=True,
                   link=None,
+                  order=0,
                   children=[],
                   attribs = {},
                   flagged = False,
@@ -181,6 +189,7 @@ class Project(Node):
                        parent=parent,
                        marked=marked,
                        link=link,
+                       order=order,
                        children=children,
                        attribs=attribs)
         self.flagged = flagged
@@ -218,7 +227,7 @@ class Visitor(object):
 
 def sort (items): # A default sort on the underlying key
     for child in items:
-        child.children.sort(key=lambda item:item.get_sort_key ())
+        child.children.sort(key=lambda item:item.order)
         sort(child.children)
 
 def traverse_list (visitor, lst, ignore_marked=False, project_mode=True):

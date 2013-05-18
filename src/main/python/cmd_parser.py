@@ -27,12 +27,13 @@ LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(level=logging.ERROR)
 
 the_time = None
+NOW = datetime.now()
 
 def now ():
     # allows us to test with a fixed date
     if the_time != None:
         return the_time
-    return datetime.now()
+    return NOW
 
 # Primary/Real name is first
 NAME_ALIASES = ['name', 'title', 'text', 'name']

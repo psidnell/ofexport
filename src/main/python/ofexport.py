@@ -34,6 +34,7 @@ from fmt_template import FmtTemplate, format_document
 from cmd_parser import make_filter
 import logging
 import cmd_parser
+from visitors import Tasks
 
 logging.basicConfig(format='%(asctime)-15s %(name)s %(levelname)s %(message)s', stream=sys.stdout)
 logger = logging.getLogger(__name__)
@@ -193,6 +194,8 @@ if __name__ == "__main__":
             visitor = make_filter (fixed_arg, include)
         elif opt in ('--any', '-a'):
             visitor = make_filter (fix_abbrieviated_expr('any', arg), include)
+        elif opt in ('--tasks'):
+            visitor = Tasks (root_project, root_context)
         elif '-C' == opt:
             logger.info ('context mode')
             subject = root_context

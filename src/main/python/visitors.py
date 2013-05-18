@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-from treemodel import Visitor, TASK, PROJECT, FOLDER
+from treemodel import Visitor, Project, Context, TASK, PROJECT, FOLDER
 import logging
 import sys
 
@@ -117,7 +117,8 @@ class Filter(BaseFilterVisitor):
             self.set_item_matched(item, matched);
     def __str__(self):
         return includes (self.include) + ' ' + str(self.types) + ' where ' + self.nice_string
-    
+
+
 class Sort(Visitor):
     def __init__(self, types, get_key_fn, nice_string):
         Visitor.__init__(self)
@@ -127,9 +128,25 @@ class Sort(Visitor):
     def begin_any (self, item):
         if item.type in self.types:
             logger.debug ("sorting id:%s %s %s", item.id, item.type, item.name)
-            self.sort_list(item.children)
+            item.children = self.sort_list(item.children)
     def sort_list (self, items):
-        items.sort(key=lambda x:self.get_key_fn (x))
+        return sorted(items, cmp=self.compare)
+    def compare (self, x, y):
+        # Use the key we've been asked to use but
+        # try other comparators to get at least a deterministic
+        # ordering
+        diff = self.cmp (self.get_key_fn (x), self.get_key_fn (y))
+        if diff == 0:
+            diff = self.cmp (x.order, y.order);
+        if diff == 0:
+            diff = self.cmp (x.id, y.id)
+        return diff;
+    def cmp (self, l, r):
+        if l < r:
+            return -1
+        if l > r:
+            return 1
+        return 0
     def __str__(self):
         return 'Sort ' + str(self.types) + ' by ' + self.nice_string
 
@@ -174,3 +191,30 @@ class Flatten (Visitor):
             item.add_child (child)
     def __str__ (self):
         return 'Flatten' + str(self.types)
+    
+class Tasks (Visitor):
+    def __init__(self, root_folder, root_context):
+        Visitor.__init__(self)
+        self.root_folder = root_folder
+        self.root_context = root_context
+        self.project = Project (name='Tasks')
+        self.context = Context (name='Tasks')
+    def end_project (self, item):
+        for child in item.children:
+            self.project.add_child(child)
+        item.children = []
+    def end_folder (self, item):
+        if item == self.root_folder:
+            self.root_folder.children = []
+            self.root_folder.add_child(self.project)
+    def end_context (self, item):
+        if item != self.root_context:
+            for child in item.children:
+                if child.type == TASK:
+                    self.context.add_child(child)
+            item.children = []
+        else:
+            self.root_context.children = []
+            self.root_context.add_child(self.context)
+    def __str__ (self):
+        return 'Tasks'
