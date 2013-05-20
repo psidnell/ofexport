@@ -28,6 +28,7 @@ LOGGER.setLevel(level=logging.ERROR)
 
 the_time = None
 NOW = datetime.now()
+FAR_FUTURE = datetime.strptime("3000-01-01", "%Y-%m-%d")
 
 def now ():
     # allows us to test with a fixed date
@@ -385,10 +386,10 @@ def parse_expr (tokens, type_required=BOOL_TYPE, now = now (), level = 0):
 
 def get_date_attrib_or_now (item, attrib):
     if not attrib in item.__dict__:
-        return now()
+        return FAR_FUTURE
     result = item.__dict__[attrib]
     if result == None:
-        return now()
+        return FAR_FUTURE
     return result
 
 def make_command_filter (expr_str):    

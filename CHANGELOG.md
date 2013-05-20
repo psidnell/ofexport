@@ -1,5 +1,9 @@
 # Changes #
 
+## 2.1.6 (2013-05-20)
+
+- Tweaks to date sorting so that items with no dates appear below those that do.
+
 ## 2.1.5 (2013-05-18)
 
 - Tweaks to sort algorithm to return underlying order when selected attributes of two items are equal.
