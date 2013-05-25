@@ -12,6 +12,7 @@
     forums.omnigroup.com/showthread.php?t=29538
 - Create a "dump" template that dumps everything.
 - Log to DayOne? - how?
+- Calendar exp global settings?
 
 # Backlog
 

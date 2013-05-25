@@ -74,9 +74,16 @@ class SummaryVisitor (Visitor):
             logger.info (k + ' ' + str(v))
         logger.info ('----------------')
 
+def load_config (home_dir):
+    logger.info ('loading config')
+    instream=codecs.open(home_dir + '/ofexport.json', 'r', 'utf-8')
+    config = json.loads(instream.read())
+    instream.close ()
+    return config
+
 def load_template (template_dir, name):
     logger.info ('loading template: %s', name)
-    instream=codecs.open(template_dir + name + '.json', 'r', 'utf-8')
+    instream=codecs.open(template_dir + '/' + name + '.json', 'r', 'utf-8')
     template = FmtTemplate (json.loads(instream.read()))
     instream.close ()
     return template
@@ -109,6 +116,46 @@ def set_debug_opt (name, value):
         the_time = datetime.strptime (value, "%Y-%m-%d")
         cmd_parser.the_time = the_time
 
+def gen_taskpaper (out, subject, project_mode, template_dir, type_config):
+    template = load_template (template_dir, type_config['template'])
+    visitor = PrintTaskpaperVisitor (out, template)
+    format_document (subject, visitor, project_mode)
+
+def gen_text (out, subject, project_mode, template_dir, type_config):
+    template = load_template (template_dir, type_config['template'])
+    visitor = PrintTextVisitor (out, template)
+    format_document (subject, visitor, project_mode)
+    
+def gen_markdown (out, subject, project_mode, template_dir, type_config):
+    template = load_template (template_dir, type_config['template'])
+    visitor = PrintMarkdownVisitor (out, template)
+    format_document (subject, visitor, project_mode)
+    
+def gen_opml (out, subject, project_mode, template_dir, type_config):
+    template = load_template (template_dir, type_config['template'])
+    visitor = PrintOpmlVisitor (out, template)
+    format_document (subject, visitor, project_mode)
+    
+def gen_html (out, subject, project_mode, template_dir, type_config):
+    template = load_template (template_dir, type_config['template'])
+    visitor = PrintHtmlVisitor (out, template)
+    format_document (subject, visitor, project_mode)
+    
+def gen_ics (out, subject, project_mode, template_dir, type_config):
+    template = load_template (template_dir, type_config['template'])
+    visitor = PrintCalendarVisitor (out, template)
+    format_document (subject, visitor, project_mode)
+
+def gen_json (out, subject, project_mode, template_dir, type_config):
+    # json has intrinsic formatting - no template required
+    root_project.marked = True
+    root_context.marked = True
+    visitor = ConvertStructureToJsonVisitor ()
+    traverse (visitor, root_project, project_mode=True)
+    visitor = ConvertStructureToJsonVisitor ()
+    traverse (visitor, root_context, project_mode=False)
+    print >> out, json.dumps([root_project.attribs['json_data'], root_context.attribs['json_data']], sort_keys=True, indent=2)
+    
 if __name__ == "__main__":
     sys.stdout = codecs.getwriter('utf8')(sys.stdout)
     
@@ -118,9 +165,13 @@ if __name__ == "__main__":
     project_mode=True
     file_name = None
     infile = None
-    template = None
-    template_dir = os.environ['OFEXPORT_HOME'] + '/templates/'
+    home_dir = os.environ['OFEXPORT_HOME']
+    template_dir = home_dir + '/templates'
     include = True
+    
+    override_data = {}
+    
+    config = load_config (home_dir)
     
     opts, args = getopt.optlist, args = getopt.getopt(sys.argv[1:],SHORT_OPTS, LONG_OPTS)
     
@@ -134,7 +185,7 @@ if __name__ == "__main__":
         elif '-i' == opt:
             infile = arg
         elif '-T' == opt:
-            template = load_template (template_dir, arg)
+            override_data['template'] = arg
         elif '-v' == opt:
             for logname in LOGGER_NAMES:
                 logging.getLogger(logname).setLevel (logging.INFO)
@@ -220,41 +271,17 @@ if __name__ == "__main__":
         out=codecs.open(file_name, 'w', 'utf-8')
     else: 
         out = sys.stdout
-        
-    if fmt in ('txt', 'text'):
-        template = template if template != None else load_template (template_dir, 'text')
-        visitor = PrintTextVisitor (out, template)
-        format_document (subject, visitor, project_mode)
-    elif fmt in ('md', 'markdown', 'ft', 'foldingtext'):
-        template = template if template != None else load_template (template_dir, 'markdown')
-        visitor = PrintMarkdownVisitor (out, template)
-        format_document (subject, visitor, project_mode)
-    elif fmt in ('tp', 'taskpaper', 'todo'):
-        template = template if template != None else load_template (template_dir, 'taskpaper')
-        visitor = PrintTaskpaperVisitor (out, template)
-        format_document (subject, visitor, project_mode)
-    elif fmt == 'opml':
-        template = template if template != None else load_template (template_dir, 'opml')
-        visitor = PrintOpmlVisitor (out, template)
-        format_document (subject, visitor, project_mode)
-    elif fmt in ('html', 'htm'):
-        template = template if template != None else load_template (template_dir, 'html')
-        visitor = PrintHtmlVisitor (out, template)
-        format_document (subject, visitor, project_mode)
-    elif fmt in ('ics'):
-        template = template if template != None else load_template (template_dir, 'ics')
-        visitor = PrintCalendarVisitor (out, template)
-        format_document (subject, visitor, project_mode)
-    elif fmt == 'json':
-        # json has intrinsic formatting - no template required
-        root_project.marked = True
-        root_context.marked = True
-        visitor = ConvertStructureToJsonVisitor ()
-        traverse (visitor, root_project, project_mode=True)
-        visitor = ConvertStructureToJsonVisitor ()
-        traverse (visitor, root_context, project_mode=False)
-        print >> out, json.dumps([root_project.attribs['json_data'], root_context.attribs['json_data']], sort_keys=True, indent=2)
-    else:
+    
+    generated = False
+    file_types = config['file_types']
+    for type_config in file_types.values():
+        if not generated and fmt in type_config['suffixes']:
+            call_fn = 'gen_' + type_config['call_fn']
+            type_config.update (override_data)
+            locals()[call_fn](out, subject, project_mode, template_dir, type_config)
+            generated = True
+    
+    if not generated:
         raise Exception ('unknown format ' + fmt)
     
     if file_name != None:

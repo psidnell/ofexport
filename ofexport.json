@@ -1,0 +1,38 @@
+{
+	"file_types": {
+		"TASKPAPER": {
+			"suffixes": [ "tp", "taskpaper", "todo" ],
+			"call_fn" : "taskpaper",
+			"template": "taskpaper"
+		},
+		"TEXT": {
+			"suffixes": [ "text", "txt" ],
+			"call_fn" : "text",
+			"template": "text"
+		},
+		"MARKDOWN": {
+			"suffixes": [ "md", "markdown", "ft", "foldingtext" ],
+			"call_fn" : "markdown",
+			"template": "markdown"
+		},
+		"OPML": {
+			"suffixes": [ "opml" ],
+			"call_fn" : "opml",
+			"template": "opml"
+		},
+		"HTML": {
+			"suffixes": [ "htm", "html" ],
+			"call_fn" : "html",
+			"template": "html"
+		},
+		"ICS": {
+			"suffixes": [ "ics" ],
+			"call_fn" : "ics",
+			"template": "ics"
+		},
+		"JSON": {
+			"suffixes": [ "json" ],
+			"call_fn" : "json"
+		}
+	}
+}
