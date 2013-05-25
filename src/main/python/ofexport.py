@@ -229,7 +229,7 @@ if __name__ == "__main__":
         template = template if template != None else load_template (template_dir, 'markdown')
         visitor = PrintMarkdownVisitor (out, template)
         format_document (subject, visitor, project_mode)
-    elif fmt in ('tp', 'taskpaper'):
+    elif fmt in ('tp', 'taskpaper', 'todo'):
         template = template if template != None else load_template (template_dir, 'taskpaper')
         visitor = PrintTaskpaperVisitor (out, template)
         format_document (subject, visitor, project_mode)
