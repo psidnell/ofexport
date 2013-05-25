@@ -2,7 +2,8 @@
 
 ## 2.1.7 (?????)
 
-- Added a global config file
+- Added a global config file: ofexport.json.
+- Moved mapping of file extensions onto formats into config. 
 
 ## 2.1.6 (2013-05-20)
 
