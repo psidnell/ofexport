@@ -2,36 +2,25 @@
     "indent": 0,
     "dateFormat": "%Y-%m-%d-%a",
     "depth": 0, 
-    "Nodes": {
+    "nodes": {
         "ProjectStart": "$indent$name:", 
         "FolderStart": "$indent$name:", 
         "ContextStart": "$indent$name:",
         "TaskStart": "$indent- $name$date_completed", 
         "TaskGroupStart": "$indent$name:$date_completed"
     }, 
-    "NodeAttributeDefaults": {
-        "date_to_start": "", 
-        "date_due": "", 
-        "date_completed": "", 
-        "link" : "",
-        "name": "", 
-        "project": "", 
-        "context": "", 
-        "flagged": "",
-        "status": "", 
-        "note": ""
-    }, 
-    "indentString": "\t", 
-    "NodeAttributes": {
-        "date_to_start": " @start($value)", 
-        "date_due": " @due($value)", 
-        "date_completed": " @$value", 
-        "link": "$value", 
-        "name": "$value", 
-        "status": " @status($value)", 
-        "project": " @project($value)", 
-        "context": " @context($value)", 
-        "flagged": " @flagged",
-        "note": "note"
-    }
+    "attributes" : {
+    	"name" : {"default": "", "format": "$value", "type": "taskpaper.title"},
+    	"id" : {"default": "", "format": " @id($value)", "type": "taskpaper.tag"},
+    	"type" : {"default": "", "format": " @type($value)", "type": "taskpaper.tag"},
+    	"flagged" : {"default": "", "format": " @flagged", "type": "boolean", "eval": "True if value else None"},
+    	"context" : {"default": "", "format": " @context($value)", "type": "taskpaper.tag", "eval": "value.name"},
+    	"project" : {"default": "", "format": " @project($value)", "type": "taskpaper.tag", "eval": "value.name"},
+    	"date_due" : {"default": "", "format": " @due($value)", "type": "date"},
+    	"date_to_start" : {"default": "", "format": " @start($value)", "type": "date"},
+    	"date_completed" : {"default": "", "format": " @$value", "type": "date"},
+    	"link" : {"default": "", "format": "$value", "type": "string"},
+    	"note" : {"default": "", "format": "$value", "type": "note"}
+    },
+    "indentString": "\t"
 }

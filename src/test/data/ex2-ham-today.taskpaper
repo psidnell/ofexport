@@ -4,4 +4,4 @@ Test Folder:
 		omnifocus:///folder/lcL-iBsxMtg
 		Whatever: @context(TestContext)
 			omnifocus:///task/obDRY3jsoxB
-			- done today  @flagged @done(2013-04-29) @context(TestContext)
+			- done today @flagged @done(2013-04-29) @context(TestContext)

@@ -6,4 +6,4 @@ Test Folder:
 			omnifocus:///folder/b-r3kiUoU2F
 			Compost: @context(TestContext)
 				omnifocus:///task/jMV4htWMbFb
-				- last week  @done(2013-04-27) @context(TestContext)
+				- last week @done(2013-04-27) @context(TestContext)

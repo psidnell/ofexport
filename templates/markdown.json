@@ -2,7 +2,7 @@
     "indent": 0,
     "dateFormat": "%Y-%m-%d",
     "depth" : 0, 
-    "Nodes": {
+    "nodes": {
         "ProjectStart": "$hashes$name", 
         "FolderStart": "$hashes$name", 
         "ContextStart": "$hashes$name",
@@ -10,29 +10,19 @@
         "TaskGroupStart": "$indent- $name$date_completed",
         "NoteLine": "$indent    $note_line"
     }, 
-    "NodeAttributeDefaults": {
-        "date_to_start": "", 
-        "date_due": "", 
-        "date_completed": "",
-        "link" : "", 
-        "name": "", 
-        "project": "", 
-        "context": "", 
-        "flagged": "",
-        "note": "",
-        "hashes": ""
-    }, 
-    "indentString": "    ", 
-    "NodeAttributes": {
-        "date_to_start": " start:**$value**", 
-        "date_due": " due:**$value**", 
-        "date_completed": " done:**$value**", 
-        "link": "$value", 
-        "name": "$value", 
-        "project": " project:**$value**", 
-        "context": " context:**$value**", 
-        "flagged": " flagged",
-        "note": "",
-        "hashes": "$value"
-    }
+    "attributes" : {
+    	"name" : {"default": "", "format": "$value", "type": "string"},
+    	"id" : {"default": "", "format": " $value", "type": "string"},
+    	"type" : {"default": "", "format": " $value", "type": "string"},
+    	"flagged" : {"default": "", "format": " flagged", "type": "boolean", "eval": "True if value else None"},
+    	"context" : {"default": "", "format": " project:**$value**", "type": "string", "eval": "value.name"},
+    	"project" : {"default": "", "format": " context:**$value**", "type": "string", "eval": "value.name"},
+    	"date_due" : {"default": "", "format": " due:**$value**", "type": "date"},
+    	"date_to_start" : {"default": "", "format": " start:**$value**", "type": "date"},
+    	"date_completed" : {"default": "", "format": " done:**$value**", "type": "date"},
+    	"link" : {"default": "", "format": "$value", "type": "string"},
+    	"note" : {"default": "", "format": "$value", "type": "note"},
+    	"hashes": {"default": "", "format": "$value", "type": "string"}
+    },
+    "indentString": "    "
 }

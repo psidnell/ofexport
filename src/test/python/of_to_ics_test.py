@@ -15,7 +15,7 @@ limitations under the License.
 '''
 
 import unittest
-from of_to_ics import fix_dates, load_note_attribs, utc, format_date, format_alarm
+from plugin_ics import fix_dates, load_note_attribs, utc, format_date, format_alarm
 from treemodel import Task, Note
 from datetime import datetime
 import dateutil.parser

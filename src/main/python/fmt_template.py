@@ -19,6 +19,7 @@ from treemodel import Visitor, traverse_list
 import codecs
 import logging
 import sys
+from attrib_convert import AttribMapBuilder, Conversion
 
 logging.basicConfig(format='%(asctime)-15s %(name)s %(levelname)s %(message)s', stream=sys.stdout)
 logger = logging.getLogger(__name__)
@@ -32,14 +33,23 @@ def load_resource (template_dir, name):
 
 class FmtTemplate:
     def __init__(self, data):
+        
+        self.attrib_map_builder = AttribMapBuilder ()
+        for attrib in data['attributes'].keys():
+            attrib_cfg = data['attributes'][attrib]
+            evaluate = None
+            if 'eval' in attrib_cfg:
+                evaluate = attrib_cfg['eval']
+            conversion = Conversion (attrib, attrib_cfg['default'], attrib_cfg['format'], attrib_cfg['type'], evaluate=evaluate)
+            self.attrib_map_builder.set_conversion(conversion)
+        self.attrib_map_builder.date_format = data['dateFormat']
+        
         self.preamble = None
         self.postamble = None
         self.indent_start = data['indent']
         self.depth_start = data['depth']
         self.indent = data['indentString']
-        self.nodes = {k:Template(v) for (k,v) in data['Nodes'].items()}
-        self.node_attributes = {k:Template(v) for (k,v) in data['NodeAttributes'].items()}
-        self.node_attribute_defaults = data['NodeAttributeDefaults']
+        self.nodes = {k:Template(v) for (k,v) in data['nodes'].items()}
         self.date_format = data['dateFormat']
         template_dir = os.environ['OFEXPORT_HOME'] + '/templates/'
         if 'preambleFile' in data:
@@ -52,27 +62,11 @@ class FmtTemplate:
             self.postamble = data['postamble']
         
 class Formatter(Visitor):
-    def __init__ (self, out, template, attrib_conversions=None):
-        if attrib_conversions == None:
-            attrib_conversions = {
-                      'id'             : lambda x: x,
-                      'name'           : lambda x: x,
-                      'link'           : lambda x: x,
-                      'status'         : lambda x: x,
-                      'flagged'        : lambda x: str(x) if x else None,
-                      'context'        : lambda x: x.name,
-                      'project'        : lambda x: x.name,
-                      'date_to_start'  : lambda x: x.strftime(template.date_format),
-                      'date_due'       : lambda x: x.strftime(template.date_format),
-                      'date_completed' : lambda x: x.strftime(template.date_format),
-                      'note'           : lambda x: x.get_note () + '\n'
-                      }
-        
+    def __init__ (self, out, template):
         self.template = template
         self.depth = self.template.indent_start
         self.traversal_depth = self.template.depth_start
         self.out = out
-        self.attrib_conversions = attrib_conversions
     def begin_folder (self, folder):
         self.update_attribs(folder, 'folder')
         line = format_item (self.template, 'FolderStart', folder.attribs['attrib_cache'])
@@ -153,37 +147,13 @@ class Formatter(Visitor):
                 print >>self.out, format_item (self.template, 'NoteLine', item.attribs['attrib_cache'])
     def update_attribs (self, item, link_type):
         if not 'attrib_cache' in item.attribs:
-            attribs = build_template_substitutions (item, self.attrib_conversions, self.template.node_attribute_defaults, self.template.node_attributes)
+            attribs = self.template.attrib_map_builder.get_values (item)
             item.attribs['attrib_cache'] = attribs
             attribs['depth'] = str (self.traversal_depth)
             attribs['indent'] = self.template.indent * (self.depth)
             self.add_extra_template_attribs(item, attribs)
     def add_extra_template_attribs (self, item, attribs):
         pass
-        
-def build_attrib_values (item, attrib_conversions):
-    logger.debug ('building attribs for: %s', item.id)
-    attrib_values = {}
-    for name in item.__dict__.keys():
-        if name in attrib_conversions:
-            convert = attrib_conversions[name]
-            value = item.__dict__[name]
-            if value != None:
-                str_value = convert (item.__dict__[name])
-                if str_value != None:
-                    attrib_values[name] = str_value
-    return attrib_values
-
-def build_template_substitutions (item, attrib_conversions, attrib_defaults, attrib_templates):
-    substitutions = dict (attrib_defaults)
-    attrib_values = build_attrib_values (item, attrib_conversions)
-    for tpl_key in attrib_templates.keys ():
-        if tpl_key in attrib_values:
-            attrib_template = attrib_templates[tpl_key]
-            value = attrib_values[tpl_key]
-            if value != None:
-                substitutions[tpl_key] = attrib_template.safe_substitute (value=value)
-    return substitutions
 
 def build_entry (line_template, attributes):
     return line_template.safe_substitute(attributes)

@@ -17,9 +17,20 @@ limitations under the License.
 import json
 import codecs
 from datetime import datetime
-from treemodel import Visitor, Context, Project, Task, Folder, Note, CONTEXT, PROJECT, TASK, FOLDER
+from treemodel import Context, Project, Task, Folder, Note, CONTEXT, PROJECT, TASK, FOLDER
+from treemodel import traverse, Visitor
 
 TIME_FMT = "%Y-%m-%d %H:%M:%S"
+
+def generate (out, root_project, root_context, project_mode, template_dir, type_config):
+    # json has intrinsic formatting - no template required
+    root_project.marked = True
+    root_context.marked = True
+    visitor = ConvertStructureToJsonVisitor ()
+    traverse (visitor, root_project, project_mode=True)
+    visitor = ConvertStructureToJsonVisitor ()
+    traverse (visitor, root_context, project_mode=False)
+    print >> out, json.dumps([root_project.attribs['json_data'], root_context.attribs['json_data']], sort_keys=True, indent=2)
 
 def save_attrib (item, attrib, attribs, convert):
     if not attrib in item.__dict__:

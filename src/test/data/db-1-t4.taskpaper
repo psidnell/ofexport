@@ -7,22 +7,22 @@ Test Folder:
 			Note line 1.
 			Note line 2.
 			parent task F1 P1 1: @context(SubContext1)
-				- sub task with a colon  @context(TestContext)
+				- sub task with a colon @context(TestContext)
 		F1 Project 2: @flagged @context(TestContext)
 			omnifocus:///task/i0LhrVuFaPc
-			- task F1 P2 1  @context(SubContext1)
+			- task F1 P2 1 @context(SubContext1)
 				Note line 1.
 				Note line 2.
-			- task F1 P2 2  @context(SubContext2)
+			- task F1 P2 2 @context(SubContext2)
 	Sub Folder 2:
 		omnifocus:///folder/kyyjHNCEm8v
 		F2 Project 1: @context(TestContext)
 			omnifocus:///task/pLoziQtuwYD
-			- task F2 P1 1  @flagged @context(SubContext1)
-			- task F2 P1 2  @context(SubContext2)
-			- I'm done!  @done(2013-04-21) @context(TestContext)
+			- task F2 P1 1 @flagged @context(SubContext1)
+			- task F2 P1 2 @context(SubContext2)
+			- I'm done! @done(2013-04-21) @context(TestContext)
 		F2 Project 2: @done(2013-04-21) @context(TestContext)
 			omnifocus:///task/fYuqelo7INX
-			- task F2 P2 1  @context(SubContext1)
-			- task F2 P2 2  @context(SubContext2)
-			- task with no context  @context(TestContext)
+			- task F2 P2 1 @context(SubContext1)
+			- task F2 P2 2 @context(SubContext2)
+			- task with no context @context(TestContext)

@@ -20,7 +20,7 @@ import os
 import codecs
 
 '''
-Experimental!!!!
+Experimental (and broken)!!!!
 
 A db directory must exist on your desktop first
  

@@ -1,5 +1,7 @@
 #!/bin/bash
 set -e
+#C set -o xtrace
+#C
 #C This file contains the examples as tests an then creates the examples.md file from itself
 #C Lines beginning with "set", "diff", '#!', '#C' are ignored
 #C Lines beginning with '#' have the # removed

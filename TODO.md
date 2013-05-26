@@ -2,8 +2,13 @@
 
 # V2.1.0
 
-# V2.1.6
+# V3.0.0
 
+- Plugin documentation
+
+# V3.0.1
+
+- Calendar exp global settings?
 - What else to put in this release?
 - useability - any quick wins? command line shortcuts? -DF? canned filters?
 - Can I determine availability?
@@ -12,7 +17,6 @@
     forums.omnigroup.com/showthread.php?t=29538
 - Create a "dump" template that dumps everything.
 - Log to DayOne? - how?
-- Calendar exp global settings?
 
 # Backlog
 

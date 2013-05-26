@@ -2,36 +2,37 @@
 	"file_types": {
 		"TASKPAPER": {
 			"suffixes": [ "tp", "taskpaper", "todo" ],
-			"call_fn" : "taskpaper",
+			"plugin" : "taskpaper",
 			"template": "taskpaper"
 		},
 		"TEXT": {
 			"suffixes": [ "text", "txt" ],
-			"call_fn" : "text",
+			"plugin" : "text",
 			"template": "text"
 		},
 		"MARKDOWN": {
 			"suffixes": [ "md", "markdown", "ft", "foldingtext" ],
-			"call_fn" : "markdown",
+			"plugin" : "markdown",
 			"template": "markdown"
 		},
 		"OPML": {
 			"suffixes": [ "opml" ],
-			"call_fn" : "opml",
+			"plugin" : "opml",
 			"template": "opml"
 		},
 		"HTML": {
 			"suffixes": [ "htm", "html" ],
-			"call_fn" : "html",
+			"plugin" : "html",
 			"template": "html"
 		},
 		"ICS": {
 			"suffixes": [ "ics" ],
-			"call_fn" : "ics",
+			"plugin" : "ics",
 			"template": "ics"
 		},
 		"JSON": {
 			"suffixes": [ "json" ],
+			"plugin" : "json",
 			"call_fn" : "json"
 		}
 	}

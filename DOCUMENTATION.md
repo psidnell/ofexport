@@ -36,13 +36,18 @@ will produce a TaskPaper document on your desktop containing all items completed
 
 There's a [list of usage examples here](documentation/examples.md) if you're not the kind of person to read instructions.
 
+### Sub Documents
+
+- [Examples](documentation/examples.md)
+- [Hazel](documentation/Hazel.md)
+
 ### Example Uses ###
 
 - Generating project/time specific reports.
 - Creating web content.
 - Exporting key tasks to devices/OSs that don't support OmniFocus via Dropbox.
 - Backing up the OmniFocus database to a form searchable by other tools.
-- Automatically creating reports on demand with Hazel whenever OmniFocus writes its database.
+- Automatically creating reports on demand with Hazel whenever OmniFocus writes its database. See [Instructions](documentation/Hazel.md).
 - Display todays tasks on the desktop with GeekTool.
 - Adding selected tasks to your calendar.
 
@@ -350,46 +355,59 @@ For example, this is the current text template:
 	{
 		"indent": 0, 
 		"depth" : 0, 
-		"Nodes": {
+		"nodes": {
 			"ProjectStart": "${indent}Project: $name $flagged$date_to_start$date_due$date_completed$context$project", 
 			"FolderStart": "${indent}Folder $name", 
 			"TaskStart": "${indent}Task $name $flagged$date_to_start$date_due$date_completed$context$project", 
 			"TaskGroupStart": "${indent}TaskGroup $name $flagged$date_to_start$date_due$date_completed$context$project", 
 			"ContextStart": "${indent}Context $name"
 		}, 
-		"NodeAttributeDefaults": {
-			"date_to_start": "", 
-			"date_due": "", 
-			"date_completed": "", 
-			"link" : "",
-			"name": "", 
-			"project": "", 
-			"context": "", 
-			"flagged": ""
-		}, 
-		"indentString": "    ", 
-		"NodeAttributes": {
-			"date_to_start": " start:$value", 
-			"date_due": " due:$value", 
-			"date_completed": " done:$value", 
-			"link": "$value", 
-			"name": "$value", 
-			"project": " project:$value", 
-			"context": " context:$value", 
-			"flagged": " flagged"
-		}
+		"attributes" : {
+			"name" : {"default": "", "format": "$value", "type": "string"},
+			"id" : {"default": "", "format": "$value", "type": "string"},
+			"type" : {"default": "", "format": "$value", "type": "string"},
+			"status" : {"default": "", "format": " status:$value", "type": "string"},
+			 "flagged" : {"default": "", "format": " flagged", "type": "boolean", "eval": "True if value else None"},
+			"context" : {"default": "", "format": " context:$value", "type": "string", "eval": "value.name"},
+			 "project" : {"default": "", "format": " project:$value", "type": "string", "eval": "value.name"},
+			 "date_due" : {"default": "", "format": " due:$value", "type": "date"},
+			 "date_to_start" : {"default": "", "format": " start:$value", "type": "date"},
+			 "date_completed" : {"default": "", "format": " done:$value", "type": "date"},
+			 "link" : {"default": "", "format": "$value", "type": "string"},
+			 "note" : {"default": "", "format": "", "type": "note"}
+		    },
+		"indentString": "    "
 	}
 
 * **indent** : The indent level the document formatting starts at. Usually 0 but for formats that have a preamble (like xml or html) you might want to increase this to improve the layout.
 * **depth** : This sets the initial value of a variable you can refer to in the template that tracks the indent depth. For example in html you might set this to start at 1 and then use **\<H$depth>$name\</H$depth>** for formatting folders.
 * **nodes**: This contains sections for formatting lines for each node type. You can optionally have an XStart and/or XEnd where X is Folder, Project, Task or Context. The contents of each entry contain references to symbolic values that will be populated from the document. 
-* **NodeAttributeDefaults**: This lists all the attribute types and what values that have if they do not occur in the line being formatted. Usually they're empty by you might want "not due" or "unflagged" etc.
 * **indentString**: This is the set of characters used to indent the document, usually a few spaces or a tab **"\t"**. The $indent variable will contain N occurrences of this where N is the depth of the item in the document.
-* **NodeAttributes**: This section lists all the attributes available for use in the line and allows a different formatting for each. For example if the document is HTML you might wish to represent a due date in bold: **"\<b>$value\</b>"**
+* **attributes**: This section lists all the attributes available for use in the line and allows a different formatting for each. For example if the document is HTML you might wish to represent a due date in bold: **"\<b>$value\</b>"**
 * **preamble/postamble**: Some text to print at the start/end of the document.
 * **preambleFile/postambleFile**: A file to include at the start/end of the document. This is useful for including things like an HTML header that incorporates a sizeable style sheet.
 
 Browsing the existing templates, making copies and experimenting is probably the best way to start - but beware: json is an unforgiving format and errors that result from a missing  coma or quote are "not towards the helpful end of the spectrum".
+
+#### Plugins - a Brief Overview####
+
+Plugins are configured in the global configuration file **ofexport.json**
+
+For example:
+
+        "TASKPAPER": {
+            "suffixes": [ "tp", "taskpaper", "todo" ],
+            "plugin" : "taskpaper",
+            "template": "taskpaper"
+         },
+
+Here the plugin **plugin_taskpaper.py** is associated with the template **taskpaper.json** and the set of file name suffixes for the output file that cause it to be selected.
+
+The text plugin is the simplest plugin and provides no special customisation, relying entirely on it's associated template for document production. 
+
+Plugins can provide additional types for attributes to ensure correct formatting, like notes for html/opml files or dates for ics files.
+
+Alternatively they can do more like the markdown plugin which has code for blank line management or json which doesn't use templates at all and has completely custom code for writing the output file using native python support. 
 
 ### Calendar Export
 

@@ -2,38 +2,20 @@
     "indent": 0,
     "dateFormat": "%Y%m%d", 
     "depth" : 0, 
-    "Nodes": {
+    "nodes": {
         "ProjectStart":   "BEGIN:VEVENT\nDTSTART:$date_to_start\nDTEND:$date_due\nDTSTAMP:$date_due\nSUMMARY:$name\nURL:$link\nUID:$id\nDESCRIPTION:\n${alarm}END:VEVENT",
         "TaskGroupStart": "BEGIN:VEVENT\nDTSTART:$date_to_start\nDTEND:$date_due\nDTSTAMP:$date_due\nSUMMARY:$name\nURL:$link\nUID:$id\nDESCRIPTION:\n${alarm}END:VEVENT",
         "TaskStart":      "BEGIN:VEVENT\nDTSTART:$date_to_start\nDTEND:$date_due\nDTSTAMP:$date_due\nSUMMARY:$name\nURL:$link\nUID:$id\nDESCRIPTION:\n${alarm}END:VEVENT"
-    }, 
-    "NodeAttributeDefaults": {
-        "date_to_start": "", 
-        "date_due": "", 
-        "date_completed": "", 
-        "link" : "",
-        "name": "", 
-        "project": "", 
-        "context": "", 
-        "flagged": "",
-        "note": "",
-        "id": "",
-        "alarm": ""
-    }, 
-    "indentString": "    ", 
-    "NodeAttributes": {
-        "date_to_start":"$value", 
-        "date_due": "$value", 
-        "date_completed": " done:$value", 
-        "link": "$value", 
-        "name": "$value", 
-        "project": " project:$value", 
-        "context": " context:$value", 
-        "flagged": " flagged",
-        "note": "",
-        "id":"$value",
-        "alarm":"$value"
     },
+    "attributes" : {
+    	"name" : {"default": "", "format": "$value", "type": "string"},
+    	"id" : {"default": "", "format": "$value", "type": "string"},
+    	"date_due" : {"default": "", "format": "$value", "type": "ics.date"},
+    	"date_to_start" : {"default": "", "format": "$value", "type": "ics.date"},
+    	"link" : {"default": "", "format": "$value", "type": "string"},
+    	"note" : {"default": "", "format": "", "type": "ics.note"}
+    },
+    "indentString": "    ",
     "preamble":"BEGIN:VCALENDAR\nVERSION:2.0\nX-WR-CALNAME:OmniFocus\nPRODID:-//ofexport//ofexport//EN\nMETHOD:PUBLISH\nCALSCALE:GREGORIAN",
     "postamble":"END:VCALENDAR"
 }

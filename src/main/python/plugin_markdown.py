@@ -16,8 +16,17 @@ limitations under the License.
 
 from fmt_template import Formatter
 from treemodel import PROJECT
+from ofexport import load_template, format_document
+
+def generate (out, root_project, root_context, project_mode, template_dir, type_config):
+    subject = root_project if project_mode else root_context
+    template = load_template (template_dir, type_config['template'])
+    visitor = PrintMarkdownVisitor (out, template)
+    format_document (subject, visitor, project_mode)
 
 class PrintMarkdownVisitor(Formatter):
+    # All this nonsense is just to get the right number of 
+    # blank lines in the right places
     def __init__ (self, out, template):
         Formatter.__init__(self, out, template)
         self.header_depth = 0

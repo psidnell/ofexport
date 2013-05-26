@@ -19,6 +19,8 @@ from fmt_template import Formatter
 import time
 import logging
 import sys
+from ofexport import load_template, format_document
+
 
 logging.basicConfig(format='%(asctime)-15s %(name)s %(levelname)s %(message)s', stream=sys.stdout)
 logger = logging.getLogger(__name__)
@@ -27,23 +29,20 @@ logger.setLevel(level=logging.ERROR)
 DATE_FORMAT_LONG = "%Y%m%dT%H%M00Z"
 DATE_FORMAT_SHORT = "%Y%m%d"
 
+def generate (out, root_project, root_context, project_mode, template_dir, type_config):
+    subject = root_project if project_mode else root_context
+    template = load_template (template_dir, type_config['template'])
+    visitor = PrintCalendarVisitor (out, template)
+    format_document (subject, visitor, project_mode)
+
 class PrintCalendarVisitor(Formatter):
     def __init__ (self, out, template):
         self.current_item = None
-        attrib_conversions = {
-                      'id'             : lambda x: x,
-                      'name'           : lambda x: x,
-                      'link'           : lambda x: x,
-                      'status'         : lambda x: x,
-                      'flagged'        : lambda x: str(x) if x else None,
-                      'context'        : lambda x: x.name,
-                      'project'        : lambda x: x.name,
-                      'date_to_start'  : lambda x: format_date(self.current_item,x, False),
-                      'date_due'       : lambda x: format_date(self.current_item, x, True),
-                      'date_completed' : lambda x: x.strftime(DATE_FORMAT_LONG),
-                      'note'           : lambda x: '\\r'.join(x.get_note_lines ())
-                      }
-        Formatter.__init__(self, out, template, attrib_conversions = attrib_conversions)
+        Formatter.__init__(self, out, template)
+        
+        template.attrib_map_builder.type_fns['ics.date'] = lambda x: format_date(self.current_item, x, True)
+        template.attrib_map_builder.type_fns['ics.note'] = lambda x: '\\r'.join(x.get_note_lines ())
+         
     def begin_any (self, item):
         Formatter.begin_any(self, item)
         self.current_item = item

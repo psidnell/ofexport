@@ -2,35 +2,26 @@
     "indent": 0,
     "dateFormat": "%Y-%m-%d",
     "depth": 0, 
-    "Nodes": {
+    "nodes": {
         "ProjectStart": "$indent$name:$flagged$date_to_start$date_due$date_completed$context$project\n$indent\t$link", 
         "FolderStart": "$indent$name:\n$indent\t$link", 
         "ContextStart": "$indent$name:\n$indent\t$link",
-        "TaskStart": "$indent- $name $flagged$date_to_start$date_due$date_completed$context$project", 
+        "TaskStart": "$indent- $name$flagged$date_to_start$date_due$date_completed$context$project", 
         "TaskGroupStart": "$indent$name:$flagged$date_to_start$date_due$date_completed$context$project",
         "NoteLine": "$indent\t$note_line"
-    }, 
-    "NodeAttributeDefaults": {
-        "date_to_start": "", 
-        "date_due": "", 
-        "date_completed": "", 
-        "link" : "",
-        "name": "", 
-        "project": "", 
-        "context": "", 
-        "flagged": "",
-        "note": ""
-    }, 
-    "indentString": "\t", 
-    "NodeAttributes": {
-        "date_to_start": " @start($value)", 
-        "date_due": " @due($value)", 
-        "date_completed": " @done($value)", 
-        "link": "$value", 
-        "name": "$value", 
-        "project": " @project($value)", 
-        "context": " @context($value)", 
-        "flagged": " @flagged",
-        "note": ""
-    }
+    },
+    "attributes" : {
+    	"name" : {"default": "", "format": "$value", "type": "taskpaper.title"},
+    	"id" : {"default": "", "format": " @id($value)", "type": "taskpaper.tag"},
+    	"type" : {"default": "", "format": " @type($value)", "type": "taskpaper.tag"},
+    	"flagged" : {"default": "", "format": " @flagged", "type": "boolean", "eval": "True if value else None"},
+    	"context" : {"default": "", "format": " @context($value)", "type": "taskpaper.tag", "eval": "value.name"},
+    	"project" : {"default": "", "format": " @project($value)", "type": "taskpaper.tag", "eval": "value.name"},
+    	"date_due" : {"default": "", "format": " @due($value)", "type": "date"},
+    	"date_to_start" : {"default": "", "format": " @start($value)", "type": "date"},
+    	"date_completed" : {"default": "", "format": " @done($value)", "type": "date"},
+    	"link" : {"default": "", "format": "$value", "type": "string"},
+    	"note" : {"default": "", "format": "$value", "type": "note"}
+    },
+    "indentString": "\t"
 }

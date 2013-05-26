@@ -22,13 +22,7 @@ import json
 from treemodel import traverse, Visitor, FOLDER, CONTEXT, PROJECT, TASK
 from omnifocus import build_model, find_database
 from datetime import date, datetime
-from of_to_tp import PrintTaskpaperVisitor
-from of_to_text import PrintTextVisitor
-from of_to_md import PrintMarkdownVisitor
-from of_to_opml import PrintOpmlVisitor
-from of_to_html import PrintHtmlVisitor
-from of_to_ics import PrintCalendarVisitor
-from of_to_json import ConvertStructureToJsonVisitor, read_json
+from plugin_json import read_json
 from help import print_help, SHORT_OPTS, LONG_OPTS
 from fmt_template import FmtTemplate, format_document
 from cmd_parser import make_filter
@@ -115,47 +109,7 @@ def set_debug_opt (name, value):
     if name== 'now' : 
         the_time = datetime.strptime (value, "%Y-%m-%d")
         cmd_parser.the_time = the_time
-
-def gen_taskpaper (out, subject, project_mode, template_dir, type_config):
-    template = load_template (template_dir, type_config['template'])
-    visitor = PrintTaskpaperVisitor (out, template)
-    format_document (subject, visitor, project_mode)
-
-def gen_text (out, subject, project_mode, template_dir, type_config):
-    template = load_template (template_dir, type_config['template'])
-    visitor = PrintTextVisitor (out, template)
-    format_document (subject, visitor, project_mode)
-    
-def gen_markdown (out, subject, project_mode, template_dir, type_config):
-    template = load_template (template_dir, type_config['template'])
-    visitor = PrintMarkdownVisitor (out, template)
-    format_document (subject, visitor, project_mode)
-    
-def gen_opml (out, subject, project_mode, template_dir, type_config):
-    template = load_template (template_dir, type_config['template'])
-    visitor = PrintOpmlVisitor (out, template)
-    format_document (subject, visitor, project_mode)
-    
-def gen_html (out, subject, project_mode, template_dir, type_config):
-    template = load_template (template_dir, type_config['template'])
-    visitor = PrintHtmlVisitor (out, template)
-    format_document (subject, visitor, project_mode)
-    
-def gen_ics (out, subject, project_mode, template_dir, type_config):
-    template = load_template (template_dir, type_config['template'])
-    visitor = PrintCalendarVisitor (out, template)
-    format_document (subject, visitor, project_mode)
-
-def gen_json (out, subject, project_mode, template_dir, type_config):
-    # json has intrinsic formatting - no template required
-    root_project.marked = True
-    root_context.marked = True
-    visitor = ConvertStructureToJsonVisitor ()
-    traverse (visitor, root_project, project_mode=True)
-    visitor = ConvertStructureToJsonVisitor ()
-    traverse (visitor, root_context, project_mode=False)
-    print >> out, json.dumps([root_project.attribs['json_data'], root_context.attribs['json_data']], sort_keys=True, indent=2)
-    
+ 
 if __name__ == "__main__":
     sys.stdout = codecs.getwriter('utf8')(sys.stdout)
     
@@ -249,9 +203,11 @@ if __name__ == "__main__":
             visitor = Tasks (root_project, root_context)
         elif '-C' == opt:
             logger.info ('context mode')
+            project_mode = False
             subject = root_context
         elif '-P' == opt:
             logger.info ('project mode')
+            project_mode = True
             subject = root_project
         elif '-I' == opt:
             logger.info ('include mode')
@@ -276,9 +232,10 @@ if __name__ == "__main__":
     file_types = config['file_types']
     for type_config in file_types.values():
         if not generated and fmt in type_config['suffixes']:
-            call_fn = 'gen_' + type_config['call_fn']
+            plugin = 'plugin_' + type_config['plugin']
+            m = __import__(plugin)
             type_config.update (override_data)
-            locals()[call_fn](out, subject, project_mode, template_dir, type_config)
+            m.generate(out, root_project, root_context, project_mode, template_dir, type_config)
             generated = True
     
     if not generated:

@@ -1,9 +1,12 @@
 # Changes #
 
-## 2.1.7 (?????)
+## 3.0.0 (2013-05-27)
 
-- Added a global config file: ofexport.json.
-- Moved mapping of file extensions onto formats into config. 
+- Introduced a plugin model.
+- Templates can now use plugin specific formatting.
+- Major internal changes.
+- Added a global config file: ofexport.json for plugins and file associations.
+- Add **id** and **type** attributes to a few templates.
 
 ## 2.1.6 (2013-05-20)
 
