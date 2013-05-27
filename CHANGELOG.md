@@ -1,10 +1,9 @@
 # Changes #
 
-## 3.0.0 (2013-05-27)
+## 3.0.0 (2013-05-27) If you're not feeling brave, wait for 3.0.1
 
 - Introduced a plugin model.
-- Templates can now use plugin specific formatting.
-- Major internal changes.
+- Changed format of templates to support plugins better.
 - Added a global config file: ofexport.json for plugins and file associations.
 - Add **id** and **type** attributes to a few templates.
 
