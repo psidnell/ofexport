@@ -344,7 +344,8 @@ def build_model (db):
         
 # The Mac Appstore virsion and the direct sale version have DBs in different locations
 DATABASES = [environ['HOME'] + '/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2',
-             environ['HOME'] + '/Library/Caches/com.omnigroup.OmniFocus.MacAppStore/OmniFocusDatabase2']
+             environ['HOME'] + '/Library/Caches/com.omnigroup.OmniFocus.MacAppStore/OmniFocusDatabase2', 
+             environ['HOME'] + '/Library/Containers/com.omnigroup.OmniFocus2/Data/Library/Caches/com.omnigroup.OmniFocus2/OmniFocusDatabase2']
 
 def find_database ():
     for db in DATABASES:
