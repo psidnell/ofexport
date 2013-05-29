@@ -15,8 +15,8 @@ limitations under the License.
 '''
 
 from string import replace
-from ofexport import load_template, format_document
-from fmt_template import Formatter
+from ofexport import load_template
+from fmt_template import Formatter, format_document
 
 def remove_trailing_colon (x):
     if x.endswith(':'):

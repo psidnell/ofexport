@@ -24,7 +24,7 @@ from omnifocus import build_model, find_database
 from datetime import date, datetime
 from plugin_json import read_json
 from help import print_help, SHORT_OPTS, LONG_OPTS
-from fmt_template import FmtTemplate, format_document
+from fmt_template import FmtTemplate
 from cmd_parser import make_filter
 import logging
 import cmd_parser
@@ -42,7 +42,7 @@ LOGGER_NAMES = [
                 'treemodel',
                 'omnifocus',
                 'fmt_template',
-                'of_to_ics']
+                'plugin_ics']
 
 class SummaryVisitor (Visitor):
     def __init__ (self):
@@ -178,7 +178,7 @@ if __name__ == "__main__":
     if infile != None:
         root_project, root_context = read_json (infile)
     else:    
-        root_project, root_context = build_model (find_database ())
+        root_project, root_context = build_model (find_database (config['db_search_path']))
     
     subject = root_project
         

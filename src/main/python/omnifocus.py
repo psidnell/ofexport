@@ -23,9 +23,7 @@ from xml.dom.minidom import parseString
 import logging
 import sys
 
-logging.basicConfig(format='%(asctime)-15s %(name)s %(levelname)s %(message)s', stream=sys.stdout)
 logger = logging.getLogger(__name__)
-logger.setLevel(level=logging.ERROR)
 
 '''
 A library for loading a data model from the Omnifocus SQLite database.
@@ -342,13 +340,12 @@ def build_model (db):
         
     return root_folder, root_context
         
-# The Mac Appstore virsion and the direct sale version have DBs in different locations
-DATABASES = [environ['HOME'] + '/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2',
-             environ['HOME'] + '/Library/Caches/com.omnigroup.OmniFocus.MacAppStore/OmniFocusDatabase2', 
-             environ['HOME'] + '/Library/Containers/com.omnigroup.OmniFocus2/Data/Library/Caches/com.omnigroup.OmniFocus2/OmniFocusDatabase2']
-
-def find_database ():
-    for db in DATABASES:
+def find_database (databases):
+    home = environ['HOME']
+    databases = [home + x for x in databases]
+    for db in databases:
+        logger.debug ("testing for db %s", db)
         if (path.exists (db)):
+            logger.info ("found db %s", db)
             return db
-    raise IOError ('cannot find OmnifocusDatabase')
+    raise IOError ('cannot find OmnifocusDatabase in ' + databases)

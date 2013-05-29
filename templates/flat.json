@@ -1,24 +1,75 @@
 {
-    "indent": 0,
-    "dateFormat": "%Y-%m-%d",
-    "depth": 0, 
-    "nodes": {
-        "TaskStart": "- $name$date_due", 
-        "TaskGroupStart": "- $name$date_due"
+    "attributes": {
+        "context": {
+            "default": "", 
+            "eval": "value.name", 
+            "format": " context:$value", 
+            "type": "string"
+        }, 
+        "date_completed": {
+            "default": "", 
+            "format": " done:$value", 
+            "type": "date"
+        }, 
+        "date_due": {
+            "default": "", 
+            "format": " due:$value", 
+            "type": "date"
+        }, 
+        "date_to_start": {
+            "default": "", 
+            "format": " start:$value", 
+            "type": "date"
+        }, 
+        "flagged": {
+            "default": "", 
+            "eval": "True if value else None", 
+            "format": " flagged", 
+            "type": "boolean"
+        }, 
+        "id": {
+            "default": "", 
+            "format": "$value", 
+            "type": "string"
+        }, 
+        "link": {
+            "default": "", 
+            "format": "$value", 
+            "type": "string"
+        }, 
+        "name": {
+            "default": "", 
+            "format": "$value", 
+            "type": "string"
+        }, 
+        "note": {
+            "default": "", 
+            "format": "", 
+            "type": "note"
+        }, 
+        "project": {
+            "default": "", 
+            "eval": "value.name", 
+            "format": " project:$value", 
+            "type": "string"
+        }, 
+        "status": {
+            "default": "", 
+            "format": " status:$value", 
+            "type": "string"
+        }, 
+        "type": {
+            "default": "", 
+            "format": "$value", 
+            "type": "string"
+        }
     }, 
-    "attributes" : {
-    	"name" : {"default": "", "format": "$value", "type": "string"},
-    	"id" : {"default": "", "format": "$value", "type": "string"},
-    	"type" : {"default": "", "format": "$value", "type": "string"},
-    	"status" : {"default": "", "format": " status:$value", "type": "string"},
-    	"flagged" : {"default": "", "format": " flagged", "type": "boolean", "eval": "True if value else None"},
-    	"context" : {"default": "", "format": " context:$value", "type": "string", "eval": "value.name"},
-    	"project" : {"default": "", "format": " project:$value", "type": "string", "eval": "value.name"},
-    	"date_due" : {"default": "", "format": " due:$value", "type": "date"},
-    	"date_to_start" : {"default": "", "format": " start:$value", "type": "date"},
-    	"date_completed" : {"default": "", "format": " done:$value", "type": "date"},
-    	"link" : {"default": "", "format": "$value", "type": "string"},
-    	"note" : {"default": "", "format": "", "type": "note"}
-    },
-    "indentString": "\t"
+    "dateFormat": "%Y-%m-%d", 
+    "depth": 0, 
+    "indent": 0, 
+    "indentString": "\t", 
+    "nodes": {
+        "TaskGroupStart": "- $name$date_due", 
+        "TaskStart": "- $name$date_due"
+    }
 }

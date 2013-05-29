@@ -1,5 +1,11 @@
 # Changes #
 
+# 3.0.1 (?????)
+
+- Reformatted json config using "recommended" layout (bleh!) with a BBEdit plugin http://bbeditextras.org/wiki/index.php?title=Text_Filters
+- Moved db search path into config.
+- Added config for default "%of cal" directives.
+
 ## 3.0.0 (2013-05-27) If you're not feeling brave, wait for 3.0.1
 
 - Introduced a plugin model.

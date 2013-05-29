@@ -18,9 +18,7 @@ from treemodel import Visitor, Project, Context, TASK, PROJECT, FOLDER
 import logging
 import sys
 
-logging.basicConfig(format='%(asctime)-15s %(name)s %(levelname)s %(message)s', stream=sys.stdout)
 logger = logging.getLogger(__name__)
-logger.setLevel(level=logging.ERROR)
 
 INCLUDED='INCLUDED'
 EXCLUDED='EXCLUDED'

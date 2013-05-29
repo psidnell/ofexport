@@ -22,9 +22,7 @@ import sys
 from visitors import Filter, Prune, Sort, Flatten
 import logging
 
-logging.basicConfig(format='%(asctime)-15s %(name)s %(levelname)s %(message)s', stream=sys.stdout)
 LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(level=logging.ERROR)
 
 the_time = None
 NOW = datetime.now()

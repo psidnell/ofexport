@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-from fmt_template import Formatter
+from fmt_template import Formatter, format_document
 from treemodel import PROJECT
-from ofexport import load_template, format_document
+from ofexport import load_template
 
 def generate (out, root_project, root_context, project_mode, template_dir, type_config):
     subject = root_project if project_mode else root_context

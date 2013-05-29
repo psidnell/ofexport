@@ -1,32 +1,78 @@
 {
-    "indent": 2,
-    "dateFormat": "%Y-%m-%d",
-    "depth" : 1, 
+    "attributes": {
+        "context": {
+            "default": "", 
+            "eval": "value.name", 
+            "format": " <span class=\"AContext\">$value</span>", 
+            "type": "html.string"
+        }, 
+        "date_completed": {
+            "default": "", 
+            "format": " <span class=\"AComplete\">$value</span>", 
+            "type": "date"
+        }, 
+        "date_due": {
+            "default": "", 
+            "format": " <span class=\"ADue\">$value</span>", 
+            "type": "date"
+        }, 
+        "date_to_start": {
+            "default": "", 
+            "format": " <span class=\"AStart\">$value</span>", 
+            "type": "date"
+        }, 
+        "flagged": {
+            "default": "", 
+            "eval": "True if value else None", 
+            "format": "  <span class=\"AFlagged\">FLAGGED</span>", 
+            "type": "boolean"
+        }, 
+        "id": {
+            "default": "", 
+            "format": " $value", 
+            "type": "html.string"
+        }, 
+        "link": {
+            "default": "", 
+            "format": "$value", 
+            "type": "string"
+        }, 
+        "name": {
+            "default": "", 
+            "format": "$value", 
+            "type": "html.string"
+        }, 
+        "note": {
+            "default": "", 
+            "format": "$value", 
+            "type": "html.note"
+        }, 
+        "project": {
+            "default": "", 
+            "eval": "value.name", 
+            "format": " <span class=\"AProject\">$value</span>", 
+            "type": "html.string"
+        }, 
+        "type": {
+            "default": "", 
+            "format": " $value", 
+            "type": "html.string"
+        }
+    }, 
+    "dateFormat": "%Y-%m-%d", 
+    "depth": 1, 
+    "indent": 2, 
+    "indentString": "  ", 
     "nodes": {
-        "ProjectStart": "$indent<H$depth class=\"Project\"><a href=\"$link\">$name</a><span class=\"Attrib\">$flagged$date_to_start$date_due$date_completed$context$project</span></H$depth><ul>", 
+        "ContextStart": "$indent<H$depth class=\"Context\"><a href=\"$link\">$name</a><H$depth>", 
         "FolderStart": "$indent<H$depth class=\"Folder\"><a href=\"$link\">$name</a></H$depth>", 
-        "TaskStart": "$indent<li class=\"Task\"><a href=\"$link\">$name</a><span class=\"Attrib\">$flagged$date_to_start$date_due$date_completed$context$project</span></li>", 
+        "NoteLine": "$indent$note_line<br>", 
+        "ProjectEnd": "$indent</ul>", 
+        "ProjectStart": "$indent<H$depth class=\"Project\"><a href=\"$link\">$name</a><span class=\"Attrib\">$flagged$date_to_start$date_due$date_completed$context$project</span></H$depth><ul>", 
+        "TaskGroupEnd": "$indent</ul>", 
         "TaskGroupStart": "$indent<li class=\"TaskGroup\"><a href=\"$link\">$name</a><span class=\"Attrib\">$flagged$date_to_start$date_due$date_completed$context$project</span></li><ul>", 
-        "ContextStart": "$indent<H$depth class=\"Context\"><a href=\"$link\">$name</a><H$depth>",
-        "ProjectEnd": "$indent</ul>",
-        "TaskGroupEnd": "$indent</ul>",
-        "NoteLine": "$indent$note_line<br>"
-    },
-    "attributes" : {
-    	"name" : {"default": "", "format": "$value", "type": "html.string"},
-    	"id" : {"default": "", "format": " $value", "type": "html.string"},
-    	"type" : {"default": "", "format": " $value", "type": "html.string"},
-    	"flagged" : {"default": "", "format": " <span class=\"AFlagged\">FLAGGED</span>", "type": "boolean", "eval": "True if value else None"},
-    	"context" : {"default": "", "format": " <span class=\"AContext\">$value</span>", "type": "html.string", "eval": "value.name"},
-    	"project" : {"default": "", "format": " <span class=\"AProject\">$value</span>", "type": "html.string", "eval": "value.name"},
-    	"date_due" : {"default": "", "format": " <span class=\"ADue\">$value</span>", "type": "date"},
-    	"date_to_start" : {"default": "", "format": " <span class=\"AStart\">$value</span>", "type": "date"},
-    	"date_completed" : {"default": "", "format": " <span class=\"AComplete\">$value</span>", "type": "date"},
-    	"link" : {"default": "", "format": "$value", "type": "string"},
-    	"note" : {"default": "", "format": "$value", "type": "html.note"},
-    	"flagged" : {"default": "", "format": "  <span class=\"AFlagged\">FLAGGED</span>", "type": "boolean", "eval": "True if value else None"}
-    },
-    "indentString": "  ",
-    "preambleFile":"html-start.txt",
-    "postamble":"  </body>\n<html>"
+        "TaskStart": "$indent<li class=\"Task\"><a href=\"$link\">$name</a><span class=\"Attrib\">$flagged$date_to_start$date_due$date_completed$context$project</span></li>"
+    }, 
+    "postamble": "  </body>\n<html>", 
+    "preambleFile": "html-start.txt"
 }

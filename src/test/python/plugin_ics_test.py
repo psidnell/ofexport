@@ -58,7 +58,7 @@ class Test_fmt_datematch(unittest.TestCase):
     def test_load_note_attribs (self):
         task = Task ()
         n_attribs_before = len (task.attribs)
-        load_note_attribs (task)
+        load_note_attribs (task, "")
         self.assertEqual (n_attribs_before, len (task.attribs))
         
         n_attribs_before = len (task.attribs)
@@ -66,33 +66,46 @@ class Test_fmt_datematch(unittest.TestCase):
         self.assertEqual (n_attribs_before, len (task.attribs))
         
         task = Task (note=TestNote("%of cal xxx"))
-        load_note_attribs (task)
+        load_note_attribs (task, "")
         self.assertEquals (True, task.attribs['xxx'])
         
         task = Task (note=TestNote("%of cal xxx\n%of cal yyy"))
-        load_note_attribs (task)
+        load_note_attribs (task, "")
         self.assertEquals (True, task.attribs['xxx'])
         self.assertEquals (True, task.attribs['yyy'])
         
         task = Task (note=TestNote("%of cal xxx   yyy zzz   "))
         n_attribs_before = len (task.attribs)
-        load_note_attribs (task)
+        load_note_attribs (task, "")
         self.assertEquals (True, task.attribs['xxx'])
         self.assertEquals (True, task.attribs['yyy'])
         self.assertEquals (True, task.attribs['zzz'])
         self.assertEqual (n_attribs_before + 3, len (task.attribs))
+     
+    def test_load_note_attribs_with_default (self):
+        task = Task ()
+        n_attribs_before = len (task.attribs)
+        load_note_attribs (task, "%of cal in_default")
+        self.assertEquals (True, task.attribs['in_default'])
+        self.assertEqual (n_attribs_before + 1, len (task.attribs))
+        
+        task = Task (note=TestNote("%of cal in_note"))
+        n_attribs_before = len (task.attribs)
+        load_note_attribs (task, "%of cal in_default")
+        self.assertEquals (True, task.attribs['in_note'])
+        self.assertEqual (n_attribs_before + 1, len (task.attribs))
         
     def test_load_note_start_attrib (self):
         the_date = dateutil.parser.parse('Wed, 27 Oct 2010 22:17:00 BST')
         task = Task (date_to_start=the_date, date_due=the_date, note=TestNote("%of cal start=18:12"))
-        load_note_attribs (task)
+        load_note_attribs (task, "")
         self.assertEqual ("2010.10.27 18:12", task.date_to_start.strftime ('%Y.%m.%d %H:%M'))
         self.assertEqual ("2010.10.27 22:17", task.date_due.strftime ('%Y.%m.%d %H:%M'))
         
     def test_load_note_due_attrib (self):
         the_date = dateutil.parser.parse('Wed, 27 Oct 2010 22:17:00 BST')
         task = Task (date_to_start=the_date, date_due=the_date, note=TestNote("%of cal due=23:12"))
-        load_note_attribs (task)
+        load_note_attribs (task, "")
         self.assertEqual ("2010.10.27 22:17", task.date_to_start.strftime ('%Y.%m.%d %H:%M'))
         self.assertEqual ("2010.10.27 23:12", task.date_due.strftime ('%Y.%m.%d %H:%M'))
         

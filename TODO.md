@@ -4,11 +4,12 @@
 
 # V3.0.0
 
-- Plugin documentation
-
 # V3.0.1
 
 - Calendar exp global settings?
+- Calendar bug (team meeting 2013-05-28)
+- have I broken stdout? Does it work with templates? What's happening?
+- Am I loading ID from the db? (for tasks)
 - What else to put in this release?
 - useability - any quick wins? command line shortcuts? -DF? canned filters?
 - Can I determine availability?

@@ -1,26 +1,73 @@
 {
-    "indent": 0,
-    "dateFormat": "%Y-%m-%d-%a",
-    "depth": 0, 
-    "nodes": {
-        "ProjectStart": "$indent$name:", 
-        "FolderStart": "$indent$name:", 
-        "ContextStart": "$indent$name:",
-        "TaskStart": "$indent- $name$date_completed", 
-        "TaskGroupStart": "$indent$name:$date_completed"
+    "attributes": {
+        "context": {
+            "default": "", 
+            "eval": "value.name", 
+            "format": " @context($value)", 
+            "type": "taskpaper.tag"
+        }, 
+        "date_completed": {
+            "default": "", 
+            "format": " @$value", 
+            "type": "date"
+        }, 
+        "date_due": {
+            "default": "", 
+            "format": " @due($value)", 
+            "type": "date"
+        }, 
+        "date_to_start": {
+            "default": "", 
+            "format": " @start($value)", 
+            "type": "date"
+        }, 
+        "flagged": {
+            "default": "", 
+            "eval": "True if value else None", 
+            "format": " @flagged", 
+            "type": "boolean"
+        }, 
+        "id": {
+            "default": "", 
+            "format": " @id($value)", 
+            "type": "taskpaper.tag"
+        }, 
+        "link": {
+            "default": "", 
+            "format": "$value", 
+            "type": "string"
+        }, 
+        "name": {
+            "default": "", 
+            "format": "$value", 
+            "type": "taskpaper.title"
+        }, 
+        "note": {
+            "default": "", 
+            "format": "$value", 
+            "type": "note"
+        }, 
+        "project": {
+            "default": "", 
+            "eval": "value.name", 
+            "format": " @project($value)", 
+            "type": "taskpaper.tag"
+        }, 
+        "type": {
+            "default": "", 
+            "format": " @type($value)", 
+            "type": "taskpaper.tag"
+        }
     }, 
-    "attributes" : {
-    	"name" : {"default": "", "format": "$value", "type": "taskpaper.title"},
-    	"id" : {"default": "", "format": " @id($value)", "type": "taskpaper.tag"},
-    	"type" : {"default": "", "format": " @type($value)", "type": "taskpaper.tag"},
-    	"flagged" : {"default": "", "format": " @flagged", "type": "boolean", "eval": "True if value else None"},
-    	"context" : {"default": "", "format": " @context($value)", "type": "taskpaper.tag", "eval": "value.name"},
-    	"project" : {"default": "", "format": " @project($value)", "type": "taskpaper.tag", "eval": "value.name"},
-    	"date_due" : {"default": "", "format": " @due($value)", "type": "date"},
-    	"date_to_start" : {"default": "", "format": " @start($value)", "type": "date"},
-    	"date_completed" : {"default": "", "format": " @$value", "type": "date"},
-    	"link" : {"default": "", "format": "$value", "type": "string"},
-    	"note" : {"default": "", "format": "$value", "type": "note"}
-    },
-    "indentString": "\t"
+    "dateFormat": "%Y-%m-%d-%a", 
+    "depth": 0, 
+    "indent": 0, 
+    "indentString": "\t", 
+    "nodes": {
+        "ContextStart": "$indent$name:", 
+        "FolderStart": "$indent$name:", 
+        "ProjectStart": "$indent$name:", 
+        "TaskGroupStart": "$indent$name:$date_completed", 
+        "TaskStart": "$indent- $name$date_completed"
+    }
 }

@@ -1,39 +1,68 @@
 {
-	"file_types": {
-		"TASKPAPER": {
-			"suffixes": [ "tp", "taskpaper", "todo" ],
-			"plugin" : "taskpaper",
-			"template": "taskpaper"
-		},
-		"TEXT": {
-			"suffixes": [ "text", "txt" ],
-			"plugin" : "text",
-			"template": "text"
-		},
-		"MARKDOWN": {
-			"suffixes": [ "md", "markdown", "ft", "foldingtext" ],
-			"plugin" : "markdown",
-			"template": "markdown"
-		},
-		"OPML": {
-			"suffixes": [ "opml" ],
-			"plugin" : "opml",
-			"template": "opml"
-		},
-		"HTML": {
-			"suffixes": [ "htm", "html" ],
-			"plugin" : "html",
-			"template": "html"
-		},
-		"ICS": {
-			"suffixes": [ "ics" ],
-			"plugin" : "ics",
-			"template": "ics"
-		},
-		"JSON": {
-			"suffixes": [ "json" ],
-			"plugin" : "json",
-			"call_fn" : "json"
-		}
-	}
+    "db_search_path": [
+        "/Library/Caches/com.omnigroup.OmniFocus/OmniFocusDatabase2", 
+        "/Library/Caches/com.omnigroup.OmniFocus.MacAppStore/OmniFocusDatabase2", 
+        "/Library/Containers/com.omnigroup.OmniFocus2/Data/Library/Caches/com.omnigroup.OmniFocus2/OmniFocusDatabase2"
+    ], 
+    "file_types": {
+        "HTML": {
+            "plugin": "html", 
+            "suffixes": [
+                "htm", 
+                "html"
+            ], 
+            "template": "html"
+        }, 
+        "ICS": {
+            "_1": "time_control_default can contain the magic that you can put in a note to control when the item appears in the calendar", 
+            "_2": "The time_control_default is only used if there is no '%of cal' directive in the node", 
+            "plugin": "ics", 
+            "suffixes": [
+                "ics"
+            ], 
+            "template": "ics", 
+            "time_control_default": "ignored unless it is of the right format"
+        }, 
+        "JSON": {
+            "call_fn": "json", 
+            "plugin": "json", 
+            "suffixes": [
+                "json"
+            ]
+        }, 
+        "MARKDOWN": {
+            "plugin": "markdown", 
+            "suffixes": [
+                "md", 
+                "markdown", 
+                "ft", 
+                "foldingtext"
+            ], 
+            "template": "markdown"
+        }, 
+        "OPML": {
+            "plugin": "opml", 
+            "suffixes": [
+                "opml"
+            ], 
+            "template": "opml"
+        }, 
+        "TASKPAPER": {
+            "plugin": "taskpaper", 
+            "suffixes": [
+                "tp", 
+                "taskpaper", 
+                "todo"
+            ], 
+            "template": "taskpaper"
+        }, 
+        "TEXT": {
+            "plugin": "text", 
+            "suffixes": [
+                "text", 
+                "txt"
+            ], 
+            "template": "text"
+        }
+    }
 }

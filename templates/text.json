@@ -1,28 +1,79 @@
 {
-    "indent": 0,
-    "dateFormat": "%Y-%m-%d", 
-    "depth" : 0, 
-    "nodes": {
-        "ProjectStart": "${indent}Project: $name$flagged$status$date_to_start$date_due$date_completed$context$project", 
-        "FolderStart": "${indent}Folder: $name", 
-        "TaskStart": "${indent}Task: $name$flagged$date_to_start$date_due$date_completed$context$project", 
-        "TaskGroupStart": "${indent}TaskGroup: $name$flagged$date_to_start$date_due$date_completed$context$project", 
-        "ContextStart": "${indent}Context: $name$status",
-        "NoteLine": "$indent\tNote: $note_line"
+    "attributes": {
+        "context": {
+            "default": "", 
+            "eval": "value.name", 
+            "format": " context:$value", 
+            "type": "string"
+        }, 
+        "date_completed": {
+            "default": "", 
+            "format": " done:$value", 
+            "type": "date"
+        }, 
+        "date_due": {
+            "default": "", 
+            "format": " due:$value", 
+            "type": "date"
+        }, 
+        "date_to_start": {
+            "default": "", 
+            "format": " start:$value", 
+            "type": "date"
+        }, 
+        "flagged": {
+            "default": "", 
+            "eval": "True if value else None", 
+            "format": " flagged", 
+            "type": "boolean"
+        }, 
+        "id": {
+            "default": "", 
+            "format": "$value", 
+            "type": "string"
+        }, 
+        "link": {
+            "default": "", 
+            "format": "$value", 
+            "type": "string"
+        }, 
+        "name": {
+            "default": "", 
+            "format": "$value", 
+            "type": "string"
+        }, 
+        "note": {
+            "default": "", 
+            "format": "", 
+            "type": "note"
+        }, 
+        "project": {
+            "default": "", 
+            "eval": "value.name", 
+            "format": " project:$value", 
+            "type": "string"
+        }, 
+        "status": {
+            "default": "", 
+            "format": " status:$value", 
+            "type": "string"
+        }, 
+        "type": {
+            "default": "", 
+            "format": "$value", 
+            "type": "string"
+        }
     }, 
-    "attributes" : {
-    	"name" : {"default": "", "format": "$value", "type": "string"},
-    	"id" : {"default": "", "format": "$value", "type": "string"},
-    	"type" : {"default": "", "format": "$value", "type": "string"},
-    	"status" : {"default": "", "format": " status:$value", "type": "string"},
-    	"flagged" : {"default": "", "format": " flagged", "type": "boolean", "eval": "True if value else None"},
-    	"context" : {"default": "", "format": " context:$value", "type": "string", "eval": "value.name"},
-    	"project" : {"default": "", "format": " project:$value", "type": "string", "eval": "value.name"},
-    	"date_due" : {"default": "", "format": " due:$value", "type": "date"},
-    	"date_to_start" : {"default": "", "format": " start:$value", "type": "date"},
-    	"date_completed" : {"default": "", "format": " done:$value", "type": "date"},
-    	"link" : {"default": "", "format": "$value", "type": "string"},
-    	"note" : {"default": "", "format": "", "type": "note"}
-    },
-    "indentString": "    "
+    "dateFormat": "%Y-%m-%d", 
+    "depth": 0, 
+    "indent": 0, 
+    "indentString": "    ", 
+    "nodes": {
+        "ContextStart": "${indent}Context: $name$status", 
+        "FolderStart": "${indent}Folder: $name", 
+        "NoteLine": "$indent\tNote: $note_line", 
+        "ProjectStart": "${indent}Project: $name$flagged$status$date_to_start$date_due$date_completed$context$project", 
+        "TaskGroupStart": "${indent}TaskGroup: $name$flagged$date_to_start$date_due$date_completed$context$project", 
+        "TaskStart": "${indent}Task: $name$flagged$date_to_start$date_due$date_completed$context$project"
+    }
 }

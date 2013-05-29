@@ -21,9 +21,7 @@ import logging
 import sys
 from attrib_convert import AttribMapBuilder, Conversion
 
-logging.basicConfig(format='%(asctime)-15s %(name)s %(levelname)s %(message)s', stream=sys.stdout)
 logger = logging.getLogger(__name__)
-logger.setLevel(level=logging.ERROR)
 
 def load_resource (template_dir, name):
     instream=codecs.open(template_dir + name, 'r', 'utf-8')

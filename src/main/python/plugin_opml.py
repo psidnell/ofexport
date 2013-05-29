@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-from fmt_template import Formatter
-from ofexport import load_template, format_document
+from fmt_template import Formatter, format_document
+from ofexport import load_template
 
 def escape (val):
     return val.replace('"','&quot;').replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')

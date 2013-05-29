@@ -1,33 +1,79 @@
 {
-    "indent": 2,
-    "dateFormat": "%Y-%m-%d",
-    "depth": 0,
+    "attributes": {
+        "context": {
+            "default": "", 
+            "eval": "value.name", 
+            "format": "$value", 
+            "type": "opml.string"
+        }, 
+        "date_completed": {
+            "default": "", 
+            "format": "$value", 
+            "type": "date"
+        }, 
+        "date_due": {
+            "default": "", 
+            "format": "$value", 
+            "type": "date"
+        }, 
+        "date_to_start": {
+            "default": "", 
+            "format": "$value", 
+            "type": "date"
+        }, 
+        "flagged": {
+            "default": "", 
+            "format": "$value", 
+            "type": "boolean"
+        }, 
+        "id": {
+            "default": "", 
+            "format": "$value", 
+            "type": "opml.string"
+        }, 
+        "link": {
+            "default": "", 
+            "format": "$value", 
+            "type": "opml.string"
+        }, 
+        "name": {
+            "default": "", 
+            "format": "$value", 
+            "type": "opml.string"
+        }, 
+        "note": {
+            "default": "", 
+            "format": "$value", 
+            "type": "opml.note"
+        }, 
+        "project": {
+            "default": "", 
+            "eval": "value.name", 
+            "format": "$value", 
+            "type": "opml.string"
+        }, 
+        "type": {
+            "default": "", 
+            "format": "$value", 
+            "type": "opml.string"
+        }
+    }, 
+    "dateFormat": "%Y-%m-%d", 
+    "depth": 0, 
+    "indent": 2, 
+    "indentString": "  ", 
     "nodes": {
-        "ProjectStart": "$indent<outline text=\"$name\" completed=\"$date_completed\" _note=\"$note\">", 
-        "FolderStart": "$indent<outline text=\"$name\">", 
-        "TaskStart": "$indent<outline text=\"$name\" completed=\"$date_completed\" _note=\"$note\">", 
-        "TaskGroupStart": "$indent<outline text=\"$name\" completed=\"$date_completed\" _note=\"$note\">", 
-        "ContextStart": "$indent<outline text=\"$name\">",
-        "ProjectEnd": "$indent</outline>", 
+        "ContextEnd": "$indent</outline>", 
+        "ContextStart": "$indent<outline text=\"$name\">", 
         "FolderEnd": "$indent</outline>", 
+        "FolderStart": "$indent<outline text=\"$name\">", 
+        "ProjectEnd": "$indent</outline>", 
+        "ProjectStart": "$indent<outline text=\"$name\" completed=\"$date_completed\" _note=\"$note\">", 
         "TaskEnd": "$indent</outline>", 
         "TaskGroupEnd": "$indent</outline>", 
-        "ContextEnd": "$indent</outline>"
-    },
-    "attributes" : {
-    	"name" : {"default": "", "format": "$value", "type": "opml.string"},
-    	"id" : {"default": "", "format": "$value", "type": "opml.string"},
-    	"type" : {"default": "", "format": "$value", "type": "opml.string"},
-    	"flagged" : {"default": "", "format": "$value", "type": "boolean"},
-    	"context" : {"default": "", "format": "$value", "type": "opml.string", "eval": "value.name"},
-    	"project" : {"default": "", "format": "$value", "type": "opml.string", "eval": "value.name"},
-    	"date_due" : {"default": "", "format": "$value", "type": "date"},
-    	"date_to_start" : {"default": "", "format": "$value", "type": "date"},
-    	"date_completed" : {"default": "", "format": "$value", "type": "date"},
-    	"link" : {"default": "", "format": "$value", "type": "opml.string"},
-    	"note" : {"default": "", "format": "$value", "type": "opml.note"}
-    },
-    "indentString": "  ",
-    "preamble": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<opml version=\"1.0\">\n  <head>\n    <title>OmniFocus</title>\n  </head>\n  <body>",
-    "postamble": "  </body>\n</opml>"
+        "TaskGroupStart": "$indent<outline text=\"$name\" completed=\"$date_completed\" _note=\"$note\">", 
+        "TaskStart": "$indent<outline text=\"$name\" completed=\"$date_completed\" _note=\"$note\">"
+    }, 
+    "postamble": "  </body>\n</opml>", 
+    "preamble": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<opml version=\"1.0\">\n  <head>\n    <title>OmniFocus</title>\n  </head>\n  <body>"
 }
