@@ -1,6 +1,6 @@
 # Changes #
 
-## 3.0.1 (?????)
+## 3.0.1 (2013-05-30)
 
 - Made default format when printing to stdout configurable.
 - Reformatted json config using "recommended" layout (bleh!) with a BBEdit plugin http://bbeditextras.org/wiki/index.php?title=Text_Filters
@@ -8,7 +8,7 @@
 - Added config for default "%of cal" directives.
 - Fixed a bug where I wasn't using the persistentIdentifier as the task id.
 
-## 3.0.0 (2013-05-27) If you're not feeling brave, wait for 3.0.1
+## 3.0.0 (2013-05-27)
 
 - Introduced a plugin model.
 - Changed format of templates to support plugins better.
