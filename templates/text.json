@@ -1,4 +1,6 @@
 {
+    "#01": "text", 
+    "#02": "A template for text documents", 
     "attributes": {
         "context": {
             "default": "", 

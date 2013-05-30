@@ -16,7 +16,6 @@ limitations under the License.
 
 from treemodel import Visitor, Project, Context, TASK, PROJECT, FOLDER
 import logging
-import sys
 
 logger = logging.getLogger(__name__)
 

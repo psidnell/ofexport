@@ -1,4 +1,6 @@
 {
+    "#01": "html", 
+    "#02": "A template that produces html output", 
     "attributes": {
         "context": {
             "default": "", 

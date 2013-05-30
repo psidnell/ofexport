@@ -1,4 +1,6 @@
 {
+    "#01": "opml", 
+    "#02": "A template for opml files that can be read by OmniOutliner and several mindmap tools", 
     "attributes": {
         "context": {
             "default": "", 

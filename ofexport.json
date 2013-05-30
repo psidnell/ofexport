@@ -47,6 +47,13 @@
             ], 
             "template": "opml"
         }, 
+        "STDOUT": {
+            "plugin": "text", 
+            "suffixes": [
+                ""
+            ], 
+            "template": "text"
+        }, 
         "TASKPAPER": {
             "plugin": "taskpaper", 
             "suffixes": [

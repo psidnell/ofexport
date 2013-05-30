@@ -86,6 +86,14 @@ echo -- $FMT
 ofexport --log ofexport=ERROR -i src/test/data/db-1.json -T flat -o target/db-1-flat.$FMT
 diff target/db-1-flat.$FMT src/test/data/db-1-flat.$FMT
 
+FMT=text
+################
+echo -- $FMT
+################
+#ofexport --log ofexport=ERROR -i src/test/data/db-1.json > src/test/data/db-1-stdout.$FMT
+ofexport --log ofexport=ERROR -i src/test/data/db-1.json > target/db-1-stdout.$FMT
+diff target/db-1-stdout.$FMT src/test/data/db-1-stdout.$FMT
+
 #---------------------------------------------------------------------
 
 ################

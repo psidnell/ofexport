@@ -1,4 +1,6 @@
 {
+    "#01": "taskpaper-lite", 
+    "#02": "Based on the taskpaper template but with less tags in the output and uses @yyyy-mm-dd instead of @done(yyyy-mm-dd)", 
     "attributes": {
         "context": {
             "default": "", 

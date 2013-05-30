@@ -106,19 +106,19 @@ def load_note_attribs (item, time_control_default):
                 if len(bits) == 2:
                     item.date_to_start = datetime (the_date.year, the_date.month, the_date.day, int(bits[0]), int(bits[1]), 0, 0, the_date.tzinfo)
                 else:
-                    logger.error ("problem parsing cal directives in %s %s", item.id, item.name)
+                    logger.error ("problem parsing cal directives, start malformed: %s %s", item.id, item.name)
             if 'due' in item.attribs:
                 bits = item.attribs['due'].split(':')
                 the_date = item.date_due
                 if len(bits) == 2:
                     item.date_due = datetime (the_date.year, the_date.month, the_date.day, int(bits[0]), int(bits[1]), 0, 0, the_date.tzinfo)
                 else:
-                    logger.error ("problem parsing cal directives in %s %s", item.id, item.name)
+                    logger.error ("problem parsing cal directives, due malformed: %s %s", item.id, item.name)
         except Exception as e:
             logger.error (e.message)
-            logger.error ("problem parsing cal directives in %s %s", item.id, item.name)
+            logger.error ("problem parsing cal directives: %s %s", item.id, item.name)
         if item.date_to_start > item.date_due:
-            logger.error ("problem parsing cal directives in %s %s", item.id, item.name)
+            logger.error ("problem parsing cal directives, the start date is after the due date: %s %s", item.id, item.name)
             item.date_to_start = item.date_due
 
 def process_line_for_directives (item, line, found_directive):

@@ -1,4 +1,6 @@
 {
+    "#01": "markdown", 
+    "#02": "A template for markdown files", 
     "attributes": {
         "context": {
             "default": "", 

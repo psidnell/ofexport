@@ -1,1 +1,2 @@
 python build-scripts/generate_help.py $@ > src/main/python/help.py
+echo $1 > VERSION

@@ -1,28 +1,17 @@
-# V2.1.4
-
-# V2.1.0
-
-# V3.0.0
-
 # V3.0.1
 
-- Calendar exp global settings?
-- Calendar bug (team meeting 2013-05-28)
-- have I broken stdout? Does it work with templates? What's happening?
-- Am I loading ID from the db? (for tasks)
-- What else to put in this release?
-- useability - any quick wins? command line shortcuts? -DF? canned filters?
-- Can I determine availability?
-- childcount as an attribute
-- Tips on perspectives and casting blobs - investigate
-    forums.omnigroup.com/showthread.php?t=29538
-- Create a "dump" template that dumps everything.
-- Log to DayOne? - how?
+- Stable?
+
+# Bugs
+
+- Are the errors coming out of the ical plugin useful?
 
 # Backlog
 
 - Command Line
-    - Select input database location - necessary for OmniFocus 2 alpha testing
+    - Recipies/macros - names bundles of command line args
+- Useability
+    - useability - any quick wins? command line shortcuts? -DF? canned filters?
 - Database
     - What about task availability? Where is it stored?
     - Try ofexport with OF 2
@@ -30,13 +19,21 @@
         Can I catch them with "No Context"
     - Can I detect a if a project/context is paused?
 - Attributes
+    - childcount as an attribute
+    - Can I determine availability?
     - "type" should be a template variable
     - $date and $time variables in templates
     - Add item depth as filterable parameter
 - Templates
+    - Create a "dump" template that dumps everything.
     - Have a default template in code such that an empty template file still works
     - Put file extension associations in the templates
-- Bug: unexpected arguments error prints whole line, not just bad arg
+- Tag Clouds
+    - Check out PyTagCloud
+        https://github.com/atizo/PyTagCloud
+    - Clouds myself: http://stackoverflow.com/questions/3180779/html-tag-cloud-in-python
+- Integrations
+    - Log to DayOne? - how?
 - Sorting
     - Add "natural" sort - i.e. sort by the order from the OF DB (this is done initially already)
 - Documentation
@@ -44,6 +41,8 @@
     - Document How I use it
     - document any new filter variables
 - Architecture
+    - Tips on perspectives and casting blobs - investigate
+        forums.omnigroup.com/showthread.php?t=29538
     - Assertions to prevent mis-wiring of type hierarchies
     - More general config - e.g. global date format?
     - A filter that prepends type to items - for debugging
@@ -60,3 +59,5 @@
     - test all the assertions properly with unit tests (done most of them)
     - Install it myself separately from my dev environment
     - Update the paths accordingly
+- Releasing
+    - Save released versions, tag? Make script

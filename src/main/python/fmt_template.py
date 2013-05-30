@@ -18,7 +18,6 @@ from string import Template
 from treemodel import Visitor, traverse_list
 import codecs
 import logging
-import sys
 from attrib_convert import AttribMapBuilder, Conversion
 
 logger = logging.getLogger(__name__)

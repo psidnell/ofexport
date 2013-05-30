@@ -142,6 +142,7 @@ class OFContext(Context):
         self.ofattribs = ofattribs
         self.order = ofattribs['rank']
         if 'persistentIdentifier' in ofattribs:
+            self.id = ofattribs['persistentIdentifier']
             self.link = 'omnifocus:///context/' + ofattribs['persistentIdentifier']
         self.status = u'inactive' if 'allowsNextAction' in ofattribs and ofattribs['allowsNextAction'] == 0 else u'active'
         logger.debug ('loaded context: %s %s', self.id, self.name)
@@ -163,6 +164,7 @@ class OFTask(Task):
         self.ofattribs = ofattribs
         self.order = ofattribs['rank']
         if 'persistentIdentifier' in ofattribs:
+            self.id = ofattribs['persistentIdentifier']
             self.link = 'omnifocus:///task/' + ofattribs['persistentIdentifier']
         noteXMLData = ofattribs['noteXMLData']
         if noteXMLData != None:
@@ -179,6 +181,7 @@ class OFFolder(Folder):
         self.ofattribs = ofattribs
         self.order = ofattribs['rank']
         if 'persistentIdentifier' in ofattribs:
+            self.id = ofattribs['persistentIdentifier']
             self.link = 'omnifocus:///folder/' + ofattribs['persistentIdentifier']
         logger.debug ('loaded folder: %s %s', self.id, self.name)
         

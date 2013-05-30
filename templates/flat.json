@@ -1,4 +1,6 @@
 {
+    "#01": "flat", 
+    "#02": "A template that doesn't print Folder, Project, or Context titles or indent tasks", 
     "attributes": {
         "context": {
             "default": "", 

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+VERSION=`cat VERSION`
+git tag -a "V$VERSION" -m "$VERSION built on `date`"
+git push

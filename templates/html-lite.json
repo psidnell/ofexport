@@ -1,4 +1,6 @@
 {
+    "#01": "html-lite", 
+    "#02": "Based on the html template, doesn't include all the attributes in the output", 
     "attributes": {
         "context": {
             "default": "", 

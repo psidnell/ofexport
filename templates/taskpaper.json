@@ -1,4 +1,6 @@
 {
+    "#01": "taskpaper", 
+    "#02": "A for taskpaper documents", 
     "attributes": {
         "context": {
             "default": "", 

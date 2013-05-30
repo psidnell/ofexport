@@ -123,7 +123,7 @@ if __name__ == "__main__":
     template_dir = home_dir + '/templates'
     include = True
     
-    override_data = {}
+    type_config_override_data = {}
     
     config = load_config (home_dir)
     
@@ -139,7 +139,7 @@ if __name__ == "__main__":
         elif '-i' == opt:
             infile = arg
         elif '-T' == opt:
-            override_data['template'] = arg
+            type_config_override_data['template'] = arg
         elif '-v' == opt:
             for logname in LOGGER_NAMES:
                 logging.getLogger(logname).setLevel (logging.INFO)
@@ -169,7 +169,8 @@ if __name__ == "__main__":
             sys.exit()
     
     if file_name == None:
-        fmt = 'txt'
+        # This blank suffix is mapped to a plugin/template in the config
+        fmt = ''
     else:
         assert file_name.find ('.') != -1, "filename has no suffix"
         dot = file_name.index ('.')
@@ -234,7 +235,7 @@ if __name__ == "__main__":
         if not generated and fmt in type_config['suffixes']:
             plugin = 'plugin_' + type_config['plugin']
             m = __import__(plugin)
-            type_config.update (override_data)
+            type_config.update (type_config_override_data)
             m.generate(out, root_project, root_context, project_mode, template_dir, type_config)
             generated = True
     

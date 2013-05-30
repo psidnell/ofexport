@@ -1,4 +1,6 @@
 {
+    "#01": "ics", 
+    "#02": "A template that produces calendar files that can be subscribed to with calendar apps/services", 
     "attributes": {
         "date_due": {
             "default": "", 

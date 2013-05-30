@@ -19,7 +19,6 @@ from typeof import TypeOf
 from util import strip_tabs_newlines
 import uuid
 import logging
-import sys
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +38,7 @@ class NodeFwdDecl (object):
     pass
 
 class Node (NodeFwdDecl):
-    id = TypeOf ('id', str)
+    id = TypeOf ('id', unicode)
     name = TypeOf ('name', unicode)
     parent = TypeOf ('parent', NodeFwdDecl)
     marked = TypeOf ('marked', bool)
@@ -64,7 +63,7 @@ class Node (NodeFwdDecl):
         self.attribs = dict(attribs)
         self.type = nType
         self.link = link
-        self.id = str(uuid.uuid1())
+        self.id = unicode(uuid.uuid1())
         self.order = order
         if parent != None:
             parent.add_child (self)
