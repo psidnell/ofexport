@@ -69,7 +69,7 @@
         "ContextStart": "$indent$name:\n$indent\t$link", 
         "FolderStart": "$indent$name:\n$indent\t$link", 
         "NoteLine": "$indent\t$note_line", 
-        "ProjectStart": "$indent$name:$flagged$date_to_start$date_due$date_completed$context$project\n$indent\t$link", 
+        "ProjectStart": "$indent$name:$flagged$date_to_start$date_due$date_completed$context\n$indent\t$link", 
         "TaskGroupStart": "$indent$name:$flagged$date_to_start$date_due$date_completed$context$project", 
         "TaskStart": "$indent- $name$flagged$date_to_start$date_due$date_completed$context$project"
     }

@@ -1,15 +1,15 @@
 Tasks:
 	
-	- parent task F1 P1 1 @context(Tasks)
-	- task F2 P2 1 @context(Tasks)
-	- task F1 P2 1 @context(Tasks)
+	- parent task F1 P1 1 @context(Tasks) @project(F1Project1)
+	- task F2 P2 1 @context(Tasks) @project(F2Project2)
+	- task F1 P2 1 @context(Tasks) @project(F1Project2)
 		Note line 1.
 		Note line 2.
-	- task F2 P1 1 @flagged @context(Tasks)
-	- task F1 P1 2 @context(Tasks)
-	- task F1 P2 2 @context(Tasks)
-	- task F2 P1 2 @context(Tasks)
-	- task F2 P2 2 @context(Tasks)
-	- sub task with a colon @context(Tasks)
-	- I'm done! @done(2013-04-21) @context(Tasks)
-	- task with no context @context(Tasks)
+	- task F2 P1 1 @flagged @context(Tasks) @project(F2Project1)
+	- task F1 P1 2 @context(Tasks) @project(F1Project1)
+	- task F1 P2 2 @context(Tasks) @project(F1Project2)
+	- task F2 P1 2 @context(Tasks) @project(F2Project1)
+	- task F2 P2 2 @context(Tasks) @project(F2Project2)
+	- sub task with a colon @context(Tasks) @project(F1Project1)
+	- I'm done! @done(2013-04-21) @context(Tasks) @project(F2Project1)
+	- task with no context @context(Tasks) @project(F2Project2)

@@ -1,3 +1,4 @@
+set -o xtrace
 
 # Usage Examples
 

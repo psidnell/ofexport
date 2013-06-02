@@ -2,9 +2,9 @@ Test Context:
 	omnifocus:///context/ptrX-c-R6_X
 	Sub Context 1:
 		omnifocus:///context/aCWpXEa6Xgx
-		- parent task F1 P1 1 @context(SubContext1)
-		- task F2 P2 1 @context(SubContext1)
-		- task F1 P2 1 @context(SubContext1)
+		- parent task F1 P1 1 @context(SubContext1) @project(F1Project1)
+		- task F2 P2 1 @context(SubContext1) @project(F2Project2)
+		- task F1 P2 1 @context(SubContext1) @project(F1Project2)
 			Note line 1.
 			Note line 2.
-		- task F2 P1 1 @flagged @context(SubContext1)
+		- task F2 P1 1 @flagged @context(SubContext1) @project(F2Project1)

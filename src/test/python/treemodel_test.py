@@ -50,6 +50,56 @@ class SortableTask(Task):
 
 class Test_treemodel(unittest.TestCase):
     
+    def test_project_add_child (self):
+        project = Project ()
+        child = Task ()
+        project.add_child (child)
+        self.assertEquals(project, child.parent)
+        self.assertEquals(project, child.project)
+        
+        project = Project ()
+        child = Task ()
+        grandchild = Task ()
+        child.add_child (grandchild)
+        project.add_child (child)
+        self.assertEquals(project, child.parent)
+        self.assertEquals(project, child.project)
+        self.assertEquals(project, grandchild.project)
+        
+    def test_task_add_child (self):
+        project = Project ()
+        task = Task ()
+        child = Task ()
+        project.add_child (task)
+        task.add_child (child)
+        self.assertEquals(task, child.parent)
+        self.assertEquals(project, child.project)
+        
+        project = Project ()
+        task = Task ()
+        child = Task ()
+        grandchild = Task ()
+        project.add_child (task)
+        task.add_child (child)
+        child.add_child (grandchild)
+        task.add_child (child)
+        self.assertEquals(task, child.parent)
+        self.assertEquals(project, child.project)
+        self.assertEquals(child, grandchild.parent)
+        self.assertEquals(project, grandchild.project)
+        
+    def test_context_add_child (self):
+        context = Context ()
+        child = Context ()
+        context.add_child (child)
+        self.assertEquals(context, child.parent)
+        
+        context = Context ()
+        child = Task ()
+        context.add_child (child)
+        self.assertEquals(context, child.context)
+        self.assertEquals(None, child.parent)
+    
     def test_traverse_list_tasks (self):
         n1 = Task (name=u'n1')
         n2 = Task (name=u'n2')

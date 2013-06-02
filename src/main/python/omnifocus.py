@@ -21,7 +21,6 @@ from datetime import datetime
 from typeof import TypeOf
 from xml.dom.minidom import parseString
 import logging
-import sys
 
 logger = logging.getLogger(__name__)
 
@@ -149,7 +148,7 @@ class OFContext(Context):
 
 class OFTask(Task):
     TABLE='task'
-    COLUMNS=['persistentIdentifier', 'name', 'dateDue', 'dateCompleted','dateToStart', 'dateDue', 
+    COLUMNS=['persistentIdentifier', 'name', 'inInbox', 'dateDue', 'dateCompleted','dateToStart', 'dateDue', 
              'projectInfo', 'context', 'containingProjectInfo', 'childrenCount', 'parent', 'rank',
              'flagged', 'noteXMLData']    
     ofattribs = TypeOf ('ofattribs', dict)
@@ -262,7 +261,7 @@ def wire_task_hierarchy (tasks):
             parent = tasks[task.ofattribs['parent']]
             parent.add_child (task)
             
-def wire_tasks_to_enclosing_projects (project_infos, tasks):
+def wire_tasks_to_enclosing_projects (project_infos, tasks, inbox):
     logger.debug ('wiring tasks to enclosing projects')
     for task in tasks.values():  
         if task.ofattribs['containingProjectInfo'] != None:
@@ -270,6 +269,9 @@ def wire_tasks_to_enclosing_projects (project_infos, tasks):
             project_info = project_infos[task.ofattribs['containingProjectInfo']]
             project = project_info.project
             task.project = project
+        elif task.ofattribs['inInbox']:
+            inbox.add_child (task)
+            
        
 def wire_tasks_and_contexts (contexts, tasks, no_context):
     logger.debug ('wiring tasks and contexts')
@@ -309,7 +311,8 @@ def only_roots (items):
 def build_model (db):
     conn = sqlite3.connect(db)
     contexts = query (conn, clazz=OFContext)
-    no_context = OFContext({'name' : 'No Context', 'rank' : 0})
+    no_context = Context(name = 'No Context')
+    inbox = Project (name='Inbox')
     project_infos = query (conn, clazz=ProjectInfo)
     folders = query (conn, clazz=OFFolder)
     tasks = query (conn, clazz=OFTask)
@@ -317,7 +320,7 @@ def build_model (db):
     projects = transmute_projects (project_infos, tasks)
     wire_projects_and_folders(projects, folders, tasks)
     wire_task_hierarchy(tasks)
-    wire_tasks_to_enclosing_projects (project_infos, tasks)
+    wire_tasks_to_enclosing_projects (project_infos, tasks, inbox)
     wire_tasks_and_contexts(contexts, tasks, no_context)
     wire_folder_hierarchy (folders)
     wire_context_hierarchy (contexts)
@@ -327,14 +330,15 @@ def build_model (db):
     # Find top level items
     project_roots = only_roots (projects.values())
     folder_roots = only_roots (folders.values())
-    roots_projects_and_folders = project_roots + folder_roots
+    root_projects_and_folders = project_roots + folder_roots
     root_contexts = only_roots (contexts.values())
     root_contexts.insert(0, no_context)
-    sort(roots_projects_and_folders)
+    root_projects_and_folders.insert(0, inbox)
+    sort(root_projects_and_folders)
     sort(root_contexts)
     
     root_folder = Folder (name='')
-    for child in roots_projects_and_folders:
+    for child in root_projects_and_folders:
         root_folder.add_child(child)
         
     root_context = Context (name='', status='active')

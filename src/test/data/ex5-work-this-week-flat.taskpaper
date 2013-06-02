@@ -1,4 +1,4 @@
-Compost: @context(TestContext) @project(Compost)
+Compost: @context(TestContext)
 	omnifocus:///task/jMV4htWMbFb
 	- last week @done(2013-04-27) @context(TestContext) @project(Compost)
 	- xxxxx @context(TestContext) @project(Compost)

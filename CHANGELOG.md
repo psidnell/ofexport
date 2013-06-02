@@ -1,5 +1,10 @@
 # Changes #
 
+## 3.0.2 (????)
+
+- Fixed bug with TaskPaper template, removed project tag from project (always itself!).
+- Fixed bug that caused tasks not have a project attribute.
+
 ## 3.0.1 (2013-05-30)
 
 - Made default format when printing to stdout configurable.

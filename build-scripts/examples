@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-#C set -o xtrace
+#set -o xtrace
 #C
 #C This file contains the examples as tests an then creates the examples.md file from itself
 #C Lines beginning with "set", "diff", '#!', '#C' are ignored
@@ -27,12 +27,12 @@ diff target/ex3-not-worms.taskpaper src/test/data/ex3-not-worms.taskpaper
 
 #This uses a little regular expression magic to create a document containing all tasks completed today from any folder with the exact name "Worms" or "Ham":
     
-        ofexport -f='^Worms$|^Ham$' -t done='today' -a prune -o target/ex4-worms-or-ham-today.taskpaper --debug now=2013-04-29
+        ofexport -f='^Worms$|^Ham$' -t done='today' -a prune -o target/ex4-worms-or-ham-today.taskpaper --debug now=2013-04-29 -i src/test/data/db-5.json
 diff target/ex4-worms-or-ham-today.taskpaper src/test/data/ex4-worms-or-ham-today.taskpaper
 
 #This produces a document containing all tasks completed this week from any folder with "Worms" in it's title and then flattens/simplifies the indenting:
     
-        ofexport -f=Worms -a flatten -a prune -o target/ex5-work-this-week-flat.taskpaper --debug now=2013-04-29
+        ofexport -f=Worms -a flatten -a prune -o target/ex5-work-this-week-flat.taskpaper --debug now=2013-04-29 -i src/test/data/db-5.json
 diff target/ex5-work-this-week-flat.taskpaper src/test/data/ex5-work-this-week-flat.taskpaper
 
 #This produces the report of what I have yet to do on this project:        
@@ -46,7 +46,7 @@ diff target/ex8-due-or-flagged.taskpaper src/test/data/ex8-due-or-flagged.taskpa
 
 #This produces a calendar file containing any items with start/due dates:
 
-        ofexport -o target/ex9.ics --debug now=2013-04-29 -i src/test/data/db-5.json
+        ofexport -o target/ex9.ics --debug now=2013-04-29 -i src/test/data/db-5.json -i src/test/data/db-5.json
 diff target/ex9.ics src/test/data/ex9.ics
 
 cat build-scripts/examples | egrep -v -e '^cat|^diff|^#C|^#!' -e '^set' | sed -e 's/^#//' -e 's/--debug.*//' -e 's/target/\/tmp/' > documentation/examples.md

@@ -2,27 +2,27 @@ Empty Folder:
 	omnifocus:///folder/cmYwdTadWxD
 F1 Project 1: @start(2013-04-22) @due(2013-04-23) @context(TestContext)
 	omnifocus:///task/d39BskyduPI
-	parent task F1 P1 1: @context(SubContext1)
-		- sub task with a colon @context(TestContext)
-	- task F1 P1 2 @context(SubContext2)
+	parent task F1 P1 1: @context(SubContext1) @project(F1Project1)
+		- sub task with a colon @context(TestContext) @project(F1Project1)
+	- task F1 P1 2 @context(SubContext2) @project(F1Project1)
 F1 Project 2: @flagged @context(TestContext)
 	omnifocus:///task/i0LhrVuFaPc
-	- task F1 P2 1 @context(SubContext1)
-	- task F1 P2 2 @context(SubContext2)
+	- task F1 P2 1 @context(SubContext1) @project(F1Project2)
+	- task F1 P2 2 @context(SubContext2) @project(F1Project2)
 Sub Folder 1:
 	omnifocus:///folder/msGNrO_ZBdL
 F2 Project 1: @context(TestContext)
 	omnifocus:///task/pLoziQtuwYD
-	- task F2 P1 1 @flagged @context(SubContext1)
-	- task F2 P1 2 @context(SubContext2)
-	- I'm done! @done(2013-04-21) @context(TestContext)
+	- task F2 P1 1 @flagged @context(SubContext1) @project(F2Project1)
+	- task F2 P1 2 @context(SubContext2) @project(F2Project1)
+	- I'm done! @done(2013-04-21) @context(TestContext) @project(F2Project1)
 empty project: @context(TestContext)
 	omnifocus:///task/iXSU7vo3FuR
 F2 Project 2: @done(2013-04-21) @context(TestContext)
 	omnifocus:///task/fYuqelo7INX
-	- task F2 P2 1 @context(SubContext1)
-	- task F2 P2 2 @context(SubContext2)
-	- task with no context @context(TestContext)
+	- task F2 P2 1 @context(SubContext1) @project(F2Project2)
+	- task F2 P2 2 @context(SubContext2) @project(F2Project2)
+	- task with no context @context(TestContext) @project(F2Project2)
 Sub Folder 2:
 	omnifocus:///folder/kyyjHNCEm8v
 Test Folder:
