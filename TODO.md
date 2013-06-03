@@ -1,6 +1,7 @@
 # V3.0.2
 
-- Let it brew, check inbox scanning
+- Let it brew
+- check inbox scanning
 - Fwd: Hazel Rules for OmniFocus `ofexport` (SOLVED) - write this up
     From: Roger Sheen <infotexture@gmail.com>   Fwd: Hazel Rules for OmniFocus `ofexport` (SOLVED)
     From: Paul Sidnell <psidnell@yahoo.co.uk>   Re: Hazel Rules for OmniFocus `ofexport` (SOLVED)
