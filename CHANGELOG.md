@@ -1,9 +1,10 @@
 # Changes #
 
-## 3.0.2 (????)
+## 3.0.2 (2013-06-03)
 
 - Fixed bug with TaskPaper template, removed project tag from project (always itself!).
 - Fixed bug that caused tasks not have a project attribute.
+- Added support for Inbox items (ofexport considers Inbox items to be in a project called "Inbox").
 
 ## 3.0.1 (2013-05-30)
 
