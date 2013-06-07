@@ -1,5 +1,9 @@
 # Changes #
 
+# 3.0.3 (2013-06-07)
+
+- Fixed but that caused exported allday calendar items to appear a day late.
+
 ## 3.0.2 (2013-06-03)
 
 - Fixed bug with TaskPaper template, removed project tag from project (always itself!).

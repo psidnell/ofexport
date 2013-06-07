@@ -5,7 +5,7 @@
   
   <groupId>org.psidnell</groupId>
   <artifactId>ofexport</artifactId>
-  <version>3.0.2</version>
+  <version>3.0.3</version>
   <name>ofexport</name>
   
   <build>

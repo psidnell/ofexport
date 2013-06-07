@@ -5,12 +5,12 @@
         "date_due": {
             "default": "", 
             "format": "$value", 
-            "type": "ics.date"
+            "type": "ics.date_due"
         }, 
         "date_to_start": {
             "default": "", 
             "format": "$value", 
-            "type": "ics.date"
+            "type": "ics.date_to_start"
         }, 
         "id": {
             "default": "", 

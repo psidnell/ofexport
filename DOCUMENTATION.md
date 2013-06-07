@@ -411,7 +411,7 @@ Alternatively they can do more like the markdown plugin which has code for blank
 
 ### Calendar Export
 
-When an ics file is exported then any Project/Task items in the report (with limitations) be included in the calendar file. The format of an entry in an ics file demands that an item has a start and end time whereas an OmniFocus task does not have this restriction, therefore there are some simple rules that ofexport uses to satisfy this constraint:
+When an ics file is exported then any Project/Task items in the report (with limitations) can be included in the calendar file. The format of an entry in an ics file demands that an item has a start and end time whereas an OmniFocus task does not have this restriction, therefore there are some simple rules that ofexport uses to satisfy this constraint:
 
 - If an item has a start and due time, then these are used as-is.
 - If an item has only a start or a due then this one date is used for both.
@@ -431,6 +431,8 @@ It's possible to combine this into a single line:
         %of cal start=11:00 due=14:00 noalarm
 
 Note: all items have an alarm set at the start time by default, but these can be stripped when subscribing with the Calendar app. The Calendar app can only subscribe to calendar files available via an http url. Services like Dropbox make the publication of individual files fairly straightforward. Once the calendar is published the Calendar app can be used to subscribe to it and share it across all your associated devices.
+
+It's possible to set a default **%of cal …** directive in the **ofexport.json** config file in the **time_control_default** setting of the **ICS** plugin. That value will be used if no such directive is found in the note of the task/project being exported.
 
 ### Expression Syntax
 
