@@ -40,7 +40,9 @@ class PrintCalendarVisitor(Formatter):
         self.current_item = None
         self.time_control_default = time_control_default
 
-        template.attrib_map_builder.type_fns['ics.date'] = lambda x: format_date(self.current_item, x, True)
+        # Start and due dates are formated differently for all day tasks, need different types
+        template.attrib_map_builder.type_fns['ics.date_due'] = lambda x: format_date(self.current_item, x, True)
+        template.attrib_map_builder.type_fns['ics.date_to_start'] = lambda x: format_date(self.current_item, x, False)
         template.attrib_map_builder.type_fns['ics.note'] = lambda x: '\\r'.join(x.get_note_lines ())
          
     def begin_any (self, item):
@@ -84,7 +86,7 @@ def fix_dates (item):
         item.date_due = item.date_to_start
 
 def load_note_attribs (item, time_control_default):
-    logger.debug ("loading note attributes %s", item.id)
+    logger.debug ("loading note attributes %s %s", item.id, item.name)
     found_directive = False
     if item.note != None:
         for line in item.note.get_note_lines ():
@@ -120,6 +122,7 @@ def load_note_attribs (item, time_control_default):
         if item.date_to_start > item.date_due:
             logger.error ("problem parsing cal directives, the start date is after the due date: %s %s", item.id, item.name)
             item.date_to_start = item.date_due
+        logger.debug ("final dates for %s are start:%s due:%s", item.id, item.date_to_start, item.date_due)
 
 def process_line_for_directives (item, line, found_directive):
     if line.strip().startswith('%of'):
@@ -144,10 +147,13 @@ def format_date (item, the_date, is_due_date):
         if is_due_date:
             the_date = the_date + timedelta (days=1)
         # NO UTC CONVERSION - it happens on the day we asked for - no adjustment required
-        return the_date.strftime(DATE_FORMAT_SHORT) 
-    
-    the_date = utc (the_date)   
-    return the_date.strftime(DATE_FORMAT_LONG)
+        result = the_date.strftime(DATE_FORMAT_SHORT) 
+    else:
+        the_date = utc (the_date)   
+        result = the_date.strftime(DATE_FORMAT_LONG)
+    type = 'due' if is_due_date else 'start'
+    logger.debug ("formatted date for %s is %s:%s", item.id, type, result)
+    return result
 
 def utc (the_date):
     epoch_second = time.mktime(the_date.timetuple())
