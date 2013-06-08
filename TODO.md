@@ -5,6 +5,7 @@
 # Bugs
 
 - Calendar bug allday task 1day late
+    Always formating for due date
 
 # Backlog
 
