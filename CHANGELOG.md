@@ -1,5 +1,9 @@
 # Changes #
 
+## 3.0.4 (2013-06-25)
+
+- Small bugfix that sometimes causes crash when reading formatted task notes.
+
 ## 3.0.3 (2013-06-07)
 
 - Fixed but that caused exported allday calendar items to appear a day late.
