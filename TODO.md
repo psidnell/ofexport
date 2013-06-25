@@ -4,9 +4,6 @@
 
 # Bugs
 
-- Calendar bug allday task 1day late
-    Always formating for due date
-
 # Backlog
 
 - Command Line
@@ -63,3 +60,7 @@
     - Update the paths accordingly
 - Releasing
     - Save released versions, tag? Make script
+- From Google Chrome - markokaestner/ofcloud GitHub
+    https://github.com/markokaestner/ofcloud
+- ondue-30min?
+- macros
