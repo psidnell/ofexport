@@ -102,10 +102,11 @@ class OFNote (Note):
             for para in  dom.getElementsByTagName("p"):
                 line = []
                 for lit in  para.getElementsByTagName("lit"):
-                    nodeValue = lit.firstChild.nodeValue
-                    if nodeValue != None:
-                        text = self.fix_dodgy_chars(nodeValue)
-                        line.append(text)
+		    if lit.firstChild != None:
+                        nodeValue = lit.firstChild.nodeValue
+                        if nodeValue != None:
+                            text = self.fix_dodgy_chars(nodeValue)
+                            line.append(text)
                 self.lines.append (u''.join(line))
             logger.debug ('%s note: processed', self.item.id)
         return self.lines

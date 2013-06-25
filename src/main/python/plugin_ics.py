@@ -151,8 +151,8 @@ def format_date (item, the_date, is_due_date):
     else:
         the_date = utc (the_date)   
         result = the_date.strftime(DATE_FORMAT_LONG)
-    type = 'due' if is_due_date else 'start'
-    logger.debug ("formatted date for %s is %s:%s", item.id, type, result)
+    typ = 'due' if is_due_date else 'start'
+    logger.debug ("formatted date for %s is %s:%s", item.id, typ, result)
     return result
 
 def utc (the_date):
