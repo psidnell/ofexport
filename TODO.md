@@ -60,7 +60,7 @@
     - Update the paths accordingly
 - Releasing
     - Save released versions, tag? Make script
-- From Google Chrome - markokaestner/ofcloud GitHub
+- From Google Chrome - markokaestner/ofcloud · GitHub
     https://github.com/markokaestner/ofcloud
 - ondue-30min?
 - macros
