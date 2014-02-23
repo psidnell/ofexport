@@ -1,13 +1,12 @@
-# V3.0.3
+# V3.0.5
 
-- -cfg altConfigLoc for testing config
-
-# Bugs
 
 # Backlog
 
 - Command Line
     - Recipies/macros - names bundles of command line args
+- GUI
+    - tkinter user interface? What would it look like?
 - Useability
     - useability - any quick wins? command line shortcuts? -DF? canned filters?
 - Database

@@ -1,5 +1,9 @@
 # Changes #
 
+## 3.0.5 (2014-02-23)
+
+- Adding estimatedMinutes and dateAdded as a task parameters that can be used in templates.
+
 ## 3.0.4 (2013-06-25)
 
 - Small bugfix that sometimes causes crash when reading formatted task notes.

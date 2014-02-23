@@ -102,7 +102,7 @@ class OFNote (Note):
             for para in  dom.getElementsByTagName("p"):
                 line = []
                 for lit in  para.getElementsByTagName("lit"):
-		    if lit.firstChild != None:
+                    if lit.firstChild != None:
                         nodeValue = lit.firstChild.nodeValue
                         if nodeValue != None:
                             text = self.fix_dodgy_chars(nodeValue)
@@ -131,6 +131,12 @@ def datetimeFromAttrib (ofattribs, name):
     if val == None:
         return None
     return datetime.fromtimestamp(THIRTY_ONE_YEARS + val)
+
+def intFromAttrib (ofattribs, name):
+    val = ofattribs[name]
+    if val == None:
+        return None
+    return val
     
 class OFContext(Context):
     TABLE='context'
@@ -149,7 +155,7 @@ class OFContext(Context):
 
 class OFTask(Task):
     TABLE='task'
-    COLUMNS=['persistentIdentifier', 'name', 'inInbox', 'dateDue', 'dateCompleted','dateToStart', 'dateDue', 
+    COLUMNS=['persistentIdentifier', 'name', 'inInbox', 'dateDue', 'dateCompleted', 'dateToStart', 'dateDue', 'dateAdded', 'estimatedMinutes',
              'projectInfo', 'context', 'containingProjectInfo', 'childrenCount', 'parent', 'rank',
              'flagged', 'noteXMLData']    
     ofattribs = TypeOf ('ofattribs', dict)
@@ -159,6 +165,8 @@ class OFTask(Task):
                       date_completed = datetimeFromAttrib (ofattribs,'dateCompleted'),
                       date_to_start = datetimeFromAttrib (ofattribs,'dateToStart'),
                       date_due = datetimeFromAttrib (ofattribs,'dateDue'),
+                      date_added = datetimeFromAttrib (ofattribs,'dateAdded'),
+                      estimated_minutes = intFromAttrib (ofattribs,'estimatedMinutes'),
                       flagged = bool (ofattribs['flagged']),
                       context=None)
         self.ofattribs = ofattribs

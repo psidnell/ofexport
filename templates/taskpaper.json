@@ -23,6 +23,16 @@
             "format": " @start($value)", 
             "type": "date"
         }, 
+        "date_added": {
+            "default": "", 
+            "format": " @added($value)", 
+            "type": "date"
+        }, 
+        "estimated_minutes": {
+            "default": "", 
+            "format": " @mins($value)", 
+            "type": "int"
+        }, 
         "flagged": {
             "default": "", 
             "eval": "True if value else None", 
@@ -69,8 +79,8 @@
         "ContextStart": "$indent$name:\n$indent\t$link", 
         "FolderStart": "$indent$name:\n$indent\t$link", 
         "NoteLine": "$indent\t$note_line", 
-        "ProjectStart": "$indent$name:$flagged$date_to_start$date_due$date_completed$context\n$indent\t$link", 
-        "TaskGroupStart": "$indent$name:$flagged$date_to_start$date_due$date_completed$context$project", 
-        "TaskStart": "$indent- $name$flagged$date_to_start$date_due$date_completed$context$project"
+        "ProjectStart": "$indent$name:$flagged$date_to_start$date_due$date_added$date_completed$context\n$indent\t$link", 
+        "TaskGroupStart": "$indent$name:$flagged$date_to_start$date_due$date_added$date_completed$estimated_minutes$context$project", 
+        "TaskStart": "$indent- $name$flagged$date_to_start$date_due$date_added$date_completed$estimated_minutes$context$project"
     }
 }

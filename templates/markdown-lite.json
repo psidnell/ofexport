@@ -1,43 +1,43 @@
 {
-    "#01": "taskpaper-lite", 
-    "#02": "Based on the taskpaper template but with less tags in the output and uses @yyyy-mm-dd instead of @done(yyyy-mm-dd)", 
+    "#01": "markdown", 
+    "#02": "A template for markdown files", 
     "attributes": {
         "context": {
             "default": "", 
             "eval": "value.name", 
-            "format": " @context($value)", 
-            "type": "taskpaper.tag"
+            "format": " project:**$value**", 
+            "type": "string"
         }, 
         "date_completed": {
             "default": "", 
-            "format": " @$value", 
+            "format": " done:**$value**", 
             "type": "date"
         }, 
         "date_due": {
             "default": "", 
-            "format": " @due($value)", 
+            "format": " due:**$value**", 
             "type": "date"
         }, 
         "date_to_start": {
             "default": "", 
-            "format": " @start($value)", 
+            "format": " start:**$value**", 
             "type": "date"
-        }, 
-        "estimated_minutes": {
-            "default": "", 
-            "format": " @mins($value)", 
-            "type": "int"
         }, 
         "flagged": {
             "default": "", 
             "eval": "True if value else None", 
-            "format": " @flagged", 
+            "format": " flagged", 
             "type": "boolean"
+        }, 
+        "hashes": {
+            "default": "", 
+            "format": "$value", 
+            "type": "string"
         }, 
         "id": {
             "default": "", 
-            "format": " @id($value)", 
-            "type": "taskpaper.tag"
+            "format": " $value", 
+            "type": "string"
         }, 
         "link": {
             "default": "", 
@@ -47,7 +47,7 @@
         "name": {
             "default": "", 
             "format": "$value", 
-            "type": "taskpaper.title"
+            "type": "string"
         }, 
         "note": {
             "default": "", 
@@ -57,24 +57,24 @@
         "project": {
             "default": "", 
             "eval": "value.name", 
-            "format": " @project($value)", 
-            "type": "taskpaper.tag"
+            "format": " context:**$value**", 
+            "type": "string"
         }, 
         "type": {
             "default": "", 
-            "format": " @type($value)", 
-            "type": "taskpaper.tag"
+            "format": " $value", 
+            "type": "string"
         }
     }, 
-    "dateFormat": "%Y-%m-%d-%a", 
+    "dateFormat": "%Y-%m-%d", 
     "depth": 0, 
     "indent": 0, 
-    "indentString": "\t", 
+    "indentString": "    ", 
     "nodes": {
-        "ContextStart": "$indent$name:", 
-        "FolderStart": "$indent$name:", 
-        "ProjectStart": "$indent$name:", 
-        "TaskGroupStart": "$indent$name:$date_completed", 
-        "TaskStart": "$indent- $name$date_completed$estimated_minutes"
+        "ContextStart": "$hashes$name", 
+        "FolderStart": "$hashes$name", 
+        "ProjectStart": "$hashes$name", 
+        "TaskGroupStart": "$indent- $name$date_completed", 
+        "TaskStart": "$indent- $name$date_completed"
     }
 }

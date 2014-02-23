@@ -117,6 +117,8 @@ class Task(Node):
     date_completed = TypeOf ('date_completed', datetime)
     date_to_start = TypeOf ('date_to_start', datetime)
     date_due = TypeOf ('date_due', datetime)
+    date_added = TypeOf ('date_added', datetime)
+    estimated_minutes = TypeOf ('estimated_minutes', int)
     note = TypeOf ('note', Note)
     
     def __init__ (self,
@@ -133,6 +135,8 @@ class Task(Node):
                   date_completed=None,
                   date_to_start=None,
                   date_due=None,
+                  date_added=None,
+                  estimated_minutes=None,
                   note=None):
         Node.__init__ (self, TASK,
                        name=name,
@@ -148,6 +152,8 @@ class Task(Node):
         self.date_completed = date_completed
         self.date_to_start = date_to_start
         self.date_due = date_due
+        self.date_added = date_added
+        self.estimated_minutes = estimated_minutes
         self.note=note
     def add_child (self, child):
         self.children.append(child)
@@ -178,6 +184,7 @@ class Project(Node):
     date_completed = TypeOf ('date_completed', datetime)
     date_to_start = TypeOf ('date_to_start', datetime)
     date_due = TypeOf ('date_due', datetime)
+    date_added = TypeOf ('date_added', datetime)
     note = TypeOf ('note', Note)
     status = TypeOf ('status', unicode)
     def __init__ (self,
@@ -192,6 +199,7 @@ class Project(Node):
                   date_completed=None,
                   date_to_start=None,
                   date_due=None,
+                  date_added=None,
                   context=None,
                   note=None,
                   status=None):
@@ -208,6 +216,7 @@ class Project(Node):
         self.date_completed = date_completed
         self.date_to_start = date_to_start
         self.date_due = date_due
+        self.date_added = date_added
         self.note = note
         self.status = unicode(status)
     def add_child (self, child):

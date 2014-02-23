@@ -62,6 +62,7 @@ class AttribMapBuilder:
         self.type_fns['string'] = lambda x: x
         self.type_fns['date'] = lambda x: x.strftime(self.date_format)
         self.type_fns['boolean'] = lambda x: str (x)
+        self.type_fns['int'] = lambda x: int (x)
         self.type_fns['note'] = lambda x: x.get_note ()
         
         self.attrib_conversions = {}
@@ -75,6 +76,8 @@ class AttribMapBuilder:
         self.set_conversion(Conversion("project", "", "$value", "string", "value.name"))
         self.set_conversion(Conversion("date_to_start", "", "$value", "date"))
         self.set_conversion(Conversion("date_due", "", "$value", "date"))
+        self.set_conversion(Conversion("date_added", "", "$value", "date"))
+        self.set_conversion(Conversion("estimated_minutes", "", "$value", "int"))
         self.set_conversion(Conversion("date_complete", "", "$value", "date"))
         self.set_conversion(Conversion("note", "", "$value", "note"))
         
