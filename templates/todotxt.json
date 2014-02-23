@@ -1,0 +1,82 @@
+{
+    "#01": "todotxt", 
+    "#02": "A template that exports to todo.txt syntax", 
+    "attributes": {
+        "context": {
+            "default": "", 
+            "eval": "value.name if value.name != 'No Context' else None", 
+            "format": " @$value", 
+            "type": "string"
+        }, 
+        "date_added": {
+            "default": "", 
+            "format": "$value ", 
+            "type": "date"
+        }, 
+        "date_completed": {
+            "default": "", 
+            "format": "x $value ", 
+            "type": "date"
+        }, 
+        "date_due": {
+            "default": "", 
+            "format": " due:$value", 
+            "type": "date"
+        }, 
+        "date_to_start": {
+            "default": "", 
+            "format": " t:$value", 
+            "type": "date"
+        }, 
+        "flagged": {
+            "default": "", 
+            "eval": "True if value else None", 
+            "format": " @flagged", 
+            "type": "string"
+        }, 
+        "id": {
+            "default": "", 
+            "format": "$value", 
+            "type": "string"
+        }, 
+        "link": {
+            "default": "", 
+            "format": " $value", 
+            "type": "string"
+        }, 
+        "name": {
+            "default": "", 
+            "format": "$value", 
+            "type": "string"
+        }, 
+        "note": {
+            "default": "", 
+            "format": "", 
+            "type": "note"
+        }, 
+        "project": {
+            "default": "", 
+            "eval": "value.name", 
+            "format": " +$value", 
+            "type": "string"
+        }, 
+        "status": {
+            "default": "", 
+            "format": " status:$value", 
+            "type": "string"
+        }, 
+        "type": {
+            "default": "", 
+            "format": " type:$value", 
+            "type": "string"
+        }
+    }, 
+    "dateFormat": "%Y-%m-%d", 
+    "depth": 0, 
+    "indent": 0, 
+    "indentString": "\t", 
+	"nodes": {
+			"TaskGroupStart": "$date_completed$date_added$name$project$context$flagged$date_due$date_to_start",
+			"TaskStart": "$date_completed$date_added$name$project$context$flagged$date_due$date_to_start"
+	}
+}
