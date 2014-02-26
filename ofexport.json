@@ -69,7 +69,7 @@
                 "todotxt"
             ], 
             "template": "todotxt"
-        }
+        },
         "TEXT": {
             "plugin": "text", 
             "suffixes": [
